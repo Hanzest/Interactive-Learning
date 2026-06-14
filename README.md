@@ -1,5 +1,4 @@
-# 📚 Interactive Learning v2 — React Edition
-
+# 📚 Interactive Learning
 A fully client-side, single-page learning application that renders educational content from uploaded JSON files. Built with **React 18** + **TypeScript** + **Vite** — component-based, statically built, no server required.
 
 ## Quick Start
