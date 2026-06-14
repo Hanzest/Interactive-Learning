@@ -133,15 +133,18 @@ export default function QuizSection({ section, sectionIndex }: QuizSectionProps)
           const isAnswered = answers[qi] !== undefined;
           let boxBg = 'var(--bg-tertiary)';
           let boxBorder = 'var(--border-color)';
+          let boxColor = 'var(--text-primary)';
 
           if (submitted) {
             const qCorrect = answers[qi] === section.questions[qi].correctIndex;
             if (qCorrect) {
-              boxBg = 'var(--success)';
-              boxBorder = 'var(--success)';
+              boxBg = 'var(--success-bg)';
+              boxBorder = 'var(--success-border)';
+              boxColor = 'var(--success-text)';
             } else if (isAnswered) {
-              boxBg = 'var(--error)';
-              boxBorder = 'var(--error)';
+              boxBg = 'var(--error-bg)';
+              boxBorder = 'var(--error-border)';
+              boxColor = 'var(--error-text)';
             }
           } else if (isAnswered) {
             boxBg = 'var(--accent-light)';
@@ -158,7 +161,7 @@ export default function QuizSection({ section, sectionIndex }: QuizSectionProps)
                 borderRadius: '6px',
                 border: `2px solid ${isActive ? 'var(--accent)' : boxBorder}`,
                 backgroundColor: boxBg,
-                color: (submitted && isAnswered) ? '#fff' : 'var(--text-primary)',
+                color: boxColor,
                 fontWeight: 600,
                 fontSize: '0.8rem',
                 cursor: 'pointer',

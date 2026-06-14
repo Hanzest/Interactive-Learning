@@ -66,6 +66,7 @@ export type AppAction =
   | { type: 'SAVE_NOTE'; payload: { pageIndex: number; sectionIndex: number; text: string } }
   | { type: 'RECORD_QUIZ_SCORE'; payload: { pageIndex: number; sectionIndex: number; correct: number; total: number } }
   | { type: 'SAVE_CHECKLIST'; payload: { pageIndex: number; sectionIndex: number; checked: Record<number, boolean> } }
+  | { type: 'SAVE_FLASHCARD_PROGRESS'; payload: { pageIndex: number; sectionIndex: number; cardIndex: number; known: boolean } }
   | { type: 'ADD_TOAST'; payload: { message: string; type: 'success' | 'error' | 'warning' | 'info'; duration?: number; undo?: (() => void) | null } }
   | { type: 'DISMISS_TOAST'; payload: { id: number } }
   | { type: 'UNDO_TOAST'; payload: { id: number } }

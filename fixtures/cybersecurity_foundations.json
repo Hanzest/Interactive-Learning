@@ -162,19 +162,19 @@
       "items": [
         {
           "text": "Preparation: Establishing tools, training, and policy frameworks before an incident occurs.",
-          "correctOrder": 0
-        },
-        {
-          "text": "Detection and Analysis: Identifying signs of malicious activity and validating the scope of the incident.",
           "correctOrder": 1
         },
         {
-          "text": "Containment and Eradication: Isolating compromised systems and removing threats completely from the environment.",
+          "text": "Detection and Analysis: Identifying signs of malicious activity and validating the scope of the incident.",
           "correctOrder": 2
         },
         {
-          "text": "Post-Incident Activity: Documenting lessons learned to improve defenses against future incidents.",
+          "text": "Containment and Eradication: Isolating compromised systems and removing threats completely from the environment.",
           "correctOrder": 3
+        },
+        {
+          "text": "Post-Incident Activity: Documenting lessons learned to improve defenses against future incidents.",
+          "correctOrder": 4
         }
       ]
     },

@@ -220,9 +220,9 @@ Plus **type-specific fields** as described below.
   "type": "sorting",
   "title": "Order the Steps",
   "items": [
-    { "text": "Plan the project", "correctOrder": 0 },
-    { "text": "Write the code", "correctOrder": 1 },
-    { "text": "Test the application", "correctOrder": 2 }
+    { "text": "Plan the project", "correctOrder": 1 },
+    { "text": "Write the code", "correctOrder": 2 },
+    { "text": "Test the application", "correctOrder": 3 }
   ]
 }
 ```

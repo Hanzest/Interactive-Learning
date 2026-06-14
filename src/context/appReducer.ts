@@ -263,6 +263,21 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, pages: newPages };
     }
 
+    /* ---- Flashcards ---- */
+    case 'SAVE_FLASHCARD_PROGRESS': {
+      const { pageIndex, sectionIndex, cardIndex, known } = action.payload;
+      if (pageIndex < 0 || pageIndex >= state.pages.length) return state;
+      const newPages = state.pages.map((p, i) => {
+        if (i !== pageIndex) return p;
+        const updated = { ...p, _meta: { ...p._meta } };
+        if (!updated._meta!.flashcardProgress) updated._meta!.flashcardProgress = {};
+        if (!updated._meta!.flashcardProgress[sectionIndex]) updated._meta!.flashcardProgress[sectionIndex] = {};
+        updated._meta!.flashcardProgress[sectionIndex][cardIndex] = { known };
+        return updated;
+      });
+      return { ...state, pages: newPages };
+    }
+
     /* ---- Toasts ---- */
     case 'ADD_TOAST': {
       const id = state.nextToastId;

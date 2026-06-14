@@ -6,7 +6,7 @@ export default function Footer() {
     state,
     nextPage,
     prevPage,
-    isPageViewed,
+    completedPercent,
   } = useAppContext();
 
   const totalPages = state.pages.length;
@@ -15,10 +15,6 @@ export default function Footer() {
 
   // Current position (1-indexed)
   const position = hasPages ? currentIndex + 1 : 0;
-
-  // Completed count
-  const completedCount = state.pages.filter((_, i) => isPageViewed(i)).length;
-  const completedPercent = totalPages > 0 ? Math.round((completedCount / totalPages) * 100) : 0;
 
   // Viewed count
   const viewedCount = state.viewedPages.length;

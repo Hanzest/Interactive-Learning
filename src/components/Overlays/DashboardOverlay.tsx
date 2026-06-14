@@ -243,6 +243,10 @@ export default function DashboardOverlay() {
     if (!chartRef.current) return;
     if (chartInstance.current) chartInstance.current.destroy();
 
+    const styles = getComputedStyle(document.documentElement);
+    const successColor = styles.getPropertyValue('--success').trim() || '#10b981';
+    const remainingColor = styles.getPropertyValue('--border-color').trim() || '#e2e8f0';
+
     const remaining = totalPages - completedCount;
     chartInstance.current = new Chart(chartRef.current, {
       type: 'doughnut',
@@ -251,7 +255,7 @@ export default function DashboardOverlay() {
         datasets: [
           {
             data: [completedCount, remaining],
-            backgroundColor: ['#10b981', '#e2e8f0'],
+            backgroundColor: [successColor, remainingColor],
             borderWidth: 0,
             hoverOffset: 4,
           },
@@ -275,7 +279,7 @@ export default function DashboardOverlay() {
     return () => {
       if (chartInstance.current) chartInstance.current.destroy();
     };
-  }, [totalPages, completedCount]);
+  }, [totalPages, completedCount, state.darkMode]);
 
   const getStatusLabel = (index: number): { label: string; style: React.CSSProperties } => {
     if (isPageCompleted(index)) return { label: '✓ Done', style: s.statusDone };
@@ -353,11 +357,11 @@ export default function DashboardOverlay() {
           </div>
           <div style={s.chartLegend}>
             <div style={s.legendItem}>
-              <span style={{ ...s.legendDot, backgroundColor: '#10b981' }} />
+              <span style={{ ...s.legendDot, backgroundColor: 'var(--success)' }} />
               <span>Completed ({completedCount})</span>
             </div>
             <div style={s.legendItem}>
-              <span style={{ ...s.legendDot, backgroundColor: '#e2e8f0' }} />
+              <span style={{ ...s.legendDot, backgroundColor: 'var(--border-color)' }} />
               <span>Remaining ({totalPages - completedCount})</span>
             </div>
           </div>

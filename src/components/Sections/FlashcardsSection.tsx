@@ -9,7 +9,7 @@ interface FlashcardsSectionProps {
 }
 
 export default function FlashcardsSection({ section, sectionIndex }: FlashcardsSectionProps) {
-  const { state } = useAppContext();
+  const { state, saveFlashcardProgress } = useAppContext();
   const [currentCard, setCurrentCard] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -31,6 +31,7 @@ export default function FlashcardsSection({ section, sectionIndex }: FlashcardsS
   const totalCards = cards.length;
   const masteredCount = masteredCards.length;
   const allMastered = masteredCount === section.cards.length;
+  const isCardMastered = flashcardProgress[currentCard]?.known === true;
 
   const advanceCard = useCallback((dir: 1 | -1) => {
     setCurrentCard((p) => {
@@ -39,6 +40,26 @@ export default function FlashcardsSection({ section, sectionIndex }: FlashcardsS
       return next;
     });
   }, [totalCards]);
+
+  const handleResetProgress = useCallback(() => {
+    section.cards.forEach((_, i) => {
+      saveFlashcardProgress(state.currentPageIndex, sectionIndex, i, false);
+    });
+    setCurrentCard(0);
+    setFlipped(false);
+  }, [saveFlashcardProgress, state.currentPageIndex, sectionIndex, section.cards]);
+
+  const handleMarkProgress = useCallback((known: boolean) => {
+    saveFlashcardProgress(state.currentPageIndex, sectionIndex, currentCard, known);
+    if (currentCard < totalCards - 1) {
+      setIsAnimating(true);
+      setFlipped(false);
+      animTimeoutRef.current = window.setTimeout(() => {
+        advanceCard(1);
+        setIsAnimating(false);
+      }, 600);
+    }
+  }, [saveFlashcardProgress, state.currentPageIndex, sectionIndex, currentCard, totalCards, advanceCard]);
 
   const handlePrev = useCallback(() => {
     if (isAnimating || currentCard <= 0) return;
@@ -89,7 +110,24 @@ export default function FlashcardsSection({ section, sectionIndex }: FlashcardsS
         }}>{section.title}</h2>}
         <div>
           <span style={{ fontSize: '3rem', display: 'block', marginBottom: '0.5rem' }}>🎉</span>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>All cards mastered!</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', marginBottom: '1rem' }}>All cards mastered!</p>
+          <button
+            onClick={handleResetProgress}
+            className="btn-base"
+            style={{
+              padding: '0.5rem 1.25rem',
+              border: '1px solid var(--border-color)',
+              borderRadius: '6px',
+              backgroundColor: 'var(--bg-secondary)',
+              color: 'var(--text-secondary)',
+              cursor: 'pointer',
+              fontWeight: 500,
+              fontSize: '0.875rem',
+              transition: 'var(--transition-fast)',
+            }}
+          >
+            Reset Progress
+          </button>
         </div>
       </div>
     );
@@ -196,6 +234,22 @@ export default function FlashcardsSection({ section, sectionIndex }: FlashcardsS
             textAlign: 'center',
             overflowY: 'auto',
           }}>
+            {isCardMastered && (
+              <span style={{
+                position: 'absolute',
+                top: '0.75rem',
+                right: '0.75rem',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: 'var(--success-text)',
+                backgroundColor: 'var(--success-bg)',
+                border: '1px solid var(--success-border)',
+                padding: '0.25rem 0.5rem',
+                borderRadius: '4px',
+              }}>
+                ✓ Mastered
+              </span>
+            )}
             <div dangerouslySetInnerHTML={{ __html: renderMarkdown(currentCardData.front) }} />
           </div>
           <div style={{
@@ -217,10 +271,71 @@ export default function FlashcardsSection({ section, sectionIndex }: FlashcardsS
             textAlign: 'left',
             overflowY: 'auto',
           }}>
+            {isCardMastered && (
+              <span style={{
+                position: 'absolute',
+                top: '0.75rem',
+                right: '0.75rem',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: 'var(--success-text)',
+                backgroundColor: 'var(--success-bg)',
+                border: '1px solid var(--success-border)',
+                padding: '0.25rem 0.5rem',
+                borderRadius: '4px',
+              }}>
+                ✓ Mastered
+              </span>
+            )}
             <div dangerouslySetInnerHTML={{ __html: renderMarkdown(currentCardData.back) }} />
           </div>
         </div>
       </div>
+
+      {/* Mastery status actions */}
+      {flipped && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '1rem',
+          marginBottom: '1.5rem',
+        }}>
+          <button
+            onClick={() => handleMarkProgress(false)}
+            className="btn-base"
+            style={{
+              padding: '0.5rem 1.25rem',
+              border: '1px solid var(--error-border)',
+              borderRadius: '6px',
+              backgroundColor: 'var(--error-bg)',
+              color: 'var(--error-text)',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              transition: 'var(--transition-fast)',
+            }}
+          >
+            ❌ Study Again
+          </button>
+          <button
+            onClick={() => handleMarkProgress(true)}
+            className="btn-base"
+            style={{
+              padding: '0.5rem 1.25rem',
+              border: '1px solid var(--success-border)',
+              borderRadius: '6px',
+              backgroundColor: 'var(--success-bg)',
+              color: 'var(--success-text)',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              transition: 'var(--transition-fast)',
+            }}
+          >
+            ✓ Got It!
+          </button>
+        </div>
+      )}
 
       {/* Navigation */}
       <div style={{

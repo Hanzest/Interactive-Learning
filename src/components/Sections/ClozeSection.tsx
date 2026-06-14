@@ -102,10 +102,20 @@ export default function ClozeSection({ section }: ClozeSectionProps) {
 
       let inputStyle: React.CSSProperties = { ...inputBaseStyle };
       if (isCorrect) {
-        inputStyle = { ...inputStyle, borderColor: 'var(--success)', backgroundColor: 'var(--bg-secondary)' };
+        inputStyle = {
+          ...inputStyle,
+          borderColor: 'var(--success)',
+          backgroundColor: 'var(--success-bg)',
+          color: 'var(--success-text)',
+        };
       }
       if (isWrong) {
-        inputStyle = { ...inputStyle, borderColor: 'var(--error)', backgroundColor: 'var(--bg-secondary)' };
+        inputStyle = {
+          ...inputStyle,
+          borderColor: 'var(--error)',
+          backgroundColor: 'var(--error-bg)',
+          color: 'var(--error-text)',
+        };
       }
 
       return (
@@ -134,6 +144,18 @@ export default function ClozeSection({ section }: ClozeSectionProps) {
               placeholder="..."
               size={12}
             />
+          )}
+          {submitted && (
+            <span style={{
+              fontSize: '1rem',
+              fontWeight: 700,
+              color: isCorrect ? 'var(--success-text)' : 'var(--error-text)',
+              marginLeft: '2px',
+              userSelect: 'none',
+            }}
+            title={isCorrect ? 'Correct' : 'Incorrect'}>
+              {isCorrect ? '✓' : '✗'}
+            </span>
           )}
           <button
             onClick={() => toggleHint(blankId)}

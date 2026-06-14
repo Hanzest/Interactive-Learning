@@ -60,6 +60,7 @@ interface AppContextValue {
   getNote: (pageIndex: number, sectionIndex: number) => string | null;
   recordQuizScore: (pageIndex: number, sectionIndex: number, correct: number, total: number) => void;
   saveChecklist: (pageIndex: number, sectionIndex: number, checked: Record<number, boolean>) => void;
+  saveFlashcardProgress: (pageIndex: number, sectionIndex: number, cardIndex: number, known: boolean) => void;
   addToast: (message: string, type: 'success' | 'error' | 'warning' | 'info', duration?: number, undo?: (() => void) | null) => void;
   dismissToast: (id: number) => void;
   isPageViewed: (index: number) => boolean;
@@ -249,6 +250,10 @@ export function AppProvider({ children }: AppProviderProps) {
     dispatch({ type: 'SAVE_CHECKLIST', payload: { pageIndex, sectionIndex, checked } });
   }, []);
 
+  const saveFlashcardProgress = useCallback((pageIndex: number, sectionIndex: number, cardIndex: number, known: boolean) => {
+    dispatch({ type: 'SAVE_FLASHCARD_PROGRESS', payload: { pageIndex, sectionIndex, cardIndex, known } });
+  }, []);
+
   const addToastFn = useCallback((
     message: string,
     type: 'success' | 'error' | 'warning' | 'info',
@@ -326,6 +331,7 @@ export function AppProvider({ children }: AppProviderProps) {
     getNote,
     recordQuizScore,
     saveChecklist,
+    saveFlashcardProgress,
     addToast: addToastFn,
     dismissToast,
     isPageViewed,
@@ -339,7 +345,7 @@ export function AppProvider({ children }: AppProviderProps) {
     togglePageComplete, movePage, goToPage, nextPage, prevPage, goToRandomPage,
     setSearchQuery, toggleDarkMode, toggleShortcuts, toggleDashboard, toggleSidebar,
     setError, setRenamingIndex, setContextMenu, saveNote, getNote, recordQuizScore,
-    saveChecklist, addToastFn, dismissToast, isPageViewed, isPageCompleted,
+    saveChecklist, saveFlashcardProgress, addToastFn, dismissToast, isPageViewed, isPageCompleted,
     isQuizCompleted, saveSession, getQuizAttemptHistory,
   ]);
 

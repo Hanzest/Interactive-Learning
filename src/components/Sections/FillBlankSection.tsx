@@ -80,8 +80,8 @@ export default function FillBlankSection({ section }: FillBlankSectionProps) {
                     padding: '0.25rem 0.5rem',
                     border: `2px solid ${isCorrect ? 'var(--success)' : isWrong ? 'var(--error)' : 'var(--border-color)'}`,
                     borderRadius: '4px',
-                    backgroundColor: 'var(--bg-primary)',
-                    color: 'var(--text-primary)',
+                    backgroundColor: isCorrect ? 'var(--success-bg)' : isWrong ? 'var(--error-bg)' : 'var(--bg-primary)',
+                    color: isCorrect ? 'var(--success-text)' : isWrong ? 'var(--error-text)' : 'var(--text-primary)',
                     fontSize: '0.875rem',
                     outline: 'none',
                   }}
@@ -90,6 +90,18 @@ export default function FillBlankSection({ section }: FillBlankSectionProps) {
                   disabled={(submitted && !instantFeedback) || showAnswer}
                   placeholder="..."
                 />
+                {submitted && (
+                  <span style={{
+                    fontSize: '1rem',
+                    fontWeight: 700,
+                    color: isCorrect ? 'var(--success-text)' : 'var(--error-text)',
+                    marginLeft: '2px',
+                    userSelect: 'none',
+                  }}
+                  title={isCorrect ? 'Correct' : 'Incorrect'}>
+                    {isCorrect ? '✓' : '✗'}
+                  </span>
+                )}
                 <button
                   onClick={() => toggleHint(index)}
                   title="Show hint"
