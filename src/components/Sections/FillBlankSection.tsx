@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import type { FillBlankSection as FillBlankSectionType } from '../../types/schema';
 import { renderMarkdown } from '../../utils/renderContent';
 
@@ -10,18 +10,21 @@ export default function FillBlankSection({ section }: FillBlankSectionProps) {
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [hints, setHints] = useState<Record<number, boolean>>({});
+  const [showAnswer, setShowAnswer] = useState(false);
+  const prevAnswersRef = useRef<Record<number, string>>({});
 
   const instantFeedback = section.instantFeedback ?? false;
 
   const handleChange = useCallback(
     (index: number, value: string) => {
+      if (showAnswer) return;
       if (submitted && !instantFeedback) return;
       setAnswers((prev) => ({ ...prev, [index]: value }));
       if (instantFeedback) {
         setSubmitted(false);
       }
     },
-    [submitted, instantFeedback]
+    [submitted, instantFeedback, showAnswer]
   );
 
   const handleCheck = useCallback(() => {
@@ -32,7 +35,22 @@ export default function FillBlankSection({ section }: FillBlankSectionProps) {
     setAnswers({});
     setSubmitted(false);
     setHints({});
+    setShowAnswer(false);
   }, []);
+
+  const handleShowAnswer = useCallback(() => {
+    if (!showAnswer) {
+      prevAnswersRef.current = { ...answers };
+      const correctAnswers: Record<number, string> = {};
+      section.sentences.forEach((s, idx) => {
+        correctAnswers[idx] = s.answer;
+      });
+      setAnswers(correctAnswers);
+    } else {
+      setAnswers(prevAnswersRef.current);
+    }
+    setShowAnswer(!showAnswer);
+  }, [showAnswer, section.sentences, answers]);
 
   const toggleHint = useCallback((index: number) => {
     setHints((prev) => ({ ...prev, [index]: !prev[index] }));
@@ -55,7 +73,7 @@ export default function FillBlankSection({ section }: FillBlankSectionProps) {
           <React.Fragment key={pi}>
             {part}
             {pi < parts.length - 1 && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', margin: '0 0.125rem' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', margin: '0 0.125rem', position: 'relative' }}>
                 <input
                   type="text"
                   style={{
@@ -69,7 +87,7 @@ export default function FillBlankSection({ section }: FillBlankSectionProps) {
                   }}
                   value={answers[index] || ''}
                   onChange={(e) => handleChange(index, e.target.value)}
-                  disabled={submitted && !instantFeedback}
+                  disabled={(submitted && !instantFeedback) || showAnswer}
                   placeholder="..."
                 />
                 <button
@@ -89,16 +107,25 @@ export default function FillBlankSection({ section }: FillBlankSectionProps) {
                     transition: 'var(--transition-fast)',
                   }}
                 >
-💡
+                  💡
                 </button>
                 {hints[index] && (
                   <span style={{
+                    position: 'absolute',
+                    bottom: '125%',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 10,
+                    width: 'max-content',
+                    maxWidth: '220px',
+                    whiteSpace: 'normal',
                     fontSize: '0.8rem',
                     color: 'var(--warning-text)',
                     backgroundColor: 'var(--warning-bg)',
                     border: '1px solid var(--warning-border)',
                     borderRadius: '4px',
-                    padding: '0.125rem 0.375rem',
+                    padding: '0.25rem 0.5rem',
+                    boxShadow: 'var(--shadow-md)',
                     fontStyle: 'italic',
                     lineHeight: 1.4,
                   }}>
@@ -170,6 +197,7 @@ export default function FillBlankSection({ section }: FillBlankSectionProps) {
           onClick={handleCheck}
           disabled={
             submitted ||
+            showAnswer ||
             Object.keys(answers).length < section.sentences.length
           }
           className="btn-base"
@@ -177,9 +205,9 @@ export default function FillBlankSection({ section }: FillBlankSectionProps) {
             padding: '0.5rem 1.25rem',
             border: 'none',
             borderRadius: '6px',
-            backgroundColor: (submitted || Object.keys(answers).length < section.sentences.length) ? 'var(--bg-tertiary)' : 'var(--accent)',
-            color: (submitted || Object.keys(answers).length < section.sentences.length) ? 'var(--text-muted)' : '#fff',
-            cursor: (submitted || Object.keys(answers).length < section.sentences.length) ? 'not-allowed' : 'pointer',
+            backgroundColor: (submitted || showAnswer || Object.keys(answers).length < section.sentences.length) ? 'var(--bg-tertiary)' : 'var(--accent)',
+            color: (submitted || showAnswer || Object.keys(answers).length < section.sentences.length) ? 'var(--text-muted)' : '#fff',
+            cursor: (submitted || showAnswer || Object.keys(answers).length < section.sentences.length) ? 'not-allowed' : 'pointer',
             fontWeight: 600,
             fontSize: '0.875rem',
             transition: 'var(--transition-fast)',
@@ -203,6 +231,23 @@ export default function FillBlankSection({ section }: FillBlankSectionProps) {
           }}
         >
           Reset
+        </button>
+        <button
+          onClick={handleShowAnswer}
+          className="btn-base"
+          style={{
+            padding: '0.5rem 1.25rem',
+            border: '1px solid var(--border-color)',
+            borderRadius: '6px',
+            backgroundColor: 'var(--bg-secondary)',
+            color: 'var(--text-secondary)',
+            cursor: 'pointer',
+            fontWeight: 500,
+            fontSize: '0.875rem',
+            transition: 'var(--transition-fast)',
+          }}
+        >
+          {showAnswer ? 'Hide Answer' : 'Show Answer'}
         </button>
       </div>
     </div>

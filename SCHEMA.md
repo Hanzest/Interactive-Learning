@@ -23,7 +23,7 @@ Each JSON file represents a **single learning page**. Upload one or more files v
 | `title` | string | ✅ | Page title (displayed in sidebar + header) |
 | `description` | string | ❌ | Short summary of the page |
 | `tags` | string[] | ❌ | Filterable tags for search |
-| `icon` | string | ❌ | Emoji or icon string (e.g., "⚛️") |
+
 ### `sections` Array
 
 Each section object requires at least:

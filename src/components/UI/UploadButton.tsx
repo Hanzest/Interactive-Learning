@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import type { LearningPage } from '../../types/schema';
+import { validateLearningPage } from '../../utils/validation';
 
 export default function UploadButton() {
   const { addPage, addToast } = useAppContext();
@@ -10,10 +11,13 @@ export default function UploadButton() {
     try {
       const text = await file.text();
       const data: LearningPage = JSON.parse(text);
-      if (!data.page && !data.sections) {
-        addToast(`Invalid JSON in ${file.name}: missing page or sections`, 'error', 4000);
+
+      const validation = validateLearningPage(data);
+      if (!validation.valid) {
+        addToast(`Invalid JSON in ${file.name}: ${validation.error}`, 'error', 5000);
         return;
       }
+
       const ok = addPage(data, file.name);
       if (ok) {
         addToast(`Loaded "${data.page?.title || 'Untitled'}"`, 'success', 2000);

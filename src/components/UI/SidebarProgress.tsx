@@ -38,7 +38,7 @@ export default function SidebarProgress() {
           style={{
             height: '100%',
             width: `${(completedCount / total) * 100}%`,
-            background: 'var(--accent)',
+            background: 'linear-gradient(90deg, var(--accent), var(--accent-hover))',
             borderRadius: 3,
             transition: 'width 0.2s',
           }}

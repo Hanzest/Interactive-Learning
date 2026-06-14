@@ -6,7 +6,6 @@ export default function Footer() {
     state,
     nextPage,
     prevPage,
-    goToRandomPage,
     isPageViewed,
   } = useAppContext();
 
@@ -73,22 +72,6 @@ export default function Footer() {
 
   const spacerStyle: React.CSSProperties = {
     flex: 1,
-  };
-
-  const randomButtonStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '2rem',
-    height: '2rem',
-    border: 'none',
-    borderRadius: '0.375rem',
-    background: 'transparent',
-    color: 'var(--text-muted)',
-    cursor: 'pointer',
-    fontSize: '1.125rem',
-    transition: 'background-color var(--transition-fast), color var(--transition-fast)',
-    flexShrink: 0,
   };
 
   const progressBarWrapperStyle: React.CSSProperties = {
@@ -158,17 +141,6 @@ export default function Footer() {
 
       {/* Spacer */}
       <div style={spacerStyle} />
-
-      {/* Random button */}
-      <button
-        style={randomButtonStyle}
-        onClick={goToRandomPage}
-        disabled={!hasPages}
-        aria-label="Random page"
-        title="Random page"
-      >
-        🎲
-      </button>
 
       {/* Progress bar */}
       <div style={progressBarWrapperStyle}>

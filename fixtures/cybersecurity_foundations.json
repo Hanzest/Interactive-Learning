@@ -1,0 +1,244 @@
+{
+  "page": {
+    "title": "Cybersecurity Foundations",
+    "description": "An interactive guide to the core principles, threat landscapes, and defensive pillars of cybersecurity.",
+    "tags": [
+      "Security",
+      "Tech Foundations",
+      "Network Security",
+      "Compliance"
+    ],
+    "icon": "🛡️"
+  },
+  "sections": [
+    {
+      "type": "text",
+      "title": "Introduction to Cybersecurity",
+      "content": "Cybersecurity is the practice of protecting systems, networks, programs, and data from digital attacks. In our interconnected world, security is no longer just an IT issue; it is a fundamental pillar of personal safety and organizational resilience. This page breaks down the core structural frameworks, types of vulnerabilities, and common attack types you must understand to build a strong security foundation."
+    },
+    {
+      "type": "tabs",
+      "title": "The CIA Triad: The Three Pillars of Security",
+      "tabs": [
+        {
+          "label": "Confidentiality",
+          "content": "Ensuring that data is accessible only to those authorized to see it. Measures include **encryption**, multi-factor authentication (MFA), and access control lists (ACLs)."
+        },
+        {
+          "label": "Integrity",
+          "content": "Maintaining and assuring the accuracy and completeness of data over its entire life cycle. This means data cannot be modified in transit undetected. Measures include **hashing** (e.g., SHA-256) and digital signatures."
+        },
+        {
+          "label": "Availability",
+          "content": "Ensuring authorized users have reliable and timely access to information and computing resources when needed. Measures include **redundancy**, backups, and DDoS mitigation systems."
+        }
+      ]
+    },
+    {
+      "type": "accordion",
+      "title": "Essential Security Terminology",
+      "accordionBehavior": "multiple",
+      "items": [
+        {
+          "heading": "What is a Vulnerability?",
+          "content": "A weakness or flaw in a system's design, implementation, or operation that could be exploited by an attacker to compromise security."
+        },
+        {
+          "heading": "What is a Threat?",
+          "content": "Any potential occurrence (man-made or natural) that could cause undesirable effects on an asset or resources. Examples include malware, hackers, or physical floods."
+        },
+        {
+          "heading": "What is Risk?",
+          "content": "The intersection of a threat and a vulnerability. It represents the likelihood that a threat will exploit a vulnerability and cause harm, combined with the impact of that event ($Risk = Threat \\times Vulnerability \\times Impact$)."
+        },
+        {
+          "heading": "What is an Exploit?",
+          "content": "A piece of software, a chunk of data, or a sequence of commands that takes advantage of a vulnerability to cause unintended behavior on computer software or hardware."
+        }
+      ]
+    },
+    {
+      "type": "flashcards",
+      "title": "Common Cybersecurity Attack Types",
+      "cards": [
+        {
+          "front": "Phishing",
+          "back": "A social engineering attack where malicious actors send fraudulent messages disguised as trusted entities to steal sensitive data or deploy malware."
+        },
+        {
+          "front": "Ransomware",
+          "back": "A type of malware designed to encrypt a victim's files, making them inaccessible, followed by a demand for payment to provide the decryption key."
+        },
+        {
+          "front": "Man-in-the-Middle (MitM)",
+          "back": "An attack where the hacker secretly relays and alters communications between two parties who believe they are directly communicating with each other."
+        },
+        {
+          "front": "DDoS (Distributed Denial of Service)",
+          "back": "An attempt to disrupt normal traffic of a targeted server, service, or network by overwhelming the target or its surrounding infrastructure with a flood of Internet traffic."
+        }
+      ]
+    },
+    {
+      "type": "quiz",
+      "title": "Knowledge Assessment",
+      "questions": [
+        {
+          "question": "An attacker intercepts a company's Wi-Fi traffic and alters the destination of data packets without either party noticing. Which component of the CIA triad is primarily violated when data is altered?",
+          "options": [
+            "Confidentiality",
+            "Integrity",
+            "Availability",
+            "Authentication"
+          ],
+          "correctIndex": 1,
+          "explanation": "Integrity refers to preventing unauthorized modifications to data. When packets are altered, the data's integrity is destroyed.",
+          "optionExplanations": [
+            "Confidentiality prevents unauthorized reading of data, not unauthorized alterations.",
+            "Integrity is the correct answer because data accuracy and completeness were compromised by altering packets.",
+            "Availability deals with keeping systems and data accessible, which is not the primary issue here.",
+            "Authentication is the process of verifying identity, not a core asset attribute of the CIA triad."
+          ]
+        },
+        {
+          "question": "Which security control is specifically designed to protect data Confidentiality at rest?",
+          "options": [
+            "Off-site data backups",
+            "Cryptographic Hashing",
+            "AES-256 Encryption",
+            "Load Balancers"
+          ],
+          "correctIndex": 2,
+          "explanation": "Encryption transforms plaintext into ciphertext, preventing unauthorized parties from reading it, thereby protecting Confidentiality.",
+          "optionExplanations": [
+            "Backups ensure Availability if primary systems fail.",
+            "Hashing verifies data Integrity by providing a unique digital fingerprint.",
+            "AES-256 Encryption actively scrambles data to keep it hidden from unauthorized eyes (Confidentiality).",
+            "Load balancers distribute traffic to ensure system Availability."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "fill-blank",
+      "title": "Defensive Measures Fill-In",
+      "instantFeedback": true,
+      "sentences": [
+        {
+          "text": "To protect user logins beyond passwords, organizations require ___ (use the 3-letter abbreviation), which forces users to provide two or more verification factors.",
+          "answer": "MFA"
+        },
+        {
+          "text": "The principle of least ___ dictates that users should only be granted the minimum level of access necessary to complete their job functions.",
+          "answer": "privilege"
+        }
+      ]
+    },
+    {
+      "type": "matching",
+      "title": "Match Threat Actors to Motivations",
+      "pairs": [
+        {
+          "left": "Cybercriminals",
+          "right": "Financial gain through ransomware, fraud, and extortion."
+        },
+        {
+          "left": "Nation-State Actors",
+          "right": "Geopolitical espionage, industrial sabotage, and strategic intelligence."
+        },
+        {
+          "left": "Hacktivists",
+          "right": "Promoting a political agenda, social change, or ideological statement."
+        },
+        {
+          "left": "Script Kiddies",
+          "right": "Thrill-seeking or bragging rights using pre-made tools without deep technical skill."
+        }
+      ]
+    },
+    {
+      "type": "sorting",
+      "title": "Incident Response Lifecycle Steps",
+      "items": [
+        {
+          "text": "Preparation: Establishing tools, training, and policy frameworks before an incident occurs.",
+          "correctOrder": 0
+        },
+        {
+          "text": "Detection and Analysis: Identifying signs of malicious activity and validating the scope of the incident.",
+          "correctOrder": 1
+        },
+        {
+          "text": "Containment and Eradication: Isolating compromised systems and removing threats completely from the environment.",
+          "correctOrder": 2
+        },
+        {
+          "text": "Post-Incident Activity: Documenting lessons learned to improve defenses against future incidents.",
+          "correctOrder": 3
+        }
+      ]
+    },
+    {
+      "type": "checklist",
+      "title": "Personal Cyber Hygiene Checklist",
+      "items": [
+        {
+          "text": "Enable Multi-Factor Authentication (MFA) on all critical personal accounts.",
+          "optional": false
+        },
+        {
+          "text": "Use a unique, complex passphrase for every single distinct service or application.",
+          "optional": false
+        },
+        {
+          "text": "Set system software updates to apply automatically across devices.",
+          "optional": false
+        },
+        {
+          "text": "Routinely run manual antivirus full-system scans every weekend.",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "type": "cloze",
+      "title": "Deep Dive into Authentication Types",
+      "text": "Authentication metrics fall into three classic factors. Something you know, such as a {{factor1}}. Something you have, such as a physical {{factor2}}. And something you are, which utilizes {{factor3}} like fingerprints or facial recognition software.",
+      "blanks": [
+        {
+          "id": "factor1",
+          "options": [
+            "password",
+            "smartcard",
+            "fingerprint"
+          ],
+          "correctIndex": 0,
+          "correctAnswer": "password",
+          "hint": "Information stored in your memory."
+        },
+        {
+          "id": "factor2",
+          "options": [
+            "passphrase",
+            "token",
+            "retina"
+          ],
+          "correctIndex": 1,
+          "correctAnswer": "token",
+          "hint": "A hardware or physical asset you possess."
+        },
+        {
+          "id": "factor3",
+          "options": [
+            "passwords",
+            "certificates",
+            "biometrics"
+          ],
+          "correctIndex": 2,
+          "correctAnswer": "biometrics",
+          "hint": "Inherent physiological traits unique to you."
+        }
+      ]
+    }
+  ]
+}

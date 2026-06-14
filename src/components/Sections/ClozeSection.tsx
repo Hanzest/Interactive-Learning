@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import type { ClozeSection as ClozeSectionType } from '../../types/schema';
 import { renderMarkdown } from '../../utils/renderContent';
 
@@ -10,13 +10,15 @@ export default function ClozeSection({ section }: ClozeSectionProps) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [hints, setHints] = useState<Record<string, boolean>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [showAnswer, setShowAnswer] = useState(false);
+  const prevAnswersRef = useRef<Record<string, string>>({});
 
   const handleAnswerChange = useCallback(
     (blankId: string, value: string) => {
-      if (submitted) return;
+      if (submitted || showAnswer) return;
       setAnswers((prev) => ({ ...prev, [blankId]: value }));
     },
-    [submitted]
+    [submitted, showAnswer]
   );
 
   const handleSubmit = useCallback(() => {
@@ -27,20 +29,29 @@ export default function ClozeSection({ section }: ClozeSectionProps) {
     setAnswers({});
     setSubmitted(false);
     setHints({});
+    setShowAnswer(false);
   }, []);
+
+  const handleShowAnswer = useCallback(() => {
+    if (!showAnswer) {
+      prevAnswersRef.current = { ...answers };
+      const correctAnswers: Record<string, string> = {};
+      section.blanks.forEach((b) => {
+        const ans = b.correctIndex !== undefined && b.options
+          ? b.options[b.correctIndex]
+          : b.correctAnswer || '';
+        correctAnswers[b.id] = ans;
+      });
+      setAnswers(correctAnswers);
+    } else {
+      setAnswers(prevAnswersRef.current);
+    }
+    setShowAnswer(!showAnswer);
+  }, [showAnswer, section.blanks, answers]);
 
   const toggleHint = useCallback((blankId: string) => {
     setHints((prev) => ({ ...prev, [blankId]: !prev[blankId] }));
   }, []);
-
-  const speak = (text: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      window.speechSynthesis.speak(utterance);
-    }
-  };
 
   const checkBlank = (blank: typeof section.blanks[0]) => {
     if (!submitted) return null;
@@ -98,13 +109,13 @@ export default function ClozeSection({ section }: ClozeSectionProps) {
       }
 
       return (
-        <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', margin: '0 0.125rem' }}>
+        <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', margin: '0 0.125rem', position: 'relative' }}>
           {blank.options ? (
             <select
               style={inputStyle}
               value={answers[blankId] || ''}
               onChange={(e) => handleAnswerChange(blankId, e.target.value)}
-              disabled={submitted}
+              disabled={submitted || showAnswer}
             >
               <option value="">...</option>
               {blank.options.map((opt, oi) => (
@@ -119,7 +130,7 @@ export default function ClozeSection({ section }: ClozeSectionProps) {
               style={inputStyle}
               value={answers[blankId] || ''}
               onChange={(e) => handleAnswerChange(blankId, e.target.value)}
-              disabled={submitted}
+              disabled={submitted || showAnswer}
               placeholder="..."
               size={12}
             />
@@ -141,18 +152,26 @@ export default function ClozeSection({ section }: ClozeSectionProps) {
               transition: 'var(--transition-fast)',
             }}
           >
-💡
+            💡
           </button>
           {hints[blankId] && blank.hint && (
             <span style={{
+              position: 'absolute',
+              bottom: '125%',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 10,
+              width: 'max-content',
+              maxWidth: '200px',
+              whiteSpace: 'normal',
               fontSize: '0.8rem',
               color: 'var(--warning-text)',
               backgroundColor: 'var(--warning-bg)',
               border: '1px solid var(--warning-border)',
               borderRadius: '4px',
-              padding: '0.125rem 0.375rem',
+              padding: '0.25rem 0.5rem',
+              boxShadow: 'var(--shadow-md)',
               fontStyle: 'italic',
-              maxWidth: '200px',
               lineHeight: 1.4,
             }}>{blank.hint}</span>
           )}
@@ -209,15 +228,15 @@ export default function ClozeSection({ section }: ClozeSectionProps) {
       }}>
         <button
           onClick={handleSubmit}
-          disabled={submitted}
+          disabled={submitted || showAnswer}
           className="btn-base"
           style={{
             padding: '0.5rem 1.25rem',
             border: 'none',
             borderRadius: '6px',
-            backgroundColor: submitted ? 'var(--bg-tertiary)' : 'var(--accent)',
-            color: submitted ? 'var(--text-muted)' : '#fff',
-            cursor: submitted ? 'not-allowed' : 'pointer',
+            backgroundColor: (submitted || showAnswer) ? 'var(--bg-tertiary)' : 'var(--accent)',
+            color: (submitted || showAnswer) ? 'var(--text-muted)' : '#fff',
+            cursor: (submitted || showAnswer) ? 'not-allowed' : 'pointer',
             fontWeight: 600,
             fontSize: '0.875rem',
             transition: 'var(--transition-fast)',
@@ -243,7 +262,7 @@ export default function ClozeSection({ section }: ClozeSectionProps) {
           Reset
         </button>
         <button
-          onClick={() => speak(section.text)}
+          onClick={handleShowAnswer}
           className="btn-base"
           style={{
             padding: '0.5rem 1.25rem',
@@ -257,7 +276,7 @@ export default function ClozeSection({ section }: ClozeSectionProps) {
             transition: 'var(--transition-fast)',
           }}
         >
-          🔊 Read Aloud
+          {showAnswer ? 'Hide Answer' : 'Show Answer'}
         </button>
       </div>
     </div>

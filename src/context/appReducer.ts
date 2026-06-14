@@ -351,6 +351,37 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
     }
 
+    case 'POMODORO_SET_REMAINING': {
+      const remaining = action.payload;
+      const mode = state.pomodoroMode;
+      let focusMins = state.pomodoroFocusMinutes;
+      let breakMins = state.pomodoroBreakMinutes;
+      
+      if (mode === 'focus') {
+        const totalSec = focusMins * 60;
+        if (remaining > totalSec) {
+          focusMins = Math.ceil(remaining / 60);
+        }
+        const newTotalSec = focusMins * 60;
+        return {
+          ...state,
+          pomodoroFocusMinutes: focusMins,
+          pomodoroSeconds: newTotalSec - remaining,
+        };
+      } else {
+        const totalSec = breakMins * 60;
+        if (remaining > totalSec) {
+          breakMins = Math.ceil(remaining / 60);
+        }
+        const newTotalSec = breakMins * 60;
+        return {
+          ...state,
+          pomodoroBreakMinutes: breakMins,
+          pomodoroSeconds: newTotalSec - remaining,
+        };
+      }
+    }
+
     case 'POMODORO_RESTORE':
       return {
         ...state,

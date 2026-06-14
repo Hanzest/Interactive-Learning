@@ -41,7 +41,7 @@ export function useTimer() {
     const totalSec = state.pomodoroMode === 'focus'
       ? state.pomodoroFocusMinutes * 60
       : state.pomodoroBreakMinutes * 60;
-    if (state.pomodoroSeconds >= totalSec && state.pomodoroSeconds > 0) {
+    if (state.pomodoroSeconds === totalSec && state.pomodoroSeconds > 0) {
       // Play notification
       playNotification();
       persist();
@@ -110,30 +110,46 @@ function getTimerProgress(
 }
 
 function playNotification() {
+  const soundEnabled = storage.load<boolean>('pomodoroSoundEnabled', true);
+  if (!soundEnabled) return;
   try {
-    const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-    const oscillator = ctx.createOscillator();
-    const gain = ctx.createGain();
-    oscillator.connect(gain);
-    gain.connect(ctx.destination);
-    oscillator.frequency.value = 880;
-    oscillator.type = 'sine';
-    gain.gain.setValueAtTime(0.5, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-    oscillator.start(ctx.currentTime);
-    oscillator.stop(ctx.currentTime + 0.5);
+    const ctx = new (window.AudioContext || (window as unknown as any).webkitAudioContext)();
+    
+    const playBeeps = () => {
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      oscillator.connect(gain);
+      gain.connect(ctx.destination);
+      oscillator.frequency.value = 880;
+      oscillator.type = 'sine';
+      gain.gain.setValueAtTime(0.5, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + 0.5);
 
-    const osc2 = ctx.createOscillator();
-    const gain2 = ctx.createGain();
-    osc2.connect(gain2);
-    gain2.connect(ctx.destination);
-    osc2.frequency.value = 660;
-    osc2.type = 'sine';
-    gain2.gain.setValueAtTime(0.5, ctx.currentTime + 0.6);
-    gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.1);
-    osc2.start(ctx.currentTime + 0.6);
-    osc2.stop(ctx.currentTime + 1.1);
-  } catch {
-    // Audio not available
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.frequency.value = 660;
+      osc2.type = 'sine';
+      gain2.gain.setValueAtTime(0.5, ctx.currentTime + 0.6);
+      gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.1);
+      osc2.start(ctx.currentTime + 0.6);
+      osc2.stop(ctx.currentTime + 1.1);
+
+      // Close context after playback completes
+      setTimeout(() => {
+        ctx.close().catch(() => {});
+      }, 1500);
+    };
+
+    if (ctx.state === 'suspended') {
+      ctx.resume().then(playBeeps).catch(playBeeps);
+    } else {
+      playBeeps();
+    }
+  } catch (e) {
+    console.warn('[Audio] playNotification failed:', e);
   }
 }

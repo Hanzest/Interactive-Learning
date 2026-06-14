@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import type { LearningPage } from '../../types/schema';
+import { validateLearningPage } from '../../utils/validation';
 
 export default function FileUploadDropZone() {
   const { addPage, addToast } = useAppContext();
@@ -15,10 +16,13 @@ export default function FileUploadDropZone() {
       try {
         const text = await file.text();
         const data: LearningPage = JSON.parse(text);
-        if (!data.page && !data.sections) {
-          setError(`"${file.name}" is invalid: missing page or sections`);
+
+        const validation = validateLearningPage(data);
+        if (!validation.valid) {
+          setError(`"${file.name}" is invalid: ${validation.error}`);
           return;
         }
+
         const ok = addPage(data, file.name);
         if (ok) {
           addToast(`Loaded "${data.page?.title || 'Untitled'}"`, 'success', 2000);

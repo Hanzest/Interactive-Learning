@@ -75,6 +75,7 @@ export type AppAction =
   | { type: 'POMODORO_PAUSE' }
   | { type: 'POMODORO_RESET' }
   | { type: 'POMODORO_SWITCH_MODE' }
+  | { type: 'POMODORO_SET_REMAINING'; payload: number }
   | { type: 'POMODORO_RESTORE'; payload: { mode: 'focus' | 'break'; focusMinutes: number; breakMinutes: number; seconds: number } };
 
 /* ==========================================================================

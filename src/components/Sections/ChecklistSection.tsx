@@ -35,6 +35,8 @@ export default function ChecklistSection({ section, sectionIndex }: ChecklistSec
 
   return (
     <div style={{
+      position: 'relative',
+      overflow: 'hidden',
       padding: '1.5rem',
       backgroundColor: 'var(--bg-primary)',
       borderRadius: '8px',
@@ -42,6 +44,15 @@ export default function ChecklistSection({ section, sectionIndex }: ChecklistSec
       boxShadow: 'var(--shadow-card)',
       marginBottom: '1.5rem',
     }}>
+      {/* Gradient top accent line */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '4px',
+        background: 'linear-gradient(90deg, var(--accent), var(--accent-hover))',
+      }} />
       {section.title && <h2 style={{
         fontSize: '1.25rem',
         fontWeight: 600,

@@ -90,11 +90,20 @@ export default function Header() {
         {/* Dashboard button */}
         <button
           style={{
-            ...iconBtnBase,
-            ...(state.showDashboard ? {
-              background: 'var(--accent-light)',
-              color: 'var(--accent)',
-            } : {}),
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 36,
+            height: 36,
+            padding: 0,
+            border: '1px solid var(--border-color)',
+            borderRadius: 8,
+            background: state.showDashboard ? 'var(--accent-light)' : 'var(--bg-secondary)',
+            color: state.showDashboard ? 'var(--accent)' : 'var(--text-secondary)',
+            borderColor: state.showDashboard ? 'var(--accent)' : 'var(--border-color)',
+            cursor: 'pointer',
+            transition: 'background 0.15s, color 0.15s, border-color 0.15s',
+            flexShrink: 0,
           }}
           onClick={toggleDashboard}
           aria-label="Dashboard"
@@ -102,7 +111,11 @@ export default function Header() {
           type="button"
           className="btn-base"
         >
-          📊
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width={20} height={20}>
+            <line x1="18" y1="20" x2="18" y2="10" />
+            <line x1="12" y1="20" x2="12" y2="4" />
+            <line x1="6" y1="20" x2="6" y2="14" />
+          </svg>
         </button>
 
         <DarkModeToggle />
@@ -110,11 +123,20 @@ export default function Header() {
         {/* Keyboard shortcuts */}
         <button
           style={{
-            ...iconBtnBase,
-            ...(state.showShortcuts ? {
-              background: 'var(--accent-light)',
-              color: 'var(--accent)',
-            } : {}),
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 36,
+            height: 36,
+            padding: 0,
+            border: '1px solid var(--border-color)',
+            borderRadius: 8,
+            background: state.showShortcuts ? 'var(--accent-light)' : 'var(--bg-secondary)',
+            color: state.showShortcuts ? 'var(--accent)' : 'var(--text-secondary)',
+            borderColor: state.showShortcuts ? 'var(--accent)' : 'var(--border-color)',
+            cursor: 'pointer',
+            transition: 'background 0.15s, color 0.15s, border-color 0.15s',
+            flexShrink: 0,
           }}
           onClick={toggleShortcuts}
           aria-label="Keyboard shortcuts"
@@ -122,15 +144,18 @@ export default function Header() {
           type="button"
           className="btn-base"
         >
-          <kbd style={{
-            padding: '2px 6px',
-            background: 'var(--bg-tertiary)',
-            borderRadius: 4,
-            fontSize: 11,
-            fontWeight: 700,
-            fontFamily: 'monospace',
-            color: 'var(--text-secondary)',
-          }}>?</kbd>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width={20} height={20}>
+            <rect x="2" y="4" width="20" height="16" rx="2" ry="2" />
+            <line x1="6" y1="8" x2="6" y2="8" />
+            <line x1="10" y1="8" x2="10" y2="8" />
+            <line x1="14" y1="8" x2="14" y2="8" />
+            <line x1="18" y1="8" x2="18" y2="8" />
+            <line x1="6" y1="12" x2="6" y2="12" />
+            <line x1="10" y1="12" x2="10" y2="12" />
+            <line x1="14" y1="12" x2="14" y2="12" />
+            <line x1="18" y1="12" x2="18" y2="12" />
+            <line x1="7" y1="16" x2="17" y2="16" />
+          </svg>
         </button>
 
         {/* Upload */}
