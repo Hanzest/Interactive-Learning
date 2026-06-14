@@ -93,7 +93,7 @@ export default function PageContent() {
           </div>
         )}
 
-        {/* Progress bar (dots) — only if multiple sections */}
+        {/* Progress bar (dots) - only if multiple sections */}
         {hasMultipleSlides && (
           <div style={{
             display: 'flex',
@@ -143,7 +143,7 @@ export default function PageContent() {
           alignItems: 'flex-start',
           gap: 12,
         }}>
-          {/* Previous Arrow — outside the card */}
+          {/* Previous Arrow - outside the card */}
           {hasMultipleSlides && (
             <button
               onClick={goPrev}
@@ -181,7 +181,7 @@ export default function PageContent() {
             />
           </div>
 
-          {/* Next Arrow — outside the card */}
+          {/* Next Arrow - outside the card */}
           {hasMultipleSlides && (
             <button
               onClick={goNext}

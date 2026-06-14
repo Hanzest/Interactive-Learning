@@ -1,7 +1,7 @@
 import type { LearningPage, Toast, ThemeMode } from './schema';
 
 /* ==========================================================================
-   AppState — the complete application state
+   AppState - the complete application state
    ========================================================================== */
 
 export interface AppState {
@@ -38,7 +38,7 @@ export interface AppState {
 }
 
 /* ==========================================================================
-   Actions — discriminated union for the reducer
+   Actions - discriminated union for the reducer
    ========================================================================== */
 
 export type AppAction =

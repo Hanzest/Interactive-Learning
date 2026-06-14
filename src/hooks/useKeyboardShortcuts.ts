@@ -18,7 +18,7 @@ export function useKeyboardShortcuts(): void {
     function handleKeydown(e: KeyboardEvent) {
       const c = ctxRef.current;
 
-      // '?' — Toggle shortcuts
+      // '?' - Toggle shortcuts
       if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
         if (!isInputFocused()) {
           e.preventDefault();
@@ -27,7 +27,7 @@ export function useKeyboardShortcuts(): void {
         return;
       }
 
-      // Escape — Close overlays / cancel rename
+      // Escape - Close overlays / cancel rename
       if (e.key === 'Escape') {
         if (c.state.showShortcuts) c.toggleShortcuts();
         if (c.state.showDashboard) c.toggleDashboard();
@@ -36,14 +36,14 @@ export function useKeyboardShortcuts(): void {
         return;
       }
 
-      // Ctrl/Cmd + B — Toggle sidebar
+      // Ctrl/Cmd + B - Toggle sidebar
       if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
         e.preventDefault();
         c.toggleSidebar();
         return;
       }
 
-      // '/' — Focus search
+      // '/' - Focus search
       if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
         if (!isInputFocused()) {
           e.preventDefault();
@@ -53,7 +53,7 @@ export function useKeyboardShortcuts(): void {
         return;
       }
 
-      // 'r' — Rename current page
+      // 'r' - Rename current page
       if (e.key === 'r' && !e.ctrlKey && !e.metaKey && !e.shiftKey && c.currentPage) {
         if (!isInputFocused()) {
           c.setRenamingIndex(c.state.currentPageIndex);
@@ -65,7 +65,7 @@ export function useKeyboardShortcuts(): void {
         return;
       }
 
-      // Delete — Delete current page
+      // Delete - Delete current page
       if ((e.key === 'Delete' || e.key === 'Del') && c.currentPage && !e.ctrlKey && !e.metaKey) {
         if (!isInputFocused()) {
           c.removePage(c.state.currentPageIndex);
@@ -73,7 +73,7 @@ export function useKeyboardShortcuts(): void {
         return;
       }
 
-      // 'a' or ArrowLeft — Trigger Previous button (flashcard, quiz, tab, slide)
+      // 'a' or ArrowLeft - Trigger Previous button (flashcard, quiz, tab, slide)
       if ((e.key === 'a' || e.key === 'ArrowLeft') && !e.ctrlKey && !e.metaKey) {
         if (!isInputFocused()) {
           e.preventDefault();
@@ -83,7 +83,7 @@ export function useKeyboardShortcuts(): void {
         return;
       }
 
-      // 'd' or ArrowRight — Trigger Next button (flashcard, quiz, tab, slide)
+      // 'd' or ArrowRight - Trigger Next button (flashcard, quiz, tab, slide)
       if ((e.key === 'd' || e.key === 'ArrowRight') && !e.ctrlKey && !e.metaKey) {
         if (!isInputFocused()) {
           e.preventDefault();
@@ -96,5 +96,5 @@ export function useKeyboardShortcuts(): void {
 
     window.addEventListener('keydown', handleKeydown);
     return () => window.removeEventListener('keydown', handleKeydown);
-  }, []); // Empty deps — never re-attaches the global listener
+  }, []); // Empty deps - never re-attaches the global listener
 }

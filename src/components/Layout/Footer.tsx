@@ -125,7 +125,7 @@ export default function Footer() {
 
       {/* Page position */}
       <span style={pagePositionStyle}>
-        {hasPages ? `${position}/${totalPages}` : '—'}
+        {hasPages ? `${position}/${totalPages}` : '-'}
       </span>
 
       {/* Next */}

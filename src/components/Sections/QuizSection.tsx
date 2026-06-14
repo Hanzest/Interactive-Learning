@@ -133,7 +133,7 @@ export default function QuizSection({ section, sectionIndex }: QuizSectionProps)
           const isAnswered = answers[qi] !== undefined;
           let boxBg = 'var(--bg-tertiary)';
           let boxBorder = 'var(--border-color)';
-          
+
           if (submitted) {
             const qCorrect = answers[qi] === section.questions[qi].correctIndex;
             if (qCorrect) {
@@ -147,7 +147,7 @@ export default function QuizSection({ section, sectionIndex }: QuizSectionProps)
             boxBg = 'var(--accent-light)';
             boxBorder = 'var(--accent)';
           }
-          
+
           return (
             <button
               key={qi}
@@ -215,13 +215,32 @@ export default function QuizSection({ section, sectionIndex }: QuizSectionProps)
             } else if (isSelected) {
               borderColor = 'var(--accent)'; bgColor = 'var(--accent-light)';
             }
+
+            // Custom radio indicator styling
+            let radioBorderColor = 'var(--border-color)';
+            const radioBgColor = 'var(--bg-primary)';
+            let radioDotColor = 'var(--accent)';
+
+            if (submitted) {
+              if (isCorrectAnswer) {
+                radioBorderColor = 'var(--success)';
+                radioDotColor = 'var(--success)';
+              } else if (isWrongSelection) {
+                radioBorderColor = 'var(--error)';
+                radioDotColor = 'var(--error)';
+              }
+            } else if (isSelected) {
+              radioBorderColor = 'var(--accent)';
+              radioDotColor = 'var(--accent)';
+            }
+
             return (
               <label
                 key={oi}
                 style={{
                   display: 'flex',
                   alignItems: 'flex-start',
-                  gap: '0.5rem',
+                  gap: '0.75rem',
                   padding: '0.625rem 0.75rem',
                   border: `1px solid ${borderColor}`,
                   borderRadius: '6px',
@@ -238,43 +257,86 @@ export default function QuizSection({ section, sectionIndex }: QuizSectionProps)
                   onChange={() => handleSelect(currentQ, oi)}
                   disabled={submitted}
                   style={{
-                    marginTop: '0.125rem',
-                    accentColor: 'var(--accent)',
-                    cursor: submitted ? 'default' : 'pointer',
+                    position: 'absolute',
+                    opacity: 0,
+                    pointerEvents: 'none',
                   }}
                 />
-                <span style={{
-                  flex: 1,
-                  color: 'var(--text-primary)',
-                  lineHeight: 1.5,
-                }}>{opt}</span>
-                {submitted && current.optionExplanations?.[oi] && (
+
+                {/* Custom radio button */}
+                <div style={{
+                  width: '1.125rem',
+                  height: '1.125rem',
+                  borderRadius: '50%',
+                  border: `2px solid ${radioBorderColor}`,
+                  backgroundColor: radioBgColor,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  marginTop: '0.1875rem',
+                  transition: 'var(--transition-fast)',
+                }}>
+                  {isSelected && (
+                    <div style={{
+                      width: '0.5rem',
+                      height: '0.5rem',
+                      borderRadius: '50%',
+                      backgroundColor: radioDotColor,
+                    }} />
+                  )}
+                </div>
+
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                   <span style={{
-                    fontSize: '0.85rem',
-                    color: 'var(--text-muted)',
-                    fontStyle: 'italic',
-                  }}>
-                    — {current.optionExplanations[oi]}
-                  </span>
-                )}
+                    color: 'var(--text-primary)',
+                    lineHeight: 1.5,
+                  }}>{opt}</span>
+                  {submitted && current.optionExplanations?.[oi] && (
+                    <span style={{
+                      fontSize: '0.85rem',
+                      color: 'var(--text-secondary)',
+                      fontStyle: 'italic',
+                      marginTop: '0.25rem',
+                    }}>
+                      {current.optionExplanations[oi]}
+                    </span>
+                  )}
+                </div>
               </label>
             );
           })}
         </div>
-
-        {submitted && current.explanation && (
-          <div style={{
-            marginTop: '0.75rem',
-            padding: '0.625rem',
-            backgroundColor: 'var(--bg-tertiary)',
-            borderRadius: '6px',
-            color: 'var(--text-secondary)',
-            fontSize: '0.9rem',
-            lineHeight: 1.5,
-            borderLeft: '3px solid var(--accent)',
-          }}>{current.explanation}</div>
-        )}
       </div>
+
+      {/* Global Explanation Box */}
+      {submitted && current.explanation && (
+        <div style={{
+          padding: '1rem',
+          backgroundColor: 'var(--success-bg)',
+          border: '1px solid var(--success-border)',
+          borderRadius: '8px',
+          color: 'var(--text-primary)',
+          fontSize: '0.95rem',
+          lineHeight: 1.5,
+          marginTop: '1rem',
+          marginBottom: '1.5rem',
+          boxShadow: 'var(--shadow-sm)',
+        }}>
+          <div style={{
+            fontWeight: 600,
+            color: 'var(--success-text)',
+            marginBottom: '0.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.375rem',
+            fontSize: '0.9rem',
+          }}>
+            <span>💡 Explanation</span>
+          </div>
+          <p style={{ margin: 0, color: 'var(--text-primary)', lineHeight: 1.5 }}>{current.explanation}</p>
+        </div>
+      )}
 
       {/* Navigation + Submit/Reset on the same line */}
       <div style={{

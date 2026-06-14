@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Global Styles — Base resets, typography, animations, shared utilities
+   Global Styles - Base resets, typography, animations, shared utilities
    ========================================================================== */
 
 @import './variables.css';
@@ -324,7 +324,7 @@ a:hover {
 }
 
 /* --------------------------------------------------------------------------
-   Interactive utilities — button hover/click & card elevation
+   Interactive utilities - button hover/click & card elevation
    -------------------------------------------------------------------------- */
 
 /* Base interactive button style */

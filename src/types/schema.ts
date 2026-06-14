@@ -41,7 +41,7 @@ export interface FlashcardProgress {
 }
 
 /* --------------------------------------------------------------------------
-   Section Types — Discriminated Union
+   Section Types - Discriminated Union
    -------------------------------------------------------------------------- */
 
 export type Section =

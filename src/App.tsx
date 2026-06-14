@@ -12,7 +12,7 @@ import ContextMenu from './components/UI/ContextMenu';
 import ToastContainer from './components/UI/ToastContainer';
 
 /* ==========================================================================
-   AppShell — inner component that uses hooks requiring AppContext
+   AppShell - inner component that uses hooks requiring AppContext
    ========================================================================== */
 
 function AppShell() {
@@ -104,7 +104,7 @@ function AppShell() {
 }
 
 /* ==========================================================================
-   App — root component wrapping everything in AppProvider
+   App - root component wrapping everything in AppProvider
    ========================================================================== */
 
 export default function App() {

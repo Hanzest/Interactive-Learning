@@ -56,7 +56,7 @@ export function renderMarkdown(text: string): string {
     /\[(.+?)\]\((.+?)\)/g,
     '<a href="$2" target="_blank" rel="noopener" class="section-link">$1</a>'
   );
-  // Tables — convert markdown table blocks to HTML tables
+  // Tables - convert markdown table blocks to HTML tables
   html = html.replace(
     /((?:\|[^\n]*\n?)+)/g,
     (match: string) => {

@@ -1,5 +1,5 @@
 # 📚 Interactive Learning
-A fully client-side, single-page learning application that renders educational content from uploaded JSON files. Built with **React 18** + **TypeScript** + **Vite** — component-based, statically built, no server required.
+A fully client-side, single-page learning application that renders educational content from uploaded JSON files. Built with **React 18** + **TypeScript** + **Vite** - component-based, statically built, no server required.
 
 ## Quick Start
 
@@ -33,17 +33,17 @@ Open `dist/index.html` in any browser, or run `npm run dev` and navigate to the 
 
 ### UX Features
 
-- 🔍 **Real-time search** — filter pages by title, description, and tags
-- 🌓 **Dark mode** — toggle with button, persisted in localStorage
-- ⌨️ **Keyboard shortcuts** — `← →` navigate, `?` show shortcuts, `/` focus search
-- 📊 **Progress dashboard** — stats grid + Chart.js doughnut chart
-- 🍅 **Pomodoro timer** — focus/break timer with audio notification
-- 🗂️ **Drag-reorder sidebar** — reorder pages by dragging
-- 🖱️ **Right-click context menu** — quick actions on pages
-- 📱 **Responsive** — works at 320px–1920px, touch-friendly
-- ♿ **Accessible** — keyboard navigation, ARIA labels, `prefers-reduced-motion`
-- 💾 **Session persistence** — all progress saved to localStorage
-- ↩️ **Toast notifications** — undo support for destructive actions
+- 🔍 **Real-time search** - filter pages by title, description, and tags
+- 🌓 **Dark mode** - toggle with button, persisted in localStorage
+- ⌨️ **Keyboard shortcuts** - `← →` navigate, `?` show shortcuts, `/` focus search
+- 📊 **Progress dashboard** - stats grid + Chart.js doughnut chart
+- 🍅 **Pomodoro timer** - focus/break timer with audio notification
+- 🗂️ **Drag-reorder sidebar** - reorder pages by dragging
+- 🖱️ **Right-click context menu** - quick actions on pages
+- 📱 **Responsive** - works at 320px–1920px, touch-friendly
+- ♿ **Accessible** - keyboard navigation, ARIA labels, `prefers-reduced-motion`
+- 💾 **Session persistence** - all progress saved to localStorage
+- ↩️ **Toast notifications** - undo support for destructive actions
 
 ## Project Structure
 
@@ -82,13 +82,13 @@ src/
 
 ## Tech Stack
 
-- **React 18** — UI library
-- **TypeScript** — Type safety
-- **Vite 6** — Build tool & dev server
-- **CSS Modules** — Scoped component styles
-- **Chart.js** — Dashboard doughnut chart
-- **SortableJS** — Drag-and-drop reordering
-- **Context + useReducer** — State management
+- **React 18** - UI library
+- **TypeScript** - Type safety
+- **Vite 6** - Build tool & dev server
+- **CSS Modules** - Scoped component styles
+- **Chart.js** - Dashboard doughnut chart
+- **SortableJS** - Drag-and-drop reordering
+- **Context + useReducer** - State management
 
 ## JSON Schema
 

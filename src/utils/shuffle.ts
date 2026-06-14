@@ -1,5 +1,5 @@
 /**
- * Fisher-Yates shuffle — returns a NEW shuffled array, original is untouched.
+ * Fisher-Yates shuffle - returns a NEW shuffled array, original is untouched.
  */
 export function shuffle<T>(arr: T[]): T[] {
   const copy = arr.slice();

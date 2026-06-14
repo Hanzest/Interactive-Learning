@@ -22,7 +22,7 @@ interface SavedPomodoro {
 }
 
 /* ==========================================================================
-   Context type — exposes state, dispatch, plus derived helpers
+   Context type - exposes state, dispatch, plus derived helpers
    ========================================================================== */
 
 interface AppContextValue {

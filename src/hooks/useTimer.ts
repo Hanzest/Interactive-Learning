@@ -36,7 +36,7 @@ export function useTimer() {
     };
   }, [state.pomodoroIsRunning, dispatch]);
 
-  // Auto-switch mode when timer completes — with proper cleanup
+  // Auto-switch mode when timer completes - with proper cleanup
   useEffect(() => {
     const totalSec = state.pomodoroMode === 'focus'
       ? state.pomodoroFocusMinutes * 60
@@ -114,7 +114,7 @@ function playNotification() {
   if (!soundEnabled) return;
   try {
     const ctx = new (window.AudioContext || (window as unknown as any).webkitAudioContext)();
-    
+
     const playBeeps = () => {
       const oscillator = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -140,7 +140,7 @@ function playNotification() {
 
       // Close context after playback completes
       setTimeout(() => {
-        ctx.close().catch(() => {});
+        ctx.close().catch(() => { });
       }, 1500);
     };
 

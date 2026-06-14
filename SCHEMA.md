@@ -6,8 +6,8 @@ Each JSON file represents a **single learning page**. Upload one or more files v
 
 ```jsonc
 {
-  "page": { /* page metadata — see below */ },
-  "sections": [ /* array of content sections — see types below */ ]
+  "page": { /* page metadata - see below */ },
+  "sections": [ /* array of content sections - see types below */ ]
 }
 ```
 
@@ -39,7 +39,7 @@ Plus **type-specific fields** as described below.
 
 ## Section Types
 
-### 1. `text` — Simple content block
+### 1. `text` - Simple content block
 
 ```json
 {
@@ -55,7 +55,7 @@ Plus **type-specific fields** as described below.
 
 ---
 
-### 2. `tabs` — Tabbed content viewer
+### 2. `tabs` - Tabbed content viewer
 
 ```json
 {
@@ -76,7 +76,7 @@ Plus **type-specific fields** as described below.
 
 ---
 
-### 3. `accordion` — Expandable sections
+### 3. `accordion` - Expandable sections
 
 ```json
 {
@@ -98,7 +98,7 @@ Plus **type-specific fields** as described below.
 
 ---
 
-### 4. `timeline` — Chronological display
+### 4. `timeline` - Chronological display
 
 ```json
 {
@@ -121,7 +121,7 @@ Plus **type-specific fields** as described below.
 
 ---
 
-### 5. `flashcards` — Interactive card deck
+### 5. `flashcards` - Interactive card deck
 
 ```json
 {
@@ -142,7 +142,7 @@ Plus **type-specific fields** as described below.
 
 ---
 
-### 6. `quiz` — Multiple choice assessment
+### 6. `quiz` - Multiple choice assessment
 
 ```json
 {
@@ -170,7 +170,7 @@ Plus **type-specific fields** as described below.
 
 ---
 
-### 7. `fill-blank` — Fill in the blanks
+### 7. `fill-blank` - Fill in the blanks
 
 ```json
 {
@@ -192,7 +192,7 @@ Plus **type-specific fields** as described below.
 
 ---
 
-### 8. `matching` — Match left-right pairs
+### 8. `matching` - Match left-right pairs
 
 ```json
 {
@@ -213,7 +213,7 @@ Plus **type-specific fields** as described below.
 
 ---
 
-### 9. `sorting` — Order items correctly
+### 9. `sorting` - Order items correctly
 
 ```json
 {
@@ -235,7 +235,7 @@ Plus **type-specific fields** as described below.
 
 ---
 
-### 10. `checklist` — Interactive checklist
+### 10. `checklist` - Interactive checklist
 
 ```json
 {
@@ -256,7 +256,7 @@ Plus **type-specific fields** as described below.
 
 ---
 
-### 11. `cloze` — Cloze deletion (fill-in-text)
+### 11. `cloze` - Cloze deletion (fill-in-text)
 
 ```json
 {
