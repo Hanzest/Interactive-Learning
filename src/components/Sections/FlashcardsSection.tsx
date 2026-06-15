@@ -216,7 +216,7 @@ export default function FlashcardsSection({ section, sectionIndex }: FlashcardsS
             transition: 'transform 0.6s ease',
           }}
         >
-          <div style={{
+          <div className="flashcard-face" style={{
             position: 'absolute',
             inset: 0,
             backfaceVisibility: 'hidden',
@@ -252,7 +252,7 @@ export default function FlashcardsSection({ section, sectionIndex }: FlashcardsS
             )}
             <div dangerouslySetInnerHTML={{ __html: renderMarkdown(currentCardData.front) }} />
           </div>
-          <div style={{
+          <div className="flashcard-face" style={{
             position: 'absolute',
             inset: 0,
             backfaceVisibility: 'hidden',

@@ -222,6 +222,20 @@ export default function MatchingSection({
         marginBottom: '0.75rem',
       }}>{section.title}</h2>}
 
+      {activeSubmitted && (
+        <div style={{
+          padding: '0.625rem 1rem',
+          backgroundColor: 'var(--accent-light)',
+          borderRadius: '6px',
+          marginBottom: '1rem',
+          fontWeight: 600,
+          color: 'var(--accent)',
+          fontSize: '0.9rem',
+        }}>
+          {lines.filter((l) => l.correct).length} / {section.pairs.length} correct
+        </div>
+      )}
+
       <div style={{
         position: 'relative',
         display: 'flex',
@@ -270,6 +284,7 @@ stroke={activeSubmitted ? (line.correct ? 'var(--success)' : 'var(--error)') : '
                 key={i}
                 ref={(el) => { leftRefs.current[i] = el; }}
                 onClick={() => handleLeftClick(i)}
+                className={`matching-option ${activeSubmitted ? 'submitted' : ''}`}
                 style={{
                   padding: '0.75rem',
                   backgroundColor: isSelected ? 'var(--accent-light)' : isCorrect ? 'rgba(16, 185, 129, 0.1)' : isWrong ? 'rgba(239, 68, 68, 0.1)' : isMatched ? 'var(--bg-tertiary)' : 'var(--bg-secondary)',
@@ -300,6 +315,7 @@ stroke={activeSubmitted ? (line.correct ? 'var(--success)' : 'var(--error)') : '
                 key={i}
                 ref={(el) => { rightRefs.current[i] = el; }}
                 onClick={() => handleRightClick(i)}
+                className={`matching-option ${activeSubmitted ? 'submitted' : ''}`}
                 style={{
                   padding: '0.75rem',
                   backgroundColor: isSelected ? 'var(--accent-light)' : isCorrect ? 'rgba(16, 185, 129, 0.1)' : isWrong ? 'rgba(239, 68, 68, 0.1)' : matchedLeft !== undefined ? 'var(--bg-tertiary)' : 'var(--bg-secondary)',
@@ -380,20 +396,6 @@ stroke={activeSubmitted ? (line.correct ? 'var(--success)' : 'var(--error)') : '
           </>
         )}
       </div>
-
-      {activeSubmitted && (
-        <div style={{
-          marginTop: '0.75rem',
-          padding: '0.625rem 1rem',
-          backgroundColor: 'var(--accent-light)',
-          borderRadius: '6px',
-          fontWeight: 600,
-          color: 'var(--accent)',
-          fontSize: '0.9rem',
-        }}>
-          {lines.filter((l) => l.correct).length} / {section.pairs.length} correct
-        </div>
-      )}
     </div>
   );
 }

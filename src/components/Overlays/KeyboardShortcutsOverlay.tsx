@@ -12,6 +12,7 @@ const shortcutGroups: ShortcutGroup[] = [
       { keys: 'Ctrl+B', desc: 'Toggle sidebar' },
       { keys: 'a / ←', desc: 'Previous step (flashcard/tab/quiz/slide)' },
       { keys: 'd / →', desc: 'Next step (flashcard/tab/quiz/slide)' },
+      { keys: 'p', desc: 'Pause / Resume exam (Exam mode)' },
     ],
   },
   {

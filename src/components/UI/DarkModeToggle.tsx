@@ -10,6 +10,7 @@ export default function DarkModeToggle() {
       aria-label={state.darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
       title={state.darkMode ? 'Light mode' : 'Dark mode'}
       type="button"
+      className="btn-base header-icon-btn"
       style={{
         display: 'inline-flex',
         alignItems: 'center',

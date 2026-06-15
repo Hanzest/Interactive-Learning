@@ -134,6 +134,7 @@ export default function PomodoroTimer() {
           title={isRunning ? 'Pause' : 'Start'}
           type="button"
           aria-label={isRunning ? 'Pause timer' : 'Start timer'}
+          className="pomodoro-btn"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -157,6 +158,7 @@ export default function PomodoroTimer() {
           title="Reset"
           type="button"
           aria-label="Reset timer"
+          className="pomodoro-btn"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -180,6 +182,7 @@ export default function PomodoroTimer() {
           title={soundEnabled ? "Mute notification sound" : "Unmute notification sound"}
           type="button"
           aria-label={soundEnabled ? "Mute notification sound" : "Unmute notification sound"}
+          className="pomodoro-btn"
           style={{
             display: 'inline-flex',
             alignItems: 'center',

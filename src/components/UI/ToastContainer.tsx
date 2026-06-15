@@ -68,21 +68,24 @@ function ToastItem({
 
   const handleDismiss = React.useCallback(() => {
     setExiting(true);
-    setTimeout(onDismiss, 420); // match exit animation duration
+    setTimeout(onDismiss, 300); // match exit animation duration (300ms)
   }, [onDismiss]);
 
+  const dismissRef = React.useRef(handleDismiss);
+  dismissRef.current = handleDismiss;
+
   useEffect(() => {
-    if (toast.duration <= 0) return;
-    const timer = setTimeout(handleDismiss, toast.duration);
+    // Wipe out in exactly 3 seconds (3000ms) from mounting
+    const timer = setTimeout(() => {
+      dismissRef.current();
+    }, 3000);
     return () => clearTimeout(timer);
-  }, [toast.duration, handleDismiss]);
+  }, []);
 
   const slideStyle: React.CSSProperties = {
     opacity: visible && !exiting ? 1 : 0,
     transform: visible && !exiting ? 'translateX(0)' : 'translateX(32px)',
-    transition: exiting
-      ? 'opacity 0.4s ease-in, transform 0.4s ease-in'
-      : 'opacity 0.45s cubic-bezier(0.22,1,0.36,1), transform 0.45s cubic-bezier(0.22,1,0.36,1)',
+    transition: 'opacity 300ms ease, transform 300ms ease',
   };
 
   return (

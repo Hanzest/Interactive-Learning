@@ -88,6 +88,16 @@ export function useKeyboardShortcuts(): void {
         return;
       }
 
+      // 'p' - Pause / Resume exam (exam mode only)
+      if (e.key === 'p' && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+        if (!isInputFocused()) {
+          e.preventDefault();
+          const pauseBtn = document.querySelector<HTMLButtonElement>('[data-exam-pause-btn]');
+          pauseBtn?.click();
+        }
+        return;
+      }
+
       // Delete - Delete current page
       if ((e.key === 'Delete' || e.key === 'Del') && c.currentPage && !e.ctrlKey && !e.metaKey) {
         if (!isInputFocused()) {

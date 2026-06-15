@@ -52,7 +52,7 @@ export default function Header() {
         aria-label="Toggle sidebar"
         title="Toggle sidebar (Ctrl+B)"
         type="button"
-        className="btn-base"
+        className="btn-base header-icon-btn"
         style={{
           ...iconBtnBase,
           fontSize: 20,
@@ -90,7 +90,7 @@ export default function Header() {
             <button
               key={m}
               onClick={() => setLearningMode(m)}
-              className="btn-base"
+              className={`btn-base mode-btn ${isActive ? 'active' : ''}`}
               style={{
                 padding: '4px 12px',
                 border: 'none',
@@ -147,7 +147,7 @@ export default function Header() {
           aria-label="Dashboard"
           title="Dashboard (Ctrl+D)"
           type="button"
-          className="btn-base"
+          className="btn-base header-icon-btn"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width={20} height={20}>
             <line x1="18" y1="20" x2="18" y2="10" />
@@ -180,7 +180,7 @@ export default function Header() {
           aria-label="Keyboard shortcuts"
           title="Keyboard shortcuts (?)"
           type="button"
-          className="btn-base"
+          className="btn-base header-icon-btn"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width={20} height={20}>
             <rect x="2" y="4" width="20" height="16" rx="2" ry="2" />

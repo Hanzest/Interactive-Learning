@@ -232,6 +232,7 @@ export default function SortingSection({
               onDragOver={(e) => handleDragOver(e, i)}
               onDrop={() => handleDrop(i)}
               onDragEnd={handleDragEnd}
+              className={`sorting-item ${activeSubmitted ? 'submitted' : ''}`}
               style={{
                 display: 'flex',
                 alignItems: 'center',

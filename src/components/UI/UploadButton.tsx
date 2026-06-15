@@ -50,7 +50,7 @@ export default function UploadButton() {
       />
       <button
         onClick={() => fileRef.current?.click()}
-        className="btn-base"
+        className="btn-base header-icon-btn"
         style={{
           display: 'inline-flex',
           alignItems: 'center',

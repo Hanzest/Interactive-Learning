@@ -519,6 +519,7 @@ export default function PageContent() {
                 {/* Pause/Resume Button */}
                 <button
                   onClick={() => setIsPaused((p) => !p)}
+                  data-exam-pause-btn
                   className="btn-base"
                   style={{
                     display: 'flex',
@@ -536,6 +537,29 @@ export default function PageContent() {
                   }}
                 >
                   {isPaused ? '▶️ Resume Exam' : '⏸️ Pause Exam'}
+                </button>
+
+                {/* Restart Button */}
+                <button
+                  onClick={() => setShowRetryConfirm(true)}
+                  className="btn-base"
+                  title="Restart this exam (clears progress and resets timer)"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '4px 10px',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: 6,
+                    background: 'var(--bg-primary)',
+                    color: 'var(--text-secondary)',
+                    fontSize: '0.825rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  🔄 Restart
                 </button>
 
                 <span style={{ fontVariantNumeric: 'tabular-nums', letterSpacing: '0.04em', minWidth: 44, textAlign: 'right' }}>
@@ -585,18 +609,21 @@ export default function PageContent() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
               {/* Score badge */}
               <div style={{
-                textAlign: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                height: '38px',
                 backgroundColor: 'var(--bg-primary)',
                 border: '1px solid var(--success-border)',
                 borderRadius: 8,
-                padding: '6px 14px',
+                padding: '0 12px',
               }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--success-text)', lineHeight: 1 }}>
+                <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--success-text)', lineHeight: 1 }}>
                   {pageExamResult.total > 0 ? Math.round((pageExamResult.correct / pageExamResult.total) * 100) : 0}%
-                </div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 2 }}>
-                  {pageExamResult.correct}/{pageExamResult.total} correct
-                </div>
+                </span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', borderLeft: '1px solid var(--success-border)', paddingLeft: '8px', lineHeight: 1 }}>
+                  {pageExamResult.correct}/{pageExamResult.total}
+                </span>
               </div>
               {/* Retry button */}
               <button
@@ -604,17 +631,19 @@ export default function PageContent() {
                 className="btn-base"
                 title="Retry this exam (clears all answers)"
                 style={{
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   gap: 6,
-                  padding: '0.5rem 1rem',
+                  height: '38px',
+                  padding: '0 16px',
                   border: '1px solid var(--border-color)',
                   borderRadius: 8,
                   background: 'var(--bg-primary)',
                   color: 'var(--text-secondary)',
                   cursor: 'pointer',
                   fontWeight: 600,
-                  fontSize: '0.85rem',
+                  fontSize: '0.875rem',
                   transition: 'var(--transition-fast)',
                   whiteSpace: 'nowrap',
                 }}
@@ -675,6 +704,7 @@ export default function PageContent() {
           display: 'flex',
           alignItems: 'flex-start',
           gap: 12,
+          minHeight: isExamMode ? '340px' : undefined,
         }}>
           {isPaused && (
             <div style={{
@@ -682,7 +712,7 @@ export default function PageContent() {
               inset: 0,
               backgroundColor: 'rgba(0, 0, 0, 0.45)',
               backdropFilter: 'blur(8px)',
-              zIndex: 10,
+              zIndex: 100,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -690,8 +720,9 @@ export default function PageContent() {
               borderRadius: 12,
               color: 'var(--text-primary)',
               textAlign: 'center',
-              padding: '2rem',
+              padding: '1.5rem',
               border: '1px solid var(--border-color)',
+              overflowY: 'auto',
             }}>
               <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>⏸️</div>
               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>Exam Paused</h2>

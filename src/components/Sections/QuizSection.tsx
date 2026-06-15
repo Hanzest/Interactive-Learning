@@ -308,6 +308,7 @@ export default function QuizSection({
             return (
               <label
                 key={oi}
+                className={`quiz-option ${submitted ? 'submitted' : ''}`}
                 style={{
                   display: 'flex',
                   alignItems: 'flex-start',
