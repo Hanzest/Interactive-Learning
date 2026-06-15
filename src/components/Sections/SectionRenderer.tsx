@@ -115,121 +115,120 @@ export default function SectionRenderer({
 
   return (
     <div style={{
-      position: 'relative',
+      display: 'flex',
+      flexDirection: 'column',
       marginBottom: '1.5rem',
+      position: 'relative',
     }}>
-      {renderSection()}
-
-      {/* Sticky Note Button & Editor */}
+      {/* Sleek section action row (completely separate from section card) */}
       <div style={{
-        position: 'absolute',
-        top: '0.5rem',
-        right: '0.5rem',
-        zIndex: 10,
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        marginBottom: '0.5rem',
       }}>
-        <button
-          onClick={() => setShowNoteEditor(!showNoteEditor)}
-          title={savedNote ? 'Edit note' : 'Add note'}
-          style={{
-            padding: '0.375rem 0.5rem',
-            border: '1px solid var(--border-color)',
-            borderRadius: '6px',
-            backgroundColor: 'var(--bg-secondary)',
-            cursor: 'pointer',
-            fontSize: '1rem',
-            position: 'relative',
-            lineHeight: 1,
-            transition: 'var(--transition-fast)',
-          }}
-        >
-          {savedNote ? '📝' : '📌'}
-          {savedNote && (
-            <span style={{
-              position: 'absolute',
-              top: '-2px',
-              right: '-2px',
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              backgroundColor: 'var(--accent)',
-            }} />
-          )}
-        </button>
-
-        {showNoteEditor && (
-          <div style={{
-            position: 'absolute',
-            top: '100%',
-            right: 0,
-            marginTop: '0.5rem',
-            width: '280px',
-            backgroundColor: 'var(--bg-primary)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '8px',
-            boxShadow: 'var(--shadow-lg)',
-            padding: '1rem',
-            zIndex: 20,
-          }}>
-            <textarea
-              value={noteText}
-              onChange={(e) => setNoteText(e.target.value)}
-              placeholder="Write your note here..."
-              rows={4}
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                border: '1px solid var(--border-color)',
-                borderRadius: '4px',
-                backgroundColor: 'var(--bg-secondary)',
-                color: 'var(--text-primary)',
-                fontSize: '0.875rem',
-                resize: 'vertical',
-                fontFamily: 'inherit',
-                marginBottom: '0.5rem',
-              }}
-            />
-            <div style={{
+        {/* Sticky Note Button & Editor */}
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setShowNoteEditor(!showNoteEditor)}
+            title={savedNote ? 'Edit note' : 'Add note'}
+            className="btn-base"
+            style={{
+              padding: '6px 12px',
+              border: '1px solid var(--border-color)',
+              borderRadius: '6px',
+              backgroundColor: 'var(--bg-secondary)',
+              color: 'var(--text-secondary)',
+              cursor: 'pointer',
+              fontSize: '0.8rem',
+              fontWeight: 600,
               display: 'flex',
-              gap: '0.5rem',
-              justifyContent: 'flex-end',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'var(--transition-fast)',
+            }}
+          >
+            <span>{savedNote ? '📝' : '📌'}</span>
+            <span>{savedNote ? 'Edit Note' : 'Add Note'}</span>
+          </button>
+
+          {showNoteEditor && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              right: 0,
+              marginTop: '0.5rem',
+              width: '280px',
+              backgroundColor: 'var(--bg-primary)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px',
+              boxShadow: 'var(--shadow-lg)',
+              padding: '1rem',
+              zIndex: 20,
             }}>
-              <button
-                onClick={handleSaveNote}
+              <textarea
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                placeholder="Write your note here..."
+                rows={4}
                 style={{
-                  padding: '0.375rem 0.75rem',
-                  border: 'none',
-                  borderRadius: '4px',
-                  backgroundColor: 'var(--accent)',
-                  color: '#fff',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  fontSize: '0.8rem',
-                }}
-              >
-                Save
-              </button>
-              <button
-                onClick={() => {
-                  setShowNoteEditor(false);
-                  setNoteText(savedNote || '');
-                }}
-                style={{
-                  padding: '0.375rem 0.75rem',
+                  width: '100%',
+                  padding: '0.5rem',
                   border: '1px solid var(--border-color)',
                   borderRadius: '4px',
                   backgroundColor: 'var(--bg-secondary)',
-                  color: 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  fontWeight: 500,
-                  fontSize: '0.8rem',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.875rem',
+                  resize: 'vertical',
+                  fontFamily: 'inherit',
+                  marginBottom: '0.5rem',
                 }}
-              >
-                Cancel
-              </button>
+              />
+              <div style={{
+                display: 'flex',
+                gap: '0.5rem',
+                justifyContent: 'flex-end',
+              }}>
+                <button
+                  onClick={handleSaveNote}
+                  style={{
+                    padding: '0.375rem 0.75rem',
+                    border: 'none',
+                    borderRadius: '4px',
+                    backgroundColor: 'var(--accent)',
+                    color: '#fff',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    fontSize: '0.8rem',
+                  }}
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => {
+                    setShowNoteEditor(false);
+                    setNoteText(savedNote || '');
+                  }}
+                  style={{
+                    padding: '0.375rem 0.75rem',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '4px',
+                    backgroundColor: 'var(--bg-secondary)',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    fontWeight: 500,
+                    fontSize: '0.8rem',
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
+
+      {renderSection()}
     </div>
   );
 }

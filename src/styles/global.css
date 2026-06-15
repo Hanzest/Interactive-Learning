@@ -417,3 +417,37 @@ a:hover {
   box-shadow: var(--shadow-card-hover);
   transform: translateY(-1px);
 }
+
+/* ==========================================================================
+   Header & Component Responsiveness
+   ========================================================================== */
+@media (max-width: 900px) {
+  header h1 {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .mode-btn {
+    padding: 4px 8px !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+@media (max-width: 680px) {
+  header button[aria-label="Keyboard shortcuts"] {
+    display: none !important;
+  }
+  .pomodoro-timer-container .pomodoro-btn {
+    display: none !important;
+  }
+}
+
+@media (max-width: 500px) {
+  .pomodoro-timer-container {
+    display: none !important;
+  }
+  .header-search-wrapper {
+    display: none !important;
+  }
+}

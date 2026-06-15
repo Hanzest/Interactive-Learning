@@ -392,9 +392,59 @@ export default function FlashcardsSection({ section, sectionIndex }: FlashcardsS
         </button>
       </div>
 
+      {/* Interactive Deck Navigator Dots */}
+      <div style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 8,
+        marginTop: 16,
+        padding: '10px 14px',
+        backgroundColor: 'var(--bg-secondary)',
+        borderRadius: 8,
+        border: '1px solid var(--border-color)',
+      }}>
+        {cards.map((_, idx) => {
+          const status = flashcardProgress[idx]?.known;
+          const isCurrent = idx === currentCard;
+          
+          let dotBg = 'var(--text-muted)';
+          let dotTitle = `Card ${idx + 1}: Unseen`;
+          if (status === true) {
+            dotBg = 'var(--success)';
+            dotTitle = `Card ${idx + 1}: Mastered`;
+          } else if (status === false) {
+            dotBg = 'var(--error)';
+            dotTitle = `Card ${idx + 1}: Still Learning`;
+          }
 
-
-
+          return (
+            <button
+              key={idx}
+              onClick={() => {
+                if (isAnimating) return;
+                setFlipped(false);
+                setCurrentCard(idx);
+              }}
+              title={dotTitle}
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                backgroundColor: dotBg,
+                border: isCurrent ? '2px solid var(--accent)' : '2px solid transparent',
+                outline: isCurrent ? '1px solid var(--accent)' : 'none',
+                padding: 0,
+                cursor: isAnimating ? 'not-allowed' : 'pointer',
+                transform: isCurrent ? 'scale(1.25)' : 'scale(1)',
+                transition: 'all 0.15s ease',
+              }}
+              aria-label={`Go to flashcard ${idx + 1}`}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }

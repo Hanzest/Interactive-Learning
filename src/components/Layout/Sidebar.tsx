@@ -10,18 +10,7 @@ export default function Sidebar() {
 
   const isOpen = state.sidebarOpen;
 
-  const sidebarStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    width: isOpen ? '18rem' : 0,
-    minWidth: 0,
-    background: 'var(--bg-secondary)',
-    borderRight: isOpen ? '1px solid var(--border-color)' : 'none',
-    overflow: 'hidden',
-    transition:
-      'width var(--transition-normal), transform var(--transition-normal), opacity var(--transition-normal)',
-    opacity: isOpen ? 1 : 0,
-  };
+  // sidebarStyle removed to avoid conflict with CSS media queries
 
   const sidebarContentStyle: React.CSSProperties = {
     display: 'flex',
@@ -53,7 +42,7 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside style={sidebarStyle}>
+      <aside className={`${styles.sidebar} ${!isOpen ? styles.sidebarCollapsed : styles.sidebarOpen}`}>
         <div style={sidebarContentStyle}>
           <div style={dropZoneSectionStyle}>
             <FileUploadDropZone />

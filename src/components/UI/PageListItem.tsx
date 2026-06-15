@@ -151,18 +151,19 @@ export default function PageListItem({ page, index, isActive, isCompleted, isVie
           }}
         />
       ) : (
-        <span
-          style={{
-            flex: 1,
-            fontSize: 13,
-            color: 'var(--text-primary)',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {title}
-        </span>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+          <span
+            style={{
+              fontSize: 13,
+              color: 'var(--text-primary)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {title}
+          </span>
+        </div>
       )}
 
       {/* Hover action buttons */}

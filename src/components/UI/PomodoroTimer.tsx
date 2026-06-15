@@ -60,17 +60,20 @@ export default function PomodoroTimer() {
 
   return (
     <>
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        padding: '8px 12px',
-        borderRadius: 8,
-        background: 'var(--bg-secondary)',
-        border: '1px solid var(--border-color)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
+      <div
+        className="pomodoro-timer-container"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '8px 12px',
+          borderRadius: 8,
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border-color)',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
         <span style={{ fontSize: 18, lineHeight: 1 }}>{mode === 'focus' ? '🍅' : '☕'}</span>
         {isEditing ? (
           <input

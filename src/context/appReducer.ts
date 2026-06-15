@@ -272,6 +272,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
     }
 
+
+
     case 'TOGGLE_SHORTCUTS':
       return { ...state, showShortcuts: !state.showShortcuts };
 

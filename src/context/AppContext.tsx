@@ -287,6 +287,8 @@ export function AppProvider({ children }: AppProviderProps) {
     dispatch({ type: 'UPDATE_EXAM_TIME_LEFT', payload: { pageIndex, timeLeft } });
   }, []);
 
+  // setPageConfidence removed
+
   const addToastFn = useCallback((
     message: string,
     type: 'success' | 'error' | 'warning' | 'info',

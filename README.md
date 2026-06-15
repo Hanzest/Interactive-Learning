@@ -42,6 +42,7 @@ Open `dist/index.html` in any browser, or run `npm run dev` and navigate to the 
 - 🖱️ **Right-click context menu** - quick actions on pages
 - 📱 **Responsive** - works at 320px–1920px, touch-friendly
 - ♿ **Accessible** - keyboard navigation, ARIA labels, `prefers-reduced-motion`
+- 🃏 **Flashcard Navigator** - jump directly to cards using the status-colored navigator dot bar
 - 💾 **Session persistence** - all progress saved to localStorage
 - ↩️ **Toast notifications** - undo support for destructive actions
 
