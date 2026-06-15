@@ -209,6 +209,8 @@ export interface ClozeBlank {
 
 export type ThemeMode = 'light' | 'dark';
 
+export type LearningMode = 'learn' | 'practice' | 'exam';
+
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
 export interface Toast {

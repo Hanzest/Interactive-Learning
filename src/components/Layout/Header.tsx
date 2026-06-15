@@ -11,6 +11,7 @@ export default function Header() {
     toggleSidebar,
     toggleDashboard,
     toggleShortcuts,
+    setLearningMode,
   } = useAppContext();
 
   const iconBtnBase: React.CSSProperties = {
@@ -72,6 +73,43 @@ export default function Header() {
       }}>
         📚 Learn
       </h1>
+
+      {/* Mode Switcher */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        backgroundColor: 'var(--bg-secondary)',
+        border: '1px solid var(--border-color)',
+        borderRadius: 8,
+        padding: 2,
+        marginLeft: 4,
+      }}>
+        {(['learn', 'practice', 'exam'] as const).map((m) => {
+          const isActive = state.learningMode === m;
+          return (
+            <button
+              key={m}
+              onClick={() => setLearningMode(m)}
+              className="btn-base"
+              style={{
+                padding: '4px 12px',
+                border: 'none',
+                borderRadius: 6,
+                backgroundColor: isActive ? 'var(--bg-primary)' : 'transparent',
+                color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
+                fontWeight: isActive ? 600 : 500,
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                boxShadow: isActive ? 'var(--shadow-sm)' : 'none',
+                transition: 'all var(--transition-fast)',
+                textTransform: 'capitalize',
+              }}
+            >
+              {m}
+            </button>
+          );
+        })}
+      </div>
 
       {/* Search */}
       <SearchBar />

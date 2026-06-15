@@ -20,11 +20,9 @@
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   pointer-events: auto;
-  animation: slideIn 0.25s ease-out;
   min-width: 280px;
   max-width: 420px;
 }
-
 .message {
   flex: 1;
   font-size: 14px;

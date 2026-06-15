@@ -65,6 +65,15 @@ export default function PageListItem({ page, index, isActive, isCompleted, isVie
   };
 
   const statusIndicator = () => {
+    const isExamMode = state.learningMode === 'exam';
+    const examSubmitted = isExamMode && !!state.examSubmittedPages[index];
+    if (isExamMode && examSubmitted) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: '50%', background: 'var(--success)', color: '#fff', fontSize: 10, fontWeight: 700, flexShrink: 0 }} title="Exam completed">
+          E
+        </span>
+      );
+    }
     if (isCompleted) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: '50%', background: 'var(--success)', color: '#fff', fontSize: 10, fontWeight: 700, flexShrink: 0 }} title="Completed">

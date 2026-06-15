@@ -2,63 +2,149 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import type { MatchingSection as MatchingSectionType } from '../../types/schema';
 import { renderMarkdown } from '../../utils/renderContent';
 import { shuffle } from '../../utils/shuffle';
+import { useAppContext } from '../../context/AppContext';
 
 interface MatchingSectionProps {
   section: MatchingSectionType;
+  sectionIndex: number;
+  forceSubmit?: boolean;
+  onGraded?: (score: number, total: number) => void;
+  isConfirmed?: boolean;
 }
 
-export default function MatchingSection({ section }: MatchingSectionProps) {
-  const [shuffledRight, setShuffledRight] = useState<string[]>(() =>
-    shuffle(section.pairs.map(p => p.right))
-  );
+export default function MatchingSection({
+  section,
+  sectionIndex,
+  forceSubmit,
+  onGraded,
+  isConfirmed,
+}: MatchingSectionProps) {
+  const { state, saveSectionAnswers, addToast } = useAppContext();
+  const [shuffledRight, setShuffledRight] = useState<string[]>([]);
   const [selectedLeft, setSelectedLeft] = useState<number | null>(null);
   const [selectedRight, setSelectedRight] = useState<number | null>(null);
-  const [matches, setMatches] = useState<Record<number, number>>({}); // leftIdx -> rightIdx (in shuffledRight)
+  const [matches, setMatches] = useState<Record<number, number>>({});
   const [submitted, setSubmitted] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [isSavedText, setIsSavedText] = useState(false);
 
   const leftRefs = useRef<(HTMLDivElement | null)[]>([]);
   const rightRefs = useRef<(HTMLDivElement | null)[]>([]);
   const svgRef = useRef<SVGSVGElement>(null);
 
+  const isExamMode = state.learningMode === 'exam';
+  const isExamSubmitted = isExamMode && !!state.examSubmittedPages[state.currentPageIndex];
+  const activeSubmitted = isExamMode ? isExamSubmitted : submitted;
+
+  // Load saved answers and layout
+  useEffect(() => {
+    const saved = state.sectionAnswers[state.currentPageIndex]?.[sectionIndex];
+    if (saved) {
+      setMatches(saved.matches || {});
+      setShuffledRight(saved.shuffledRight || shuffle(section.pairs.map(p => p.right)));
+    } else {
+      setMatches({});
+      const freshShuffled = shuffle(section.pairs.map(p => p.right));
+      setShuffledRight(freshShuffled);
+      if (isExamMode) {
+        saveSectionAnswers(state.currentPageIndex, sectionIndex, { matches: {}, shuffledRight: freshShuffled });
+      }
+    }
+    if (!isExamMode) {
+      setSubmitted(false);
+    }
+  }, [state.currentPageIndex, sectionIndex, isExamMode, state.sectionAnswers]);
+
+  const saveAndSetMatches = useCallback((newMatches: Record<number, number>) => {
+    setMatches(newMatches);
+    saveSectionAnswers(state.currentPageIndex, sectionIndex, { matches: newMatches, shuffledRight });
+  }, [state.currentPageIndex, sectionIndex, shuffledRight, saveSectionAnswers]);
+
   const handleLeftClick = useCallback(
     (leftIdx: number) => {
-      if (submitted || showAnswer) return;
+      if (activeSubmitted || showAnswer) return;
       setSelectedLeft(leftIdx);
       if (selectedRight !== null) {
-        setMatches((prev) => ({ ...prev, [leftIdx]: selectedRight }));
+        const newMatches = { ...matches, [leftIdx]: selectedRight };
+        saveAndSetMatches(newMatches);
         setSelectedLeft(null);
         setSelectedRight(null);
       }
     },
-    [submitted, showAnswer, selectedRight]
+    [activeSubmitted, showAnswer, selectedRight, matches, saveAndSetMatches]
   );
 
   const handleRightClick = useCallback(
     (rightIdx: number) => {
-      if (submitted || showAnswer) return;
+      if (activeSubmitted || showAnswer) return;
       setSelectedRight(rightIdx);
       if (selectedLeft !== null) {
-        setMatches((prev) => ({ ...prev, [selectedLeft]: rightIdx }));
+        const newMatches = { ...matches, [selectedLeft]: rightIdx };
+        saveAndSetMatches(newMatches);
         setSelectedLeft(null);
         setSelectedRight(null);
       }
     },
-    [submitted, showAnswer, selectedLeft]
+    [activeSubmitted, showAnswer, selectedLeft, matches, saveAndSetMatches]
   );
 
-  const handleSubmit = useCallback(() => {
+  const runGrading = useCallback(() => {
     setSubmitted(true);
-  }, []);
+    setConfirming(false);
+    if (onGraded) {
+      let correct = 0;
+      Object.entries(matches).forEach(([leftIdxStr, rightIdx]) => {
+        const leftIdx = Number(leftIdxStr);
+        if (section.pairs[leftIdx].right === shuffledRight[rightIdx]) {
+          correct++;
+        }
+      });
+      onGraded(correct, section.pairs.length);
+    }
+  }, [matches, section.pairs, shuffledRight, onGraded]);
+
+  useEffect(() => {
+    if (forceSubmit && !submitted && !isExamMode) {
+      runGrading();
+    }
+  }, [forceSubmit, submitted, runGrading, isExamMode]);
+
+  const handleSubmit = useCallback(() => {
+    const allMatched = Object.keys(matches).length === section.pairs.length;
+    if (!allMatched) {
+      alert("Please match all pairs before submitting.");
+      return;
+    }
+    if (isExamMode) {
+      saveSectionAnswers(state.currentPageIndex, sectionIndex, { matches, shuffledRight });
+      setIsSavedText(true);
+      setTimeout(() => setIsSavedText(false), 2000);
+      addToast("Answers saved!", "success", 2000);
+      return;
+    }
+    if (state.learningMode === 'learn') {
+      runGrading();
+    } else {
+      if (!confirming) {
+        setConfirming(true);
+      } else {
+        runGrading();
+      }
+    }
+  }, [state.learningMode, isExamMode, confirming, runGrading, matches, section.pairs.length, shuffledRight, saveSectionAnswers, state.currentPageIndex, sectionIndex, addToast]);
 
   const handleReset = useCallback(() => {
+    const freshShuffled = shuffle(section.pairs.map(p => p.right));
     setMatches({});
     setSelectedLeft(null);
     setSelectedRight(null);
     setSubmitted(false);
+    setConfirming(false);
     setShowAnswer(false);
-    setShuffledRight(shuffle(section.pairs.map(p => p.right)));
-  }, [section.pairs]);
+    setShuffledRight(freshShuffled);
+    saveSectionAnswers(state.currentPageIndex, sectionIndex, { matches: {}, shuffledRight: freshShuffled });
+  }, [section.pairs, state.currentPageIndex, sectionIndex, saveSectionAnswers]);
 
   const prevMatchesRef = useRef<Record<number, number>>({});
 
@@ -164,9 +250,9 @@ export default function MatchingSection({ section }: MatchingSectionProps) {
               y1={line.y1}
               x2={line.x2}
               y2={line.y2}
-stroke={submitted ? (line.correct ? 'var(--success)' : 'var(--error)') : 'var(--accent)'}
+stroke={activeSubmitted ? (line.correct ? 'var(--success)' : 'var(--error)') : 'var(--accent)'}
               strokeWidth={2}
-              strokeDasharray={submitted && line.correct ? 'none' : '4'}
+              strokeDasharray={activeSubmitted && line.correct ? 'none' : '4'}
             />
           ))}
         </svg>
@@ -176,8 +262,8 @@ stroke={submitted ? (line.correct ? 'var(--success)' : 'var(--error)') : 'var(--
           {section.pairs.map((pair, i) => {
             const isSelected = selectedLeft === i;
             const isMatched = matches[i] !== undefined;
-            const isCorrect = submitted && isMatched && section.pairs[i].right === shuffledRight[matches[i]];
-            const isWrong = submitted && isMatched && !isCorrect;
+            const isCorrect = activeSubmitted && isMatched && section.pairs[i].right === shuffledRight[matches[i]];
+            const isWrong = activeSubmitted && isMatched && !isCorrect;
 
             return (
               <div
@@ -189,7 +275,7 @@ stroke={submitted ? (line.correct ? 'var(--success)' : 'var(--error)') : 'var(--
                   backgroundColor: isSelected ? 'var(--accent-light)' : isCorrect ? 'rgba(16, 185, 129, 0.1)' : isWrong ? 'rgba(239, 68, 68, 0.1)' : isMatched ? 'var(--bg-tertiary)' : 'var(--bg-secondary)',
                   border: `1px solid ${isSelected ? 'var(--accent)' : isCorrect ? 'var(--success)' : isWrong ? 'var(--error)' : isMatched ? 'var(--border-color)' : 'var(--border-color)'}`,
                   borderRadius: '6px',
-                  cursor: submitted ? 'default' : 'pointer',
+                  cursor: activeSubmitted ? 'default' : 'pointer',
                   transition: 'var(--transition-fast)',
                   color: 'var(--text-primary)',
                   fontSize: '0.9rem',
@@ -206,8 +292,8 @@ stroke={submitted ? (line.correct ? 'var(--success)' : 'var(--error)') : 'var(--
           {shuffledRight.map((right, i) => {
             const matchedLeft = Object.entries(matches).find(([, v]) => v === i)?.[0];
             const isSelected = selectedRight === i;
-            const isCorrect = submitted && matchedLeft !== undefined && section.pairs[Number(matchedLeft)].right === right;
-            const isWrong = submitted && matchedLeft !== undefined && !isCorrect;
+            const isCorrect = activeSubmitted && matchedLeft !== undefined && section.pairs[Number(matchedLeft)].right === right;
+            const isWrong = activeSubmitted && matchedLeft !== undefined && !isCorrect;
 
             return (
               <div
@@ -219,7 +305,7 @@ stroke={submitted ? (line.correct ? 'var(--success)' : 'var(--error)') : 'var(--
                   backgroundColor: isSelected ? 'var(--accent-light)' : isCorrect ? 'rgba(16, 185, 129, 0.1)' : isWrong ? 'rgba(239, 68, 68, 0.1)' : matchedLeft !== undefined ? 'var(--bg-tertiary)' : 'var(--bg-secondary)',
                   border: `1px solid ${isSelected ? 'var(--accent)' : isCorrect ? 'var(--success)' : isWrong ? 'var(--error)' : matchedLeft !== undefined ? 'var(--border-color)' : 'var(--border-color)'}`,
                   borderRadius: '6px',
-                  cursor: submitted ? 'default' : 'pointer',
+                  cursor: activeSubmitted ? 'default' : 'pointer',
                   transition: 'var(--transition-fast)',
                   color: 'var(--text-primary)',
                   fontSize: '0.9rem',
@@ -239,59 +325,63 @@ stroke={submitted ? (line.correct ? 'var(--success)' : 'var(--error)') : 'var(--
       }}>
         <button
           onClick={handleSubmit}
-          disabled={!allMatched || submitted}
+          disabled={!allMatched || activeSubmitted}
           className="btn-base"
           style={{
             padding: '0.5rem 1.25rem',
             border: 'none',
             borderRadius: '6px',
-            backgroundColor: (!allMatched || submitted) ? 'var(--bg-tertiary)' : 'var(--accent)',
-            color: (!allMatched || submitted) ? 'var(--text-muted)' : '#fff',
-            cursor: (!allMatched || submitted) ? 'not-allowed' : 'pointer',
+            backgroundColor: (!allMatched || activeSubmitted) ? 'var(--bg-tertiary)' : (confirming ? 'var(--warning)' : 'var(--accent)'),
+            color: (!allMatched || activeSubmitted) ? 'var(--text-muted)' : '#fff',
+            cursor: (!allMatched || activeSubmitted) ? 'not-allowed' : 'pointer',
             fontWeight: 600,
             fontSize: '0.875rem',
             transition: 'var(--transition-fast)',
           }}
         >
-          Submit
+          {isExamMode ? (isSavedText ? 'Answers Saved ✓' : 'Save Answers') : (confirming ? 'Confirm Submit?' : 'Submit')}
         </button>
-        <button
-          onClick={handleReset}
-          className="btn-base"
-          style={{
-            padding: '0.5rem 1.25rem',
-            border: '1px solid var(--border-color)',
-            borderRadius: '6px',
-            backgroundColor: 'var(--bg-secondary)',
-            color: 'var(--text-secondary)',
-            cursor: 'pointer',
-            fontWeight: 500,
-            fontSize: '0.875rem',
-            transition: 'var(--transition-fast)',
-          }}
-        >
-          Reset
-        </button>
-        <button
-          onClick={handleShowAnswer}
-          className="btn-base"
-          style={{
-            padding: '0.5rem 1.25rem',
-            border: '1px solid var(--border-color)',
-            borderRadius: '6px',
-            backgroundColor: 'var(--bg-secondary)',
-            color: 'var(--text-secondary)',
-            cursor: 'pointer',
-            fontWeight: 500,
-            fontSize: '0.875rem',
-            transition: 'var(--transition-fast)',
-          }}
-        >
-          {showAnswer ? 'Hide Answer' : 'Show Answer'}
-        </button>
+        {state.learningMode !== 'exam' && (
+          <>
+            <button
+              onClick={handleReset}
+              className="btn-base"
+              style={{
+                padding: '0.5rem 1.25rem',
+                border: '1px solid var(--border-color)',
+                borderRadius: '6px',
+                backgroundColor: 'var(--bg-secondary)',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                fontWeight: 500,
+                fontSize: '0.875rem',
+                transition: 'var(--transition-fast)',
+              }}
+            >
+              Reset
+            </button>
+            <button
+              onClick={handleShowAnswer}
+              className="btn-base"
+              style={{
+                padding: '0.5rem 1.25rem',
+                border: '1px solid var(--border-color)',
+                borderRadius: '6px',
+                backgroundColor: 'var(--bg-secondary)',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                fontWeight: 500,
+                fontSize: '0.875rem',
+                transition: 'var(--transition-fast)',
+              }}
+            >
+              {showAnswer ? 'Hide Answer' : 'Show Answer'}
+            </button>
+          </>
+        )}
       </div>
 
-      {submitted && (
+      {activeSubmitted && (
         <div style={{
           marginTop: '0.75rem',
           padding: '0.625rem 1rem',

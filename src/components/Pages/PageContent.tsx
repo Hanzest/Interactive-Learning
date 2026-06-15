@@ -1,33 +1,194 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import SectionRenderer from '../Sections/SectionRenderer';
+import { gradePageSections } from '../../utils/grading';
 import styles from './PageContent.module.css';
 
 export default function PageContent() {
-  const { state } = useAppContext();
+  const { state, submitExam, retryExam, updateExamTimeLeft, addToast } = useAppContext();
   const [currentSlide, setCurrentSlide] = useState(0);
   const slideDirection = useRef(1);
   const [animClass, setAnimClass] = useState('');
+  const [showConfirmOverlay, setShowConfirmOverlay] = useState(false);
+  const [slideScore, setSlideScore] = useState<{ score: number; total: number } | null>(null);
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [forceSubmit, setForceSubmit] = useState(false);
+  // Exam timer: custom minutes override (null = auto-calculated)
+  const [customExamMinutes, setCustomExamMinutes] = useState<number | null>(null);
+  const [editingDuration, setEditingDuration] = useState(false);
+  const [durationInput, setDurationInput] = useState('');
+  const [showRetryConfirm, setShowRetryConfirm] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
   const page = state.currentPageIndex >= 0 && state.currentPageIndex < state.pages.length
     ? state.pages[state.currentPageIndex]
     : null;
 
-  // Reset slide position when navigating between pages
+  // Reset slide position when navigating between pages or switching modes
   useEffect(() => {
     setCurrentSlide(0);
-  }, [state.currentPageIndex]);
+    setShowConfirmOverlay(false);
+    setSlideScore(null);
+    setIsConfirmed(false);
+    setForceSubmit(false);
+  }, [state.currentPageIndex, state.learningMode]);
+
+  const sections = page
+    ? (page.sections || []).filter((sec) => {
+        if (state.learningMode === 'learn') return true;
+        return ['text', 'quiz', 'fill-blank', 'matching', 'sorting', 'cloze'].includes(sec.type);
+      })
+    : [];
+
+  const section = sections[currentSlide];
+  const isGraded = section && ['quiz', 'fill-blank', 'matching', 'sorting', 'cloze'].includes(section.type);
+
+  // ── Exam mode: page-wide timer ─────────────────────────────────────────────
+  const isExamMode = state.learningMode === 'exam';
+  const isPageExamSubmitted = isExamMode && !!state.examSubmittedPages[state.currentPageIndex];
+
+  // Calculate the auto total exam time for the entire page (sum of all graded components)
+  const pageExamAutoTime = useMemo(() => {
+    if (!isExamMode || !page) return 0;
+    let total = 0;
+    (page.sections || []).forEach((sec) => {
+      const isGradedSec = ['quiz', 'fill-blank', 'matching', 'sorting', 'cloze'].includes(sec.type);
+      if (!isGradedSec) return;
+      if (sec.type === 'quiz' && 'questions' in sec) total += ((sec as any).questions?.length || 1) * 30;
+      else if (sec.type === 'fill-blank' && 'sentences' in sec) total += ((sec as any).sentences?.length || 1) * 30;
+      else if (sec.type === 'matching' && 'pairs' in sec) total += ((sec as any).pairs?.length || 1) * 20;
+      else if (sec.type === 'sorting' && 'items' in sec) total += ((sec as any).items?.length || 1) * 30;
+      else if (sec.type === 'cloze') total += 60;
+    });
+    return Math.max(total, 60); // at least 1 minute
+  }, [isExamMode, page, state.currentPageIndex]);
+
+  const pageExamMaxTime = customExamMinutes != null
+    ? customExamMinutes * 60
+    : pageExamAutoTime;
+
+  // Restore or initialize the page-level time left
+  const [timeLeft, setTimeLeft] = useState<number>(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Initialize timeLeft when entering exam mode or switching pages
+  useEffect(() => {
+    if (!isExamMode || isPageExamSubmitted) {
+      setTimeLeft(0);
+      setIsPaused(false);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      return;
+    }
+    const persisted = state.examTimeLeft[state.currentPageIndex];
+    const initialTime = persisted !== undefined ? persisted : pageExamMaxTime;
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    setTimeLeft(initialTime);
+    setIsPaused(false); // Reset pause on page change
+  }, [state.currentPageIndex, state.learningMode, pageExamMaxTime, isExamMode, isPageExamSubmitted]);
+
+  // Page-wide countdown timer
+  useEffect(() => {
+    if (!isExamMode || isPageExamSubmitted || isPaused) {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      return;
+    }
+
+    if (timeLeft <= 0) return;
+
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+          }
+          submitExam(state.currentPageIndex);
+          addToast('⏰ Time is up! Exam submitted automatically.', 'warning', 4000);
+          return 0;
+        }
+        const next = prev - 1;
+        updateExamTimeLeft(state.currentPageIndex, next);
+        return next;
+      });
+    }, 1000);
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [isExamMode, isPageExamSubmitted, isPaused, state.currentPageIndex, timeLeft > 0, submitExam, addToast, updateExamTimeLeft]);
+
+  // ── Practice mode: per-slide grading ──────────────────────────────────────
+  // Reset slide-local states on slide navigation (practice mode only)
+  useEffect(() => {
+    if (!isExamMode) {
+      setIsConfirmed(false);
+      setForceSubmit(false);
+      setSlideScore(null);
+    }
+  }, [currentSlide, isExamMode]);
+
+  const handleGraded = useCallback((score: number, total: number) => {
+    setSlideScore({ score, total });
+    setIsConfirmed(true);
+  }, []);
+
+  // ── Exam: Confirm & Submit all ─────────────────────────────────────────────
+  const handleExamConfirm = useCallback(() => {
+    submitExam(state.currentPageIndex);
+    setShowConfirmOverlay(false);
+    addToast('✅ Exam submitted! Scroll through each slide to review answers.', 'success', 5000);
+  }, [state.currentPageIndex, submitExam, addToast]);
+
+  // ── Exam: Retry ────────────────────────────────────────────────────────────
+  const handleRetryExam = useCallback(() => {
+    retryExam(state.currentPageIndex);
+    setShowRetryConfirm(false);
+    setCurrentSlide(0);
+    setCustomExamMinutes(null);
+    setIsPaused(false);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    addToast('🔄 Exam reset! Timer will restart when you enter exam mode.', 'info', 3000);
+  }, [state.currentPageIndex, retryExam, addToast]);
+
+  // Compute page exam score for the review summary
+  const pageExamResult = useMemo(() => {
+    if (!isPageExamSubmitted || !page) return null;
+    return gradePageSections(page, state.currentPageIndex, state.sectionAnswers);
+  }, [isPageExamSubmitted, page, state.currentPageIndex, state.sectionAnswers]);
+
+  const formatTime = (secs: number) => {
+    const m = Math.floor(secs / 60).toString().padStart(2, '0');
+    const s = (secs % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
+  const timerUrgent = timeLeft > 0 && timeLeft < 30;
 
   if (!page) return null;
 
   const meta = page.page || {};
   const title = meta.title || 'Untitled';
   const description = meta.description || '';
-  const tags = meta.tags || [];
-  const sections = page.sections || [];
+  const tags = (meta as any).tags || [];
 
   const totalSlides = sections.length;
   const hasMultipleSlides = totalSlides > 1;
+  const isLastSlide = currentSlide === totalSlides - 1;
 
   const goPrev = useCallback(() => {
     slideDirection.current = -1;
@@ -49,8 +210,146 @@ export default function PageContent() {
   }, [animClass]);
 
   return (
-    <div style={{ padding: '1.5rem 2rem', maxWidth: 900, margin: '0 auto' }}>
+    <div style={{ padding: '1.5rem 2rem', maxWidth: 900, margin: '0 auto', position: 'relative' }}>
+
+      {/* ── Confirm Submit Overlay ── */}
+      {showConfirmOverlay && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 200,
+          backgroundColor: 'rgba(0,0,0,0.55)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div style={{
+            background: 'var(--bg-primary)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 16,
+            boxShadow: 'var(--shadow-lg)',
+            padding: '2rem',
+            maxWidth: 480,
+            width: '90%',
+            textAlign: 'center',
+          }}>
+            <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>📝</div>
+            <h2 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+              Submit Exam?
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', marginTop: 8, marginBottom: 24, fontSize: '0.95rem', lineHeight: 1.6 }}>
+              Once you confirm, all your answers will be locked and you can review your results for <strong>every slide</strong> on this page.
+            </p>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <button
+                onClick={() => setShowConfirmOverlay(false)}
+                className="btn-base"
+                style={{
+                  padding: '0.6rem 1.5rem',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 8,
+                  background: 'var(--bg-secondary)',
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleExamConfirm}
+                className="btn-base"
+                style={{
+                  padding: '0.6rem 1.5rem',
+                  border: 'none',
+                  borderRadius: 8,
+                  background: 'var(--accent)',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  boxShadow: '0 2px 8px var(--accent-shadow)',
+                }}
+              >
+                Confirm & Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Retry Exam Confirm Overlay ── */}
+      {showRetryConfirm && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 200,
+          backgroundColor: 'rgba(0,0,0,0.55)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div style={{
+            background: 'var(--bg-primary)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 16,
+            boxShadow: 'var(--shadow-lg)',
+            padding: '2rem',
+            maxWidth: 480,
+            width: '90%',
+            textAlign: 'center',
+          }}>
+            <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>🔄</div>
+            <h2 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+              Retry This Exam?
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', marginTop: 8, marginBottom: 24, fontSize: '0.95rem', lineHeight: 1.6 }}>
+              This will <strong>clear all your answers</strong> and reset the timer for this page. Your progress cannot be recovered.
+            </p>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <button
+                onClick={() => setShowRetryConfirm(false)}
+                className="btn-base"
+                style={{
+                  padding: '0.6rem 1.5rem',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 8,
+                  background: 'var(--bg-secondary)',
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRetryExam}
+                className="btn-base"
+                style={{
+                  padding: '0.6rem 1.5rem',
+                  border: 'none',
+                  borderRadius: 8,
+                  background: 'var(--error, #ef4444)',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  boxShadow: '0 2px 8px rgba(239,68,68,0.35)',
+                }}
+              >
+                Yes, Retry Exam
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* === Fixed Metadata Section === */}
+
       <div style={{ marginBottom: 24 }}>
         {/* Title */}
         <h1 style={{
@@ -77,7 +376,7 @@ export default function PageContent() {
         {/* Tags */}
         {tags.length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
-            {tags.map((tag) => (
+            {tags.map((tag: string) => (
               <span key={tag} style={{
                 padding: '2px 10px',
                 borderRadius: 999,
@@ -93,7 +392,241 @@ export default function PageContent() {
           </div>
         )}
 
-        {/* Progress bar (dots) - only if multiple sections */}
+        {/* Page-wide exam timer banner */}
+        {isExamMode && pageExamMaxTime > 0 && !isPageExamSubmitted && (
+          <div style={{
+            padding: '12px 18px',
+            borderRadius: 8,
+            backgroundColor: timerUrgent ? 'rgba(239,68,68,0.08)' : 'var(--bg-secondary)',
+            border: `1px solid ${timerUrgent ? 'var(--error)' : 'var(--border-color)'}`,
+            marginBottom: 16,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            transition: 'border-color 0.3s, background-color 0.3s',
+            boxShadow: 'var(--shadow-sm)',
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              fontWeight: 600,
+              fontSize: '0.9rem',
+              color: timerUrgent ? 'var(--error)' : 'var(--text-primary)',
+            }}>
+              <span>⏱️ Exam Mode • Page Timer</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                {/* Editable duration */}
+                {editingDuration ? (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const mins = parseInt(durationInput, 10);
+                      if (!isNaN(mins) && mins > 0) {
+                        setCustomExamMinutes(mins);
+                        setTimeLeft(mins * 60);
+                        updateExamTimeLeft(state.currentPageIndex, mins * 60);
+                      }
+                      setEditingDuration(false);
+                    }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+                  >
+                    <input
+                      type="number"
+                      min={1}
+                      max={180}
+                      value={durationInput}
+                      onChange={(e) => setDurationInput(e.target.value)}
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') {
+                          setEditingDuration(false);
+                        }
+                      }}
+                      style={{
+                        width: 60,
+                        padding: '4px 8px',
+                        borderRadius: 6,
+                        border: '1px solid var(--accent)',
+                        background: 'var(--bg-primary)',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.85rem',
+                        fontWeight: 600,
+                        textAlign: 'center',
+                      }}
+                    />
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>min</span>
+                    <button
+                      type="submit"
+                      style={{
+                        padding: '4px 10px',
+                        border: 'none',
+                        borderRadius: 6,
+                        background: 'var(--accent)',
+                        color: '#fff',
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'background-color 0.2s',
+                      }}
+                    >
+                      Set
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingDuration(false)}
+                      style={{
+                        padding: '4px 10px',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: 6,
+                        background: 'var(--bg-secondary)',
+                        color: 'var(--text-secondary)',
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </form>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setDurationInput(String(Math.ceil(pageExamMaxTime / 60)));
+                      setEditingDuration(true);
+                    }}
+                    title="Change exam duration"
+                    className="btn-base"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '4px 10px',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: 6,
+                      background: 'var(--bg-primary)',
+                      color: 'var(--text-secondary)',
+                      fontSize: '0.825rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    ✏️ Change Duration ({Math.ceil(pageExamMaxTime / 60)}m)
+                  </button>
+                )}
+
+                {/* Pause/Resume Button */}
+                <button
+                  onClick={() => setIsPaused((p) => !p)}
+                  className="btn-base"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '4px 10px',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: 6,
+                    background: isPaused ? 'var(--accent)' : 'var(--bg-primary)',
+                    color: isPaused ? '#fff' : 'var(--text-secondary)',
+                    fontSize: '0.825rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  {isPaused ? '▶️ Resume Exam' : '⏸️ Pause Exam'}
+                </button>
+
+                <span style={{ fontVariantNumeric: 'tabular-nums', letterSpacing: '0.04em', minWidth: 44, textAlign: 'right' }}>
+                  {formatTime(timeLeft)}
+                </span>
+              </div>
+            </div>
+            <div style={{
+              width: '100%',
+              height: 6,
+              backgroundColor: 'var(--bg-tertiary)',
+              borderRadius: 3,
+              overflow: 'hidden',
+            }}>
+              <div style={{
+                width: `${pageExamMaxTime > 0 ? Math.max(0, (timeLeft / pageExamMaxTime) * 100) : 100}%`,
+                height: '100%',
+                backgroundColor: timerUrgent ? 'var(--error)' : 'var(--accent)',
+                borderRadius: 3,
+                transition: 'width 1s linear, background-color 0.3s',
+              }} />
+            </div>
+          </div>
+        )}
+
+        {/* Exam submitted – review mode banner */}
+        {isExamMode && isPageExamSubmitted && pageExamResult && (
+          <div style={{
+            padding: '14px 18px',
+            borderRadius: 10,
+            backgroundColor: 'var(--success-bg)',
+            border: '1px solid var(--success-border)',
+            marginBottom: 16,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+          }}>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--success-text)', marginBottom: 2 }}>
+                ✅ Exam Submitted — Review Mode
+              </div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                Navigate slides to review your answers.
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+              {/* Score badge */}
+              <div style={{
+                textAlign: 'center',
+                backgroundColor: 'var(--bg-primary)',
+                border: '1px solid var(--success-border)',
+                borderRadius: 8,
+                padding: '6px 14px',
+              }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--success-text)', lineHeight: 1 }}>
+                  {pageExamResult.total > 0 ? Math.round((pageExamResult.correct / pageExamResult.total) * 100) : 0}%
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 2 }}>
+                  {pageExamResult.correct}/{pageExamResult.total} correct
+                </div>
+              </div>
+              {/* Retry button */}
+              <button
+                onClick={() => setShowRetryConfirm(true)}
+                className="btn-base"
+                title="Retry this exam (clears all answers)"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '0.5rem 1rem',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 8,
+                  background: 'var(--bg-primary)',
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  transition: 'var(--transition-fast)',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                🔄 Retry
+              </button>
+            </div>
+          </div>
+        )}
+
+
+        {/* Progress dots - only if multiple sections */}
         {hasMultipleSlides && (
           <div style={{
             display: 'flex',
@@ -143,11 +676,55 @@ export default function PageContent() {
           alignItems: 'flex-start',
           gap: 12,
         }}>
-          {/* Previous Arrow - outside the card */}
+          {isPaused && (
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.45)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 10,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 12,
+              color: 'var(--text-primary)',
+              textAlign: 'center',
+              padding: '2rem',
+              border: '1px solid var(--border-color)',
+            }}>
+              <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>⏸️</div>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>Exam Paused</h2>
+              <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginTop: 8, marginBottom: 24, maxWidth: 320 }}>
+                The exam timer is currently paused. Resume when you are ready to continue.
+              </p>
+              <button
+                onClick={() => setIsPaused(false)}
+                className="btn-base"
+                style={{
+                  padding: '0.6rem 1.8rem',
+                  border: 'none',
+                  borderRadius: 8,
+                  background: 'var(--accent)',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  fontSize: '0.95rem',
+                  boxShadow: '0 4px 12px var(--accent-shadow)',
+                  transition: 'transform 0.2s',
+                }}
+              >
+                Resume Exam
+              </button>
+            </div>
+          )}
+
+          {/* Previous Arrow */}
           {hasMultipleSlides && (
             <button
               onClick={goPrev}
               disabled={currentSlide === 0}
+              data-nav-prev="slide"
               aria-label="Previous section"
               style={{
                 flexShrink: 0,
@@ -174,18 +751,119 @@ export default function PageContent() {
 
           {/* Slide content */}
           <div className={animClass || undefined} style={{ flex: 1, minWidth: 0 }}>
+
+            {/* Practice mode badge */}
+            {state.learningMode === 'practice' && isGraded && (
+              <div style={{
+                padding: '8px 16px',
+                borderRadius: 8,
+                backgroundColor: 'var(--accent-light)',
+                color: 'var(--accent)',
+                fontWeight: 600,
+                fontSize: '0.85rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                marginBottom: 16,
+              }}>
+                ✨ Practice Mode • Unlimited Time • Graded Component
+              </div>
+            )}
+
+            {/* Practice mode: slide score after grading */}
+            {state.learningMode === 'practice' && isConfirmed && slideScore && (
+              <div style={{
+                padding: '16px 20px',
+                borderRadius: 8,
+                backgroundColor: 'var(--success-bg)',
+                border: '1px solid var(--success-border)',
+                color: 'var(--success-text)',
+                marginBottom: 16,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                boxShadow: 'var(--shadow-sm)',
+              }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700 }}>
+                    🎉 Slide Score Summary
+                  </h3>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.9rem', opacity: 0.9 }}>
+                    You got {slideScore.score} out of {slideScore.total} correct!
+                  </p>
+                </div>
+                <div style={{
+                  fontSize: '1.75rem',
+                  fontWeight: 800,
+                  padding: '4px 12px',
+                  borderRadius: 6,
+                  backgroundColor: 'var(--bg-primary)',
+                  border: '1px solid var(--success-border)',
+                }}>
+                  {slideScore.total > 0 ? Math.round((slideScore.score / slideScore.total) * 100) : 0}%
+                </div>
+              </div>
+            )}
+
             <SectionRenderer
               key={`${state.currentPageIndex}-${currentSlide}`}
-              section={sections[currentSlide]}
-              sectionIndex={currentSlide}
+              section={section}
+              sectionIndex={page.sections ? page.sections.indexOf(section) : currentSlide}
+              forceSubmit={forceSubmit}
+              isConfirmed={isConfirmed}
+              onGraded={isExamMode ? undefined : handleGraded}
             />
+
+            {/* Exam mode: Confirm & Submit on last slide */}
+            {isExamMode && isLastSlide && !isPageExamSubmitted && (
+              <div style={{
+                marginTop: 24,
+                padding: '20px 24px',
+                borderRadius: 12,
+                background: 'linear-gradient(135deg, var(--accent-light) 0%, var(--bg-secondary) 100%)',
+                border: '1px solid var(--accent-mid)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 16,
+              }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)', marginBottom: 4 }}>
+                    Ready to submit?
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    Make sure you've saved answers for all slides. After confirming, answers are locked and you can review them.
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowConfirmOverlay(true)}
+                  className="btn-base"
+                  style={{
+                    flexShrink: 0,
+                    padding: '0.6rem 1.5rem',
+                    border: 'none',
+                    borderRadius: 8,
+                    background: 'var(--accent)',
+                    color: '#fff',
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    fontSize: '0.9rem',
+                    boxShadow: '0 2px 8px var(--accent-shadow)',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Confirm & Submit →
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Next Arrow - outside the card */}
+          {/* Next Arrow */}
           {hasMultipleSlides && (
             <button
               onClick={goNext}
               disabled={currentSlide === totalSlides - 1}
+              data-nav-next="slide"
               aria-label="Next section"
               style={{
                 flexShrink: 0,

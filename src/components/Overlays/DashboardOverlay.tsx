@@ -1,6 +1,7 @@
 import { useEffect, useRef, useMemo, useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import Chart from 'chart.js/auto';
+import { gradePageSections } from '../../utils/grading';
 
 const s = {
   overlay: {
@@ -229,14 +230,30 @@ export default function DashboardOverlay() {
   const totalPages = pages.length;
   const viewedCount = viewedPages.length;
 
-  // Average quiz %
+  // Average quiz/exam %
   const avgQuizPercent = useMemo(() => {
-    const scores = state.quizScores || {};
-    const entries = Object.values(scores);
-    if (entries.length === 0) return 0;
-    const total = entries.reduce((sum, s) => sum + (s.total > 0 ? s.correct / s.total : 0), 0);
-    return Math.round((total / entries.length) * 100);
-  }, [state.quizScores]);
+    if (state.learningMode === 'exam') {
+      let totalPageScores = 0;
+      let submittedCount = 0;
+      pages.forEach((page, i) => {
+        if (state.examSubmittedPages[i]) {
+          const res = gradePageSections(page, i, state.sectionAnswers);
+          if (res.total > 0) {
+            totalPageScores += res.correct / res.total;
+            submittedCount++;
+          }
+        }
+      });
+      if (submittedCount === 0) return 0;
+      return Math.round((totalPageScores / submittedCount) * 100);
+    } else {
+      const scores = state.quizScores || {};
+      const entries = Object.values(scores);
+      if (entries.length === 0) return 0;
+      const total = entries.reduce((sum, s) => sum + (s.total > 0 ? s.correct / s.total : 0), 0);
+      return Math.round((total / entries.length) * 100);
+    }
+  }, [state.learningMode, state.examSubmittedPages, state.sectionAnswers, pages, state.quizScores]);
 
   // Doughnut chart
   useEffect(() => {
@@ -346,7 +363,7 @@ export default function DashboardOverlay() {
           </div>
           <div style={s.statCard}>
             <span style={s.statValue}>{avgQuizPercent}%</span>
-            <span style={s.statLabel}>Avg Quiz %</span>
+            <span style={s.statLabel}>{state.learningMode === 'exam' ? 'Avg Exam %' : 'Avg Quiz %'}</span>
           </div>
         </div>
 
@@ -372,7 +389,21 @@ export default function DashboardOverlay() {
           <h3 style={s.pageListTitle}>Pages</h3>
           <div style={s.pageListScroll}>
             {pages.map((page, i) => {
-              const status = getStatusLabel(i);
+              const isExamMode = state.learningMode === 'exam';
+              const examSubmitted = isExamMode && !!state.examSubmittedPages[i];
+              let statusLabel = '';
+              let badgeStyle = s.statusNew;
+
+              if (examSubmitted) {
+                const results = gradePageSections(page, i, state.sectionAnswers);
+                statusLabel = results.total > 0 ? `Exam: ${results.correct}/${results.total}` : 'Exam: Done';
+                badgeStyle = s.statusDone;
+              } else {
+                const status = getStatusLabel(i);
+                statusLabel = status.label;
+                badgeStyle = status.style;
+              }
+
               return (
                 <button
                   key={i}
@@ -382,8 +413,8 @@ export default function DashboardOverlay() {
                   <span style={s.pageName}>
                     {page.page?.title || `Page ${i + 1}`}
                   </span>
-                  <span style={status.style}>
-                    {status.label}
+                  <span style={badgeStyle}>
+                    {statusLabel}
                   </span>
                 </button>
               );

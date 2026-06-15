@@ -1,36 +1,117 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import type { ClozeSection as ClozeSectionType } from '../../types/schema';
 import { renderMarkdown } from '../../utils/renderContent';
+import { useAppContext } from '../../context/AppContext';
 
 interface ClozeSectionProps {
   section: ClozeSectionType;
+  sectionIndex: number;
+  forceSubmit?: boolean;
+  onGraded?: (score: number, total: number) => void;
+  isConfirmed?: boolean;
 }
 
-export default function ClozeSection({ section }: ClozeSectionProps) {
+export default function ClozeSection({
+  section,
+  sectionIndex,
+  forceSubmit,
+  onGraded,
+  isConfirmed,
+}: ClozeSectionProps) {
+  const { state, saveSectionAnswers, addToast } = useAppContext();
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [hints, setHints] = useState<Record<string, boolean>>({});
   const [submitted, setSubmitted] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [isSavedText, setIsSavedText] = useState(false);
   const prevAnswersRef = useRef<Record<string, string>>({});
+
+  const isExamMode = state.learningMode === 'exam';
+  const isExamSubmitted = isExamMode && !!state.examSubmittedPages[state.currentPageIndex];
+  const activeSubmitted = isExamMode ? isExamSubmitted : submitted;
+
+  // Load saved answers
+  useEffect(() => {
+    const saved = state.sectionAnswers[state.currentPageIndex]?.[sectionIndex];
+    if (saved) {
+      setAnswers(saved);
+    } else {
+      setAnswers({});
+    }
+    if (!isExamMode) {
+      setSubmitted(false);
+    }
+  }, [state.currentPageIndex, sectionIndex, isExamMode, state.sectionAnswers]);
 
   const handleAnswerChange = useCallback(
     (blankId: string, value: string) => {
-      if (submitted || showAnswer) return;
-      setAnswers((prev) => ({ ...prev, [blankId]: value }));
+      if (activeSubmitted || showAnswer) return;
+      const newAnswers = { ...answers, [blankId]: value };
+      setAnswers(newAnswers);
+      saveSectionAnswers(state.currentPageIndex, sectionIndex, newAnswers);
     },
-    [submitted, showAnswer]
+    [activeSubmitted, showAnswer, answers, saveSectionAnswers, state.currentPageIndex, sectionIndex]
   );
 
-  const handleSubmit = useCallback(() => {
+  const runGrading = useCallback(() => {
     setSubmitted(true);
-  }, []);
+    setConfirming(false);
+    if (onGraded) {
+      let correct = 0;
+      section.blanks.forEach((b) => {
+        const userAnswer = answers[b.id]?.trim().toLowerCase() || '';
+        let isCorrect = false;
+        if (b.correctIndex !== undefined && b.options) {
+          const selectedOptionIndex = b.options.indexOf(answers[b.id] || '');
+          isCorrect = selectedOptionIndex === b.correctIndex;
+        } else if (b.correctAnswer) {
+          isCorrect = userAnswer === b.correctAnswer.trim().toLowerCase();
+        }
+        if (isCorrect) correct++;
+      });
+      onGraded(correct, section.blanks.length);
+    }
+  }, [answers, section.blanks, onGraded]);
+
+  useEffect(() => {
+    if (forceSubmit && !submitted && !isExamMode) {
+      runGrading();
+    }
+  }, [forceSubmit, submitted, runGrading, isExamMode]);
+
+  const handleSubmit = useCallback(() => {
+    const answeredCount = Object.keys(answers).length;
+    if (answeredCount < section.blanks.length) {
+      alert("Please fill in all blanks before checking.");
+      return;
+    }
+    if (isExamMode) {
+      saveSectionAnswers(state.currentPageIndex, sectionIndex, answers);
+      setIsSavedText(true);
+      setTimeout(() => setIsSavedText(false), 2000);
+      addToast("Answers saved!", "success", 2000);
+      return;
+    }
+    if (state.learningMode === 'learn') {
+      runGrading();
+    } else {
+      if (!confirming) {
+        setConfirming(true);
+      } else {
+        runGrading();
+      }
+    }
+  }, [state.learningMode, isExamMode, confirming, runGrading, answers, section.blanks.length, saveSectionAnswers, state.currentPageIndex, sectionIndex, addToast]);
 
   const handleReset = useCallback(() => {
     setAnswers({});
     setSubmitted(false);
+    setConfirming(false);
     setHints({});
     setShowAnswer(false);
-  }, []);
+    saveSectionAnswers(state.currentPageIndex, sectionIndex, {});
+  }, [state.currentPageIndex, sectionIndex, saveSectionAnswers]);
 
   const handleShowAnswer = useCallback(() => {
     if (!showAnswer) {
@@ -54,7 +135,7 @@ export default function ClozeSection({ section }: ClozeSectionProps) {
   }, []);
 
   const checkBlank = (blank: typeof section.blanks[0]) => {
-    if (!submitted) return null;
+    if (!activeSubmitted) return null;
     const userAnswer = answers[blank.id]?.trim().toLowerCase() || '';
     if (blank.correctIndex !== undefined && blank.options) {
       const selectedOptionIndex = blank.options.indexOf(answers[blank.id] || '');
@@ -66,7 +147,7 @@ export default function ClozeSection({ section }: ClozeSectionProps) {
     return null;
   };
 
-  const correctCount = submitted
+  const correctCount = activeSubmitted
     ? section.blanks.filter((b) => {
         const result = checkBlank(b);
         return result === true;
@@ -88,7 +169,7 @@ export default function ClozeSection({ section }: ClozeSectionProps) {
       }
 
       const isCorrect = checkBlank(blank);
-      const isWrong = submitted && isCorrect === false;
+      const isWrong = activeSubmitted && isCorrect === false;
 
       const inputBaseStyle: React.CSSProperties = {
         padding: '0.25rem 0.5rem',
@@ -125,7 +206,7 @@ export default function ClozeSection({ section }: ClozeSectionProps) {
               style={inputStyle}
               value={answers[blankId] || ''}
               onChange={(e) => handleAnswerChange(blankId, e.target.value)}
-              disabled={submitted || showAnswer}
+              disabled={activeSubmitted || showAnswer}
             >
               <option value="">...</option>
               {blank.options.map((opt, oi) => (
@@ -140,12 +221,12 @@ export default function ClozeSection({ section }: ClozeSectionProps) {
               style={inputStyle}
               value={answers[blankId] || ''}
               onChange={(e) => handleAnswerChange(blankId, e.target.value)}
-              disabled={submitted || showAnswer}
+              disabled={activeSubmitted || showAnswer}
               placeholder="..."
               size={12}
             />
           )}
-          {submitted && (
+          {activeSubmitted && (
             <span style={{
               fontSize: '1rem',
               fontWeight: 700,
@@ -157,25 +238,27 @@ export default function ClozeSection({ section }: ClozeSectionProps) {
               {isCorrect ? '✓' : '✗'}
             </span>
           )}
-          <button
-            onClick={() => toggleHint(blankId)}
-            title="Show hint"
-            aria-label="Show hint"
-            style={{
-              padding: '0.35rem 0.35rem',
-              border: '2px solid var(--warning-border)',
-              borderRadius: '4px',
-              backgroundColor: 'var(--warning-bg)',
-              color: 'var(--warning-text)',
-              cursor: 'pointer',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              lineHeight: 1.2,
-              transition: 'var(--transition-fast)',
-            }}
-          >
-            💡
-          </button>
+          {state.learningMode !== 'exam' && (
+            <button
+              onClick={() => toggleHint(blankId)}
+              title="Show hint"
+              aria-label="Show hint"
+              style={{
+                padding: '0.35rem 0.35rem',
+                border: '2px solid var(--warning-border)',
+                borderRadius: '4px',
+                backgroundColor: 'var(--warning-bg)',
+                color: 'var(--warning-text)',
+                cursor: 'pointer',
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                lineHeight: 1.2,
+                transition: 'var(--transition-fast)',
+              }}
+            >
+              💡
+            </button>
+          )}
           {hints[blankId] && blank.hint && (
             <span style={{
               position: 'absolute',
@@ -218,7 +301,7 @@ export default function ClozeSection({ section }: ClozeSectionProps) {
         marginBottom: '0.75rem',
       }}>{section.title}</h2>}
 
-      {submitted && (
+      {activeSubmitted && (
         <div style={{
           padding: '0.625rem 1rem',
           backgroundColor: 'var(--accent-light)',
@@ -250,56 +333,60 @@ export default function ClozeSection({ section }: ClozeSectionProps) {
       }}>
         <button
           onClick={handleSubmit}
-          disabled={submitted || showAnswer}
+          disabled={activeSubmitted || showAnswer}
           className="btn-base"
           style={{
             padding: '0.5rem 1.25rem',
             border: 'none',
             borderRadius: '6px',
-            backgroundColor: (submitted || showAnswer) ? 'var(--bg-tertiary)' : 'var(--accent)',
-            color: (submitted || showAnswer) ? 'var(--text-muted)' : '#fff',
-            cursor: (submitted || showAnswer) ? 'not-allowed' : 'pointer',
+            backgroundColor: (activeSubmitted || showAnswer) ? 'var(--bg-tertiary)' : (confirming ? 'var(--warning)' : 'var(--accent)'),
+            color: (activeSubmitted || showAnswer) ? 'var(--text-muted)' : '#fff',
+            cursor: (activeSubmitted || showAnswer) ? 'not-allowed' : 'pointer',
             fontWeight: 600,
             fontSize: '0.875rem',
             transition: 'var(--transition-fast)',
           }}
         >
-          Submit
+          {isExamMode ? (isSavedText ? 'Answers Saved ✓' : 'Save Answers') : (confirming ? 'Confirm Submit?' : 'Submit')}
         </button>
-        <button
-          onClick={handleReset}
-          className="btn-base"
-          style={{
-            padding: '0.5rem 1.25rem',
-            border: '1px solid var(--border-color)',
-            borderRadius: '6px',
-            backgroundColor: 'var(--bg-secondary)',
-            color: 'var(--text-secondary)',
-            cursor: 'pointer',
-            fontWeight: 500,
-            fontSize: '0.875rem',
-            transition: 'var(--transition-fast)',
-          }}
-        >
-          Reset
-        </button>
-        <button
-          onClick={handleShowAnswer}
-          className="btn-base"
-          style={{
-            padding: '0.5rem 1.25rem',
-            border: '1px solid var(--border-color)',
-            borderRadius: '6px',
-            backgroundColor: 'var(--bg-secondary)',
-            color: 'var(--text-secondary)',
-            cursor: 'pointer',
-            fontWeight: 500,
-            fontSize: '0.875rem',
-            transition: 'var(--transition-fast)',
-          }}
-        >
-          {showAnswer ? 'Hide Answer' : 'Show Answer'}
-        </button>
+        {state.learningMode !== 'exam' && (
+          <>
+            <button
+              onClick={handleReset}
+              className="btn-base"
+              style={{
+                padding: '0.5rem 1.25rem',
+                border: '1px solid var(--border-color)',
+                borderRadius: '6px',
+                backgroundColor: 'var(--bg-secondary)',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                fontWeight: 500,
+                fontSize: '0.875rem',
+                transition: 'var(--transition-fast)',
+              }}
+            >
+              Reset
+            </button>
+            <button
+              onClick={handleShowAnswer}
+              className="btn-base"
+              style={{
+                padding: '0.5rem 1.25rem',
+                border: '1px solid var(--border-color)',
+                borderRadius: '6px',
+                backgroundColor: 'var(--bg-secondary)',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                fontWeight: 500,
+                fontSize: '0.875rem',
+                transition: 'var(--transition-fast)',
+              }}
+            >
+              {showAnswer ? 'Hide Answer' : 'Show Answer'}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

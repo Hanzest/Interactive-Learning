@@ -57,11 +57,33 @@ function ToastItem({
   onDismiss: () => void;
   onUndo: () => void;
 }) {
+  const [visible, setVisible] = React.useState(false);
+  const [exiting, setExiting] = React.useState(false);
+
+  // Trigger entrance animation on mount
+  React.useEffect(() => {
+    const raf = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  const handleDismiss = React.useCallback(() => {
+    setExiting(true);
+    setTimeout(onDismiss, 420); // match exit animation duration
+  }, [onDismiss]);
+
   useEffect(() => {
     if (toast.duration <= 0) return;
-    const timer = setTimeout(onDismiss, toast.duration);
+    const timer = setTimeout(handleDismiss, toast.duration);
     return () => clearTimeout(timer);
-  }, [toast.duration, onDismiss]);
+  }, [toast.duration, handleDismiss]);
+
+  const slideStyle: React.CSSProperties = {
+    opacity: visible && !exiting ? 1 : 0,
+    transform: visible && !exiting ? 'translateX(0)' : 'translateX(32px)',
+    transition: exiting
+      ? 'opacity 0.4s ease-in, transform 0.4s ease-in'
+      : 'opacity 0.45s cubic-bezier(0.22,1,0.36,1), transform 0.45s cubic-bezier(0.22,1,0.36,1)',
+  };
 
   return (
     <div
@@ -78,6 +100,7 @@ function ToastItem({
         pointerEvents: 'auto',
         minWidth: 280,
         maxWidth: 420,
+        ...slideStyle,
       }}
       role="alert"
     >
@@ -119,7 +142,7 @@ function ToastItem({
             cursor: 'pointer',
             transition: 'background 0.15s',
           }}
-          onClick={onDismiss}
+          onClick={handleDismiss}
           type="button"
           aria-label="Dismiss"
         >

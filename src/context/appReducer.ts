@@ -1,5 +1,5 @@
 import type { AppState, AppAction } from '../types/state';
-import type { LearningPage } from '../types/schema';
+import type { LearningPage, LearningMode } from '../types/schema';
 import { computeContentHash } from '../utils/contentHash';
 import { storage } from '../utils/storage';
 
@@ -31,6 +31,10 @@ export const initialState: AppState = {
   pomodoroBreakMinutes: 5,
   pomodoroSeconds: 0,
   pomodoroIsRunning: false,
+  learningMode: storage.load<LearningMode>('learningMode', 'learn'),
+  sectionAnswers: storage.load<Record<number, Record<number, any>>>('sectionAnswers', {}),
+  examSubmittedPages: storage.load<Record<number, boolean>>('examSubmittedPages', {}),
+  examTimeLeft: storage.load<Record<number, number>>('examTimeLeft', {}),
 };
 
 export function appReducer(state: AppState, action: AppAction): AppState {
@@ -196,6 +200,76 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case 'SET_DARK_MODE': {
       storage.save('theme', action.payload ? 'dark' : 'light');
       return { ...state, darkMode: action.payload };
+    }
+
+    case 'SET_LEARNING_MODE': {
+      storage.save('learningMode', action.payload);
+      return { ...state, learningMode: action.payload };
+    }
+
+    case 'SAVE_SECTION_ANSWERS': {
+      const { pageIndex, sectionIndex, answers } = action.payload;
+      const pageAnswers = state.sectionAnswers[pageIndex] || {};
+      const newAnswers = {
+        ...state.sectionAnswers,
+        [pageIndex]: {
+          ...pageAnswers,
+          [sectionIndex]: answers
+        }
+      };
+      storage.save('sectionAnswers', newAnswers);
+      return {
+        ...state,
+        sectionAnswers: newAnswers
+      };
+    }
+
+    case 'SUBMIT_EXAM': {
+      const { pageIndex } = action.payload;
+      const newSubmitted = {
+        ...state.examSubmittedPages,
+        [pageIndex]: true
+      };
+      storage.save('examSubmittedPages', newSubmitted);
+      return {
+        ...state,
+        examSubmittedPages: newSubmitted
+      };
+    }
+
+    case 'RETRY_EXAM': {
+      const { pageIndex } = action.payload;
+      // Remove the submitted flag for this page
+      const newSubmitted = { ...state.examSubmittedPages };
+      delete newSubmitted[pageIndex];
+      // Clear all section answers for this page
+      const newAnswers = { ...state.sectionAnswers };
+      delete newAnswers[pageIndex];
+      // Reset the timer for this page
+      const newTimeLeft = { ...state.examTimeLeft };
+      delete newTimeLeft[pageIndex];
+      storage.save('examSubmittedPages', newSubmitted);
+      storage.save('sectionAnswers', newAnswers);
+      storage.save('examTimeLeft', newTimeLeft);
+      return {
+        ...state,
+        examSubmittedPages: newSubmitted,
+        sectionAnswers: newAnswers,
+        examTimeLeft: newTimeLeft,
+      };
+    }
+
+    case 'UPDATE_EXAM_TIME_LEFT': {
+      const { pageIndex, timeLeft } = action.payload;
+      const newTimeLeft = {
+        ...state.examTimeLeft,
+        [pageIndex]: timeLeft
+      };
+      storage.save('examTimeLeft', newTimeLeft);
+      return {
+        ...state,
+        examTimeLeft: newTimeLeft
+      };
     }
 
     case 'TOGGLE_SHORTCUTS':

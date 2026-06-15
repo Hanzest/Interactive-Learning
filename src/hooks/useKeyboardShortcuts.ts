@@ -2,6 +2,29 @@ import { useEffect, useRef } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { isInputFocused } from '../utils/renderContent';
 
+function getActiveTabSibling(direction: 'next' | 'prev'): HTMLButtonElement | null {
+  const activeTab = document.querySelector<HTMLButtonElement>('[role="tab"][aria-selected="true"]');
+  if (!activeTab) return null;
+
+  const tabList = activeTab.closest('[role="tablist"]');
+  if (!tabList) return null;
+
+  const allTabs = Array.from(tabList.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+  const activeIndex = allTabs.indexOf(activeTab);
+  if (activeIndex === -1) return null;
+
+  if (direction === 'next') {
+    if (activeIndex < allTabs.length - 1) {
+      return allTabs[activeIndex + 1];
+    }
+  } else {
+    if (activeIndex > 0) {
+      return allTabs[activeIndex - 1];
+    }
+  }
+  return null;
+}
+
 /**
  * Global keyboard shortcut handler.
  * Must be used inside <AppProvider>.
@@ -77,8 +100,23 @@ export function useKeyboardShortcuts(): void {
       if ((e.key === 'a' || e.key === 'ArrowLeft') && !e.ctrlKey && !e.metaKey) {
         if (!isInputFocused()) {
           e.preventDefault();
-          const prevBtn = document.querySelector<HTMLButtonElement>('[data-nav-prev]:not([disabled])');
-          prevBtn?.click();
+          
+          // 1. Try to find active sub-component (quiz or flashcards)
+          let prevBtn = document.querySelector<HTMLButtonElement>('[data-nav-prev="quiz"]:not([disabled]), [data-nav-prev="flashcards"]:not([disabled])');
+          
+          // 2. Try tabs
+          if (!prevBtn) {
+            prevBtn = getActiveTabSibling('prev');
+          }
+          
+          // 3. Fallback to slide
+          if (!prevBtn) {
+            prevBtn = document.querySelector<HTMLButtonElement>('[data-nav-prev="slide"]:not([disabled])');
+          }
+
+          if (prevBtn) {
+            prevBtn.click();
+          }
         }
         return;
       }
@@ -87,8 +125,23 @@ export function useKeyboardShortcuts(): void {
       if ((e.key === 'd' || e.key === 'ArrowRight') && !e.ctrlKey && !e.metaKey) {
         if (!isInputFocused()) {
           e.preventDefault();
-          const nextBtn = document.querySelector<HTMLButtonElement>('[data-nav-next]:not([disabled])');
-          nextBtn?.click();
+          
+          // 1. Try to find active sub-component (quiz or flashcards)
+          let nextBtn = document.querySelector<HTMLButtonElement>('[data-nav-next="quiz"]:not([disabled]), [data-nav-next="flashcards"]:not([disabled])');
+          
+          // 2. Try tabs
+          if (!nextBtn) {
+            nextBtn = getActiveTabSibling('next');
+          }
+          
+          // 3. Fallback to slide
+          if (!nextBtn) {
+            nextBtn = document.querySelector<HTMLButtonElement>('[data-nav-next="slide"]:not([disabled])');
+          }
+
+          if (nextBtn) {
+            nextBtn.click();
+          }
         }
         return;
       }

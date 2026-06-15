@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback, useMemo } from 'react';
 import type { AppState, AppAction } from '../types/state';
 import { initialState, appReducer, getVisibleIndices } from './appReducer';
-import type { LearningPage, Toast } from '../types/schema';
+import type { LearningPage, Toast, LearningMode } from '../types/schema';
 import { storage } from '../utils/storage';
 import { computeContentHash } from '../utils/contentHash';
 
@@ -53,6 +53,7 @@ interface AppContextValue {
   toggleShortcuts: () => void;
   toggleDashboard: () => void;
   toggleSidebar: () => void;
+  setLearningMode: (mode: LearningMode) => void;
   setError: (err: string | null) => void;
   setRenamingIndex: (idx: number | null) => void;
   setContextMenu: (menu: { index: number; x: number; y: number } | null) => void;
@@ -67,6 +68,10 @@ interface AppContextValue {
   isPageCompleted: (index: number) => boolean;
   isQuizCompleted: (index: number) => boolean;
   saveSession: () => void;
+  saveSectionAnswers: (pageIndex: number, sectionIndex: number, answers: any) => void;
+  submitExam: (pageIndex: number) => void;
+  retryExam: (pageIndex: number) => void;
+  updateExamTimeLeft: (pageIndex: number, timeLeft: number) => void;
   getQuizAttemptHistory: (pageIndex: number, sectionIndex: number) => { attempts: number; bestCorrect: number; bestTotal: number };
 }
 
@@ -94,6 +99,14 @@ export function AppProvider({ children }: AppProviderProps) {
     const savedTheme = storage.load<string>('theme', 'light');
     if (savedTheme === 'dark') {
       dispatch({ type: 'SET_DARK_MODE', payload: true });
+    }
+  }, []);
+
+  // Load saved learning mode on mount
+  useEffect(() => {
+    const savedMode = storage.load<LearningMode>('learningMode', 'learn');
+    if (savedMode && ['learn', 'practice', 'exam'].includes(savedMode)) {
+      dispatch({ type: 'SET_LEARNING_MODE', payload: savedMode });
     }
   }, []);
 
@@ -254,6 +267,26 @@ export function AppProvider({ children }: AppProviderProps) {
     dispatch({ type: 'SAVE_FLASHCARD_PROGRESS', payload: { pageIndex, sectionIndex, cardIndex, known } });
   }, []);
 
+  const setLearningMode = useCallback((mode: LearningMode) => {
+    dispatch({ type: 'SET_LEARNING_MODE', payload: mode });
+  }, []);
+
+  const saveSectionAnswers = useCallback((pageIndex: number, sectionIndex: number, answers: any) => {
+    dispatch({ type: 'SAVE_SECTION_ANSWERS', payload: { pageIndex, sectionIndex, answers } });
+  }, []);
+
+  const submitExam = useCallback((pageIndex: number) => {
+    dispatch({ type: 'SUBMIT_EXAM', payload: { pageIndex } });
+  }, []);
+
+  const retryExam = useCallback((pageIndex: number) => {
+    dispatch({ type: 'RETRY_EXAM', payload: { pageIndex } });
+  }, []);
+
+  const updateExamTimeLeft = useCallback((pageIndex: number, timeLeft: number) => {
+    dispatch({ type: 'UPDATE_EXAM_TIME_LEFT', payload: { pageIndex, timeLeft } });
+  }, []);
+
   const addToastFn = useCallback((
     message: string,
     type: 'success' | 'error' | 'warning' | 'info',
@@ -324,6 +357,11 @@ export function AppProvider({ children }: AppProviderProps) {
     toggleShortcuts,
     toggleDashboard,
     toggleSidebar,
+    setLearningMode,
+    saveSectionAnswers,
+    submitExam,
+    retryExam,
+    updateExamTimeLeft,
     setError,
     setRenamingIndex,
     setContextMenu,
@@ -344,6 +382,7 @@ export function AppProvider({ children }: AppProviderProps) {
     isCurrentPageVisible, addPage, removePage, removeAllPages, renamePage,
     togglePageComplete, movePage, goToPage, nextPage, prevPage, goToRandomPage,
     setSearchQuery, toggleDarkMode, toggleShortcuts, toggleDashboard, toggleSidebar,
+    setLearningMode, saveSectionAnswers, submitExam, retryExam, updateExamTimeLeft,
     setError, setRenamingIndex, setContextMenu, saveNote, getNote, recordQuizScore,
     saveChecklist, saveFlashcardProgress, addToastFn, dismissToast, isPageViewed, isPageCompleted,
     isQuizCompleted, saveSession, getQuizAttemptHistory,

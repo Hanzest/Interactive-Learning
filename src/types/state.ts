@@ -1,4 +1,4 @@
-import type { LearningPage, Toast, ThemeMode } from './schema';
+import type { LearningPage, Toast, ThemeMode, LearningMode } from './schema';
 
 /* ==========================================================================
    AppState - the complete application state
@@ -35,6 +35,10 @@ export interface AppState {
   pomodoroBreakMinutes: number;
   pomodoroSeconds: number;
   pomodoroIsRunning: boolean;
+  learningMode: LearningMode;
+  sectionAnswers: Record<number, Record<number, any>>;
+  examSubmittedPages: Record<number, boolean>;
+  examTimeLeft: Record<number, number>;
 }
 
 /* ==========================================================================
@@ -77,7 +81,12 @@ export type AppAction =
   | { type: 'POMODORO_RESET' }
   | { type: 'POMODORO_SWITCH_MODE' }
   | { type: 'POMODORO_SET_REMAINING'; payload: number }
-  | { type: 'POMODORO_RESTORE'; payload: { mode: 'focus' | 'break'; focusMinutes: number; breakMinutes: number; seconds: number } };
+  | { type: 'POMODORO_RESTORE'; payload: { mode: 'focus' | 'break'; focusMinutes: number; breakMinutes: number; seconds: number } }
+  | { type: 'SET_LEARNING_MODE'; payload: LearningMode }
+  | { type: 'SAVE_SECTION_ANSWERS'; payload: { pageIndex: number; sectionIndex: number; answers: any } }
+  | { type: 'SUBMIT_EXAM'; payload: { pageIndex: number } }
+  | { type: 'RETRY_EXAM'; payload: { pageIndex: number } }
+  | { type: 'UPDATE_EXAM_TIME_LEFT'; payload: { pageIndex: number; timeLeft: number } };
 
 /* ==========================================================================
    Derived / Computed State (not stored, computed from state)

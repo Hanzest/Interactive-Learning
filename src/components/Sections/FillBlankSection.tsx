@@ -1,42 +1,115 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import type { FillBlankSection as FillBlankSectionType } from '../../types/schema';
 import { renderMarkdown } from '../../utils/renderContent';
+import { useAppContext } from '../../context/AppContext';
 
 interface FillBlankSectionProps {
   section: FillBlankSectionType;
+  sectionIndex: number;
+  forceSubmit?: boolean;
+  onGraded?: (score: number, total: number) => void;
+  isConfirmed?: boolean;
 }
 
-export default function FillBlankSection({ section }: FillBlankSectionProps) {
+export default function FillBlankSection({
+  section,
+  sectionIndex,
+  forceSubmit,
+  onGraded,
+  isConfirmed,
+}: FillBlankSectionProps) {
+  const { state, saveSectionAnswers, addToast } = useAppContext();
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [hints, setHints] = useState<Record<number, boolean>>({});
   const [showAnswer, setShowAnswer] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [isSavedText, setIsSavedText] = useState(false);
   const prevAnswersRef = useRef<Record<number, string>>({});
+
+  const isExamMode = state.learningMode === 'exam';
+  const isExamSubmitted = isExamMode && !!state.examSubmittedPages[state.currentPageIndex];
+  const activeSubmitted = isExamMode ? isExamSubmitted : submitted;
+
+  // Load saved answers
+  useEffect(() => {
+    const saved = state.sectionAnswers[state.currentPageIndex]?.[sectionIndex];
+    if (saved) {
+      setAnswers(saved);
+    } else {
+      setAnswers({});
+    }
+    if (!isExamMode) {
+      setSubmitted(false);
+    }
+  }, [state.currentPageIndex, sectionIndex, isExamMode, state.sectionAnswers]);
 
   const instantFeedback = section.instantFeedback ?? false;
 
   const handleChange = useCallback(
     (index: number, value: string) => {
       if (showAnswer) return;
-      if (submitted && !instantFeedback) return;
-      setAnswers((prev) => ({ ...prev, [index]: value }));
+      if (activeSubmitted && !instantFeedback) return;
+      const newAnswers = { ...answers, [index]: value };
+      setAnswers(newAnswers);
+      saveSectionAnswers(state.currentPageIndex, sectionIndex, newAnswers);
       if (instantFeedback) {
         setSubmitted(false);
       }
     },
-    [submitted, instantFeedback, showAnswer]
+    [activeSubmitted, instantFeedback, showAnswer, answers, saveSectionAnswers, state.currentPageIndex, sectionIndex]
   );
 
-  const handleCheck = useCallback(() => {
+  const runGrading = useCallback(() => {
     setSubmitted(true);
-  }, []);
+    setConfirming(false);
+    if (onGraded) {
+      let correct = 0;
+      section.sentences.forEach((s, i) => {
+        if (answers[i]?.trim().toLowerCase() === s.answer.trim().toLowerCase()) correct++;
+      });
+      onGraded(correct, section.sentences.length);
+    }
+  }, [answers, section.sentences, onGraded]);
+
+  useEffect(() => {
+    if (forceSubmit && !submitted && !isExamMode) {
+      runGrading();
+    }
+  }, [forceSubmit, submitted, runGrading, isExamMode]);
+
+  const handleCheck = useCallback(() => {
+    const answeredCount = Object.keys(answers).length;
+    if (answeredCount < section.sentences.length) {
+      alert("Please fill in all blanks before checking.");
+      return;
+    }
+    if (isExamMode) {
+      saveSectionAnswers(state.currentPageIndex, sectionIndex, answers);
+      setIsSavedText(true);
+      setTimeout(() => setIsSavedText(false), 2000);
+      addToast("Answers saved!", "success", 2000);
+      return;
+    }
+    if (state.learningMode === 'learn') {
+      runGrading();
+    } else {
+      if (!confirming) {
+        setConfirming(true);
+      } else {
+        runGrading();
+      }
+    }
+  }, [state.learningMode, isExamMode, confirming, runGrading, answers, section.sentences, saveSectionAnswers, state.currentPageIndex, sectionIndex, addToast]);
 
   const handleReset = useCallback(() => {
     setAnswers({});
     setSubmitted(false);
+    setConfirming(false);
     setHints({});
     setShowAnswer(false);
-  }, []);
+    saveSectionAnswers(state.currentPageIndex, sectionIndex, {});
+  }, [state.currentPageIndex, sectionIndex, saveSectionAnswers]);
 
   const handleShowAnswer = useCallback(() => {
     if (!showAnswer) {
@@ -56,15 +129,15 @@ export default function FillBlankSection({ section }: FillBlankSectionProps) {
     setHints((prev) => ({ ...prev, [index]: !prev[index] }));
   }, []);
 
-  const correctCount = submitted
+  const correctCount = activeSubmitted
     ? section.sentences.filter((s, i) => answers[i]?.trim().toLowerCase() === s.answer.trim().toLowerCase()).length
     : 0;
 
   const renderSentence = (text: string, index: number) => {
     const isCorrect =
-      submitted &&
+      activeSubmitted &&
       answers[index]?.trim().toLowerCase() === section.sentences[index].answer.trim().toLowerCase();
-    const isWrong = submitted && answers[index] !== undefined && !isCorrect;
+    const isWrong = activeSubmitted && answers[index] !== undefined && !isCorrect;
 
     const parts = text.split('___');
     return (
@@ -87,10 +160,10 @@ export default function FillBlankSection({ section }: FillBlankSectionProps) {
                   }}
                   value={answers[index] || ''}
                   onChange={(e) => handleChange(index, e.target.value)}
-                  disabled={(submitted && !instantFeedback) || showAnswer}
+                  disabled={(activeSubmitted && !instantFeedback) || showAnswer}
                   placeholder="..."
                 />
-                {submitted && (
+                {activeSubmitted && (
                   <span style={{
                     fontSize: '1rem',
                     fontWeight: 700,
@@ -102,25 +175,27 @@ export default function FillBlankSection({ section }: FillBlankSectionProps) {
                     {isCorrect ? '✓' : '✗'}
                   </span>
                 )}
-                <button
-                  onClick={() => toggleHint(index)}
-                  title="Show hint"
-                  aria-label="Show hint"
-                  style={{
-                    padding: '0.35rem 0.35rem',
-                    border: '2px solid var(--warning-border)',
-                    borderRadius: '4px',
-                    backgroundColor: 'var(--warning-bg)',
-                    color: 'var(--warning-text)',
-                    cursor: 'pointer',
-                    fontSize: '0.7rem',
-                    fontWeight: 700,
-                    lineHeight: 1.2,
-                    transition: 'var(--transition-fast)',
-                  }}
-                >
-                  💡
-                </button>
+                {state.learningMode !== 'exam' && (
+                  <button
+                    onClick={() => toggleHint(index)}
+                    title="Show hint"
+                    aria-label="Show hint"
+                    style={{
+                      padding: '0.35rem 0.35rem',
+                      border: '2px solid var(--warning-border)',
+                      borderRadius: '4px',
+                      backgroundColor: 'var(--warning-bg)',
+                      color: 'var(--warning-text)',
+                      cursor: 'pointer',
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      lineHeight: 1.2,
+                      transition: 'var(--transition-fast)',
+                    }}
+                  >
+                    💡
+                  </button>
+                )}
                 {hints[index] && (
                   <span style={{
                     position: 'absolute',
@@ -168,7 +243,7 @@ export default function FillBlankSection({ section }: FillBlankSectionProps) {
         marginBottom: '0.75rem',
       }}>{section.title}</h2>}
 
-      {submitted && (
+      {activeSubmitted && (
         <div style={{
           padding: '0.625rem 1rem',
           backgroundColor: 'var(--accent-light)',
@@ -208,7 +283,7 @@ export default function FillBlankSection({ section }: FillBlankSectionProps) {
         <button
           onClick={handleCheck}
           disabled={
-            submitted ||
+            activeSubmitted ||
             showAnswer ||
             Object.keys(answers).length < section.sentences.length
           }
@@ -217,50 +292,54 @@ export default function FillBlankSection({ section }: FillBlankSectionProps) {
             padding: '0.5rem 1.25rem',
             border: 'none',
             borderRadius: '6px',
-            backgroundColor: (submitted || showAnswer || Object.keys(answers).length < section.sentences.length) ? 'var(--bg-tertiary)' : 'var(--accent)',
-            color: (submitted || showAnswer || Object.keys(answers).length < section.sentences.length) ? 'var(--text-muted)' : '#fff',
-            cursor: (submitted || showAnswer || Object.keys(answers).length < section.sentences.length) ? 'not-allowed' : 'pointer',
+            backgroundColor: (activeSubmitted || showAnswer || Object.keys(answers).length < section.sentences.length) ? 'var(--bg-tertiary)' : (confirming ? 'var(--warning)' : 'var(--accent)'),
+            color: (activeSubmitted || showAnswer || Object.keys(answers).length < section.sentences.length) ? 'var(--text-muted)' : '#fff',
+            cursor: (activeSubmitted || showAnswer || Object.keys(answers).length < section.sentences.length) ? 'not-allowed' : 'pointer',
             fontWeight: 600,
             fontSize: '0.875rem',
             transition: 'var(--transition-fast)',
           }}
         >
-          Check Answers
+          {isExamMode ? (isSavedText ? 'Answers Saved ✓' : 'Save Answers') : (confirming ? 'Confirm Submit?' : 'Check Answers')}
         </button>
-        <button
-          onClick={handleReset}
-          className="btn-base"
-          style={{
-            padding: '0.5rem 1.25rem',
-            border: '1px solid var(--border-color)',
-            borderRadius: '6px',
-            backgroundColor: 'var(--bg-secondary)',
-            color: 'var(--text-secondary)',
-            cursor: 'pointer',
-            fontWeight: 500,
-            fontSize: '0.875rem',
-            transition: 'var(--transition-fast)',
-          }}
-        >
-          Reset
-        </button>
-        <button
-          onClick={handleShowAnswer}
-          className="btn-base"
-          style={{
-            padding: '0.5rem 1.25rem',
-            border: '1px solid var(--border-color)',
-            borderRadius: '6px',
-            backgroundColor: 'var(--bg-secondary)',
-            color: 'var(--text-secondary)',
-            cursor: 'pointer',
-            fontWeight: 500,
-            fontSize: '0.875rem',
-            transition: 'var(--transition-fast)',
-          }}
-        >
-          {showAnswer ? 'Hide Answer' : 'Show Answer'}
-        </button>
+        {state.learningMode !== 'exam' && (
+          <>
+            <button
+              onClick={handleReset}
+              className="btn-base"
+              style={{
+                padding: '0.5rem 1.25rem',
+                border: '1px solid var(--border-color)',
+                borderRadius: '6px',
+                backgroundColor: 'var(--bg-secondary)',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                fontWeight: 500,
+                fontSize: '0.875rem',
+                transition: 'var(--transition-fast)',
+              }}
+            >
+              Reset
+            </button>
+            <button
+              onClick={handleShowAnswer}
+              className="btn-base"
+              style={{
+                padding: '0.5rem 1.25rem',
+                border: '1px solid var(--border-color)',
+                borderRadius: '6px',
+                backgroundColor: 'var(--bg-secondary)',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                fontWeight: 500,
+                fontSize: '0.875rem',
+                transition: 'var(--transition-fast)',
+              }}
+            >
+              {showAnswer ? 'Hide Answer' : 'Show Answer'}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

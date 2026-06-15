@@ -16,9 +16,18 @@ import ClozeSection from './ClozeSection';
 interface SectionRendererProps {
   section: Section;
   sectionIndex: number;
+  forceSubmit?: boolean;
+  onGraded?: (score: number, total: number) => void;
+  isConfirmed?: boolean;
 }
 
-export default function SectionRenderer({ section, sectionIndex }: SectionRendererProps) {
+export default function SectionRenderer({
+  section,
+  sectionIndex,
+  forceSubmit,
+  onGraded,
+  isConfirmed,
+}: SectionRendererProps) {
   const { saveNote, getNote, state } = useAppContext();
   const [showNoteEditor, setShowNoteEditor] = React.useState(false);
   const [noteText, setNoteText] = React.useState('');
@@ -48,17 +57,57 @@ export default function SectionRenderer({ section, sectionIndex }: SectionRender
       case 'flashcards':
         return <FlashcardsSection section={section} sectionIndex={sectionIndex} />;
       case 'quiz':
-        return <QuizSection section={section} sectionIndex={sectionIndex} />;
+        return (
+          <QuizSection
+            section={section}
+            sectionIndex={sectionIndex}
+            forceSubmit={forceSubmit}
+            onGraded={onGraded}
+            isConfirmed={isConfirmed}
+          />
+        );
       case 'fill-blank':
-        return <FillBlankSection section={section} />;
+        return (
+          <FillBlankSection
+            section={section}
+            sectionIndex={sectionIndex}
+            forceSubmit={forceSubmit}
+            onGraded={onGraded}
+            isConfirmed={isConfirmed}
+          />
+        );
       case 'matching':
-        return <MatchingSection section={section} />;
+        return (
+          <MatchingSection
+            section={section}
+            sectionIndex={sectionIndex}
+            forceSubmit={forceSubmit}
+            onGraded={onGraded}
+            isConfirmed={isConfirmed}
+          />
+        );
       case 'sorting':
-        return <SortingSection section={section} />;
+        return (
+          <SortingSection
+            section={section}
+            sectionIndex={sectionIndex}
+            forceSubmit={forceSubmit}
+            onGraded={onGraded}
+            isConfirmed={isConfirmed}
+          />
+        );
       case 'checklist':
         return <ChecklistSection section={section} sectionIndex={sectionIndex} />;
       case 'cloze':
-        return <ClozeSection section={section} />;
+        return (
+          <ClozeSection
+            section={section}
+            sectionIndex={sectionIndex}
+            forceSubmit={forceSubmit}
+            onGraded={onGraded}
+            isConfirmed={isConfirmed}
+          />
+        );
       default:
         return <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Unknown section type</div>;
     }

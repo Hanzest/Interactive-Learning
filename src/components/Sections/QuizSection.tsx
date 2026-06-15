@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import type { QuizSection as QuizSectionType, QuizAttempt } from '../../types/schema';
 import { useAppContext } from '../../context/AppContext';
 import { renderMarkdown } from '../../utils/renderContent';
@@ -6,14 +6,65 @@ import { renderMarkdown } from '../../utils/renderContent';
 interface QuizSectionProps {
   section: QuizSectionType;
   sectionIndex: number;
+  forceSubmit?: boolean;
+  onGraded?: (score: number, total: number) => void;
+  isConfirmed?: boolean;
 }
 
-export default function QuizSection({ section, sectionIndex }: QuizSectionProps) {
-  const { state, recordQuizScore } = useAppContext();
+export default function QuizSection({
+  section,
+  sectionIndex,
+  forceSubmit,
+  onGraded,
+  isConfirmed,
+}: QuizSectionProps) {
+  const { state, recordQuizScore, saveSectionAnswers, addToast } = useAppContext();
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [submitted, setSubmitted] = useState(false);
   const [attempt, setAttempt] = useState(1);
+  const [confirming, setConfirming] = useState(false);
+  const [isSavedText, setIsSavedText] = useState(false);
+
+  const isExamMode = state.learningMode === 'exam';
+  const isExamSubmitted = isExamMode && !!state.examSubmittedPages[state.currentPageIndex];
+  const activeSubmitted = isExamMode ? isExamSubmitted : submitted;
+
+  // Load saved answers
+  useEffect(() => {
+    const saved = state.sectionAnswers[state.currentPageIndex]?.[sectionIndex];
+    if (saved) {
+      setAnswers(saved);
+    } else {
+      setAnswers({});
+    }
+    if (!isExamMode) {
+      setSubmitted(false);
+    }
+  }, [state.currentPageIndex, sectionIndex, isExamMode, state.sectionAnswers]);
+
+  const runGrading = useCallback(() => {
+    let correct = 0;
+    section.questions.forEach((q, i) => {
+      if (answers[i] === q.correctIndex) correct++;
+    });
+    setSubmitted(true);
+    setConfirming(false);
+    recordQuizScore(state.currentPageIndex, sectionIndex, correct, section.questions.length);
+    if (onGraded) {
+      onGraded(correct, section.questions.length);
+    }
+  }, [answers, section.questions, recordQuizScore, state.currentPageIndex, sectionIndex, onGraded]);
+
+  useEffect(() => {
+    if (forceSubmit && !submitted && !isExamMode) {
+      runGrading();
+    }
+  }, [forceSubmit, submitted, runGrading, isExamMode]);
+
+  useEffect(() => {
+    setConfirming(false);
+  }, [currentQ]);
 
   const pageMeta = state.pages[state.currentPageIndex]?._meta;
   const quizAttempts: QuizAttempt[] = pageMeta?.quizAttempts?.[sectionIndex] || [];
@@ -23,34 +74,51 @@ export default function QuizSection({ section, sectionIndex }: QuizSectionProps)
 
   const handleSelect = useCallback(
     (questionIndex: number, optionIndex: number) => {
-      if (submitted) return;
-      setAnswers((prev) => ({ ...prev, [questionIndex]: optionIndex }));
+      if (activeSubmitted) return;
+      const newAnswers = { ...answers, [questionIndex]: optionIndex };
+      setAnswers(newAnswers);
+      saveSectionAnswers(state.currentPageIndex, sectionIndex, newAnswers);
     },
-    [submitted]
+    [activeSubmitted, answers, saveSectionAnswers, state.currentPageIndex, sectionIndex]
   );
 
   const handleSubmit = useCallback(() => {
     const answeredAll = section.questions.every((_, i) => answers[i] !== undefined);
-    if (!answeredAll) return;
-    setSubmitted(true);
-    let correct = 0;
-    section.questions.forEach((q, i) => {
-      if (answers[i] === q.correctIndex) correct++;
-    });
-    recordQuizScore(state.currentPageIndex, sectionIndex, correct, section.questions.length);
-  }, [answers, section.questions, recordQuizScore, state.currentPageIndex, sectionIndex]);
+    if (!answeredAll) {
+      alert("Please answer all questions before submitting.");
+      return;
+    }
+    if (isExamMode) {
+      saveSectionAnswers(state.currentPageIndex, sectionIndex, answers);
+      setIsSavedText(true);
+      setTimeout(() => setIsSavedText(false), 2000);
+      addToast("Answers saved!", "success", 2000);
+      return;
+    }
+    if (state.learningMode === 'learn') {
+      runGrading();
+    } else {
+      if (!confirming) {
+        setConfirming(true);
+      } else {
+        runGrading();
+      }
+    }
+  }, [state.learningMode, isExamMode, confirming, runGrading, section.questions, answers, saveSectionAnswers, state.currentPageIndex, sectionIndex, addToast]);
 
   const handleReset = useCallback(() => {
     setAnswers({});
     setSubmitted(false);
+    setConfirming(false);
     setAttempt((p) => p + 1);
     setCurrentQ(0);
-  }, []);
+    saveSectionAnswers(state.currentPageIndex, sectionIndex, {});
+  }, [state.currentPageIndex, sectionIndex, saveSectionAnswers]);
 
-  const correctCount = submitted
+  const correctCount = activeSubmitted
     ? section.questions.filter((q, i) => answers[i] === q.correctIndex).length
     : 0;
-  const progressPercent = submitted
+  const progressPercent = activeSubmitted
     ? 100
     : (Object.keys(answers).length / section.questions.length) * 100;
 
@@ -83,7 +151,7 @@ export default function QuizSection({ section, sectionIndex }: QuizSectionProps)
       }}>{section.title}</h2>}
 
       {/* Score display after submit */}
-      {submitted && (
+      {activeSubmitted && (
         <div style={{
           padding: '0.625rem 1rem',
           backgroundColor: 'var(--accent-light)',
@@ -135,7 +203,7 @@ export default function QuizSection({ section, sectionIndex }: QuizSectionProps)
           let boxBorder = 'var(--border-color)';
           let boxColor = 'var(--text-primary)';
 
-          if (submitted) {
+          if (activeSubmitted) {
             const qCorrect = answers[qi] === section.questions[qi].correctIndex;
             if (qCorrect) {
               boxBg = 'var(--success-bg)';
@@ -295,7 +363,7 @@ export default function QuizSection({ section, sectionIndex }: QuizSectionProps)
                     color: 'var(--text-primary)',
                     lineHeight: 1.5,
                   }}>{opt}</span>
-                  {submitted && current.optionExplanations?.[oi] && (
+                  {activeSubmitted && current.optionExplanations?.[oi] && (
                     <span style={{
                       fontSize: '0.85rem',
                       color: 'var(--text-secondary)',
@@ -313,7 +381,7 @@ export default function QuizSection({ section, sectionIndex }: QuizSectionProps)
       </div>
 
       {/* Global Explanation Box */}
-      {submitted && current.explanation && (
+      {activeSubmitted && current.explanation && (
         <div style={{
           padding: '1rem',
           backgroundColor: 'var(--success-bg)',
@@ -368,7 +436,7 @@ export default function QuizSection({ section, sectionIndex }: QuizSectionProps)
           ◀ Prev
         </button>
 
-        {!submitted ? (
+        {!activeSubmitted ? (
           <button
             onClick={handleSubmit}
             disabled={Object.keys(answers).length < section.questions.length}
@@ -377,7 +445,7 @@ export default function QuizSection({ section, sectionIndex }: QuizSectionProps)
               padding: '0.5rem 1.25rem',
               border: 'none',
               borderRadius: '6px',
-              backgroundColor: (Object.keys(answers).length < section.questions.length) ? 'var(--bg-tertiary)' : 'var(--accent)',
+              backgroundColor: (Object.keys(answers).length < section.questions.length) ? 'var(--bg-tertiary)' : (confirming ? 'var(--warning)' : 'var(--accent)'),
               color: (Object.keys(answers).length < section.questions.length) ? 'var(--text-muted)' : '#fff',
               cursor: (Object.keys(answers).length < section.questions.length) ? 'not-allowed' : 'pointer',
               fontWeight: 600,
@@ -385,26 +453,28 @@ export default function QuizSection({ section, sectionIndex }: QuizSectionProps)
               transition: 'var(--transition-fast)',
             }}
           >
-            Submit
+            {isExamMode ? (isSavedText ? 'Answers Saved ✓' : 'Save Answers') : (confirming ? 'Confirm Submit?' : 'Submit')}
           </button>
         ) : (
-          <button
-            onClick={handleReset}
-            className="btn-base"
-            style={{
-              padding: '0.5rem 1.25rem',
-              border: '1px solid var(--border-color)',
-              borderRadius: '6px',
-              backgroundColor: 'var(--bg-secondary)',
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '0.875rem',
-              transition: 'var(--transition-fast)',
-            }}
-          >
-            Reset
-          </button>
+          state.learningMode !== 'exam' && (
+            <button
+              onClick={handleReset}
+              className="btn-base"
+              style={{
+                padding: '0.5rem 1.25rem',
+                border: '1px solid var(--border-color)',
+                borderRadius: '6px',
+                backgroundColor: 'var(--bg-secondary)',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                fontWeight: 500,
+                fontSize: '0.875rem',
+                transition: 'var(--transition-fast)',
+              }}
+            >
+              Reset
+            </button>
+          )
         )}
 
         <button

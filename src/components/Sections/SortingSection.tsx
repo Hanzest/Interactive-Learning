@@ -1,21 +1,58 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import type { SortingSection as SortingSectionType } from '../../types/schema';
+import { useAppContext } from '../../context/AppContext';
 
 interface SortingSectionProps {
   section: SortingSectionType;
+  sectionIndex: number;
+  forceSubmit?: boolean;
+  onGraded?: (score: number, total: number) => void;
+  isConfirmed?: boolean;
 }
 
-// Drag-to-reorder list with smooth FLIP animation
-export default function SortingSection({ section }: SortingSectionProps) {
-  const [items, setItems] = useState(() =>
-    [...section.items].sort(() => Math.random() - 0.5)
-  );
+export default function SortingSection({
+  section,
+  sectionIndex,
+  forceSubmit,
+  onGraded,
+  isConfirmed,
+}: SortingSectionProps) {
+  const { state, saveSectionAnswers, addToast } = useAppContext();
+  const [items, setItems] = useState<typeof section.items>([]);
   const [submitted, setSubmitted] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [isSavedText, setIsSavedText] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const dragItemRef = useRef<number | null>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const animFrameRef = useRef<number>(0);
+
+  const isExamMode = state.learningMode === 'exam';
+  const isExamSubmitted = isExamMode && !!state.examSubmittedPages[state.currentPageIndex];
+  const activeSubmitted = isExamMode ? isExamSubmitted : submitted;
+
+  // Load saved answers
+  useEffect(() => {
+    const saved = state.sectionAnswers[state.currentPageIndex]?.[sectionIndex];
+    if (saved) {
+      setItems(saved);
+    } else {
+      const freshItems = [...section.items].sort(() => Math.random() - 0.5);
+      setItems(freshItems);
+      if (isExamMode) {
+        saveSectionAnswers(state.currentPageIndex, sectionIndex, freshItems);
+      }
+    }
+    if (!isExamMode) {
+      setSubmitted(false);
+    }
+  }, [state.currentPageIndex, sectionIndex, isExamMode, state.sectionAnswers]);
+
+  const saveAndSetItems = useCallback((newItems: typeof section.items) => {
+    setItems(newItems);
+    saveSectionAnswers(state.currentPageIndex, sectionIndex, newItems);
+  }, [state.currentPageIndex, sectionIndex, saveSectionAnswers]);
 
   // FLIP animation: record positions before reorder, animate delta after reorder
   const flipAnimate = useCallback(() => {
@@ -32,7 +69,6 @@ export default function SortingSection({ section }: SortingSectionProps) {
           if (dx === 0 && dy === 0) return;
           el.style.transition = 'none';
           el.style.transform = `translate(${dx}px, ${dy}px)`;
-          // Force style recalc, then animate back
           void el.offsetHeight;
           el.style.transition = 'transform 250ms ease';
           el.style.transform = '';
@@ -42,16 +78,19 @@ export default function SortingSection({ section }: SortingSectionProps) {
   }, []);
 
   const handleDragStart = (index: number) => {
+    if (activeSubmitted) return;
     dragItemRef.current = index;
     setDragIndex(index);
   };
 
   const handleDragOver = (e: React.DragEvent, index: number) => {
+    if (activeSubmitted) return;
     e.preventDefault();
     setDragOverIndex(index);
   };
 
   const handleDrop = (index: number) => {
+    if (activeSubmitted) return;
     const from = dragItemRef.current;
     if (from === null || from === index) {
       setDragIndex(null);
@@ -59,13 +98,10 @@ export default function SortingSection({ section }: SortingSectionProps) {
       return;
     }
     const cleanup = flipAnimate();
-    setItems((prev) => {
-      const next = [...prev];
-      const [moved] = next.splice(from, 1);
-      next.splice(index, 0, moved);
-      return next;
-    });
-    // Run FLIP after state update
+    const next = [...items];
+    const [moved] = next.splice(from, 1);
+    next.splice(index, 0, moved);
+    saveAndSetItems(next);
     requestAnimationFrame(() => requestAnimationFrame(cleanup));
     setDragIndex(null);
     setDragOverIndex(null);
@@ -78,22 +114,55 @@ export default function SortingSection({ section }: SortingSectionProps) {
     dragItemRef.current = null;
   };
 
-  const handleSubmit = () => {
+  const runGrading = useCallback(() => {
     setSubmitted(true);
+    setConfirming(false);
+    if (onGraded) {
+      const correct = items.filter((item, i) => item.correctOrder === i + 1).length;
+      onGraded(correct, section.items.length);
+    }
+  }, [items, section.items.length, onGraded]);
+
+  useEffect(() => {
+    if (forceSubmit && !submitted && !isExamMode) {
+      runGrading();
+    }
+  }, [forceSubmit, submitted, runGrading, isExamMode]);
+
+  const handleSubmit = () => {
+    if (isExamMode) {
+      saveSectionAnswers(state.currentPageIndex, sectionIndex, items);
+      setIsSavedText(true);
+      setTimeout(() => setIsSavedText(false), 2000);
+      addToast("Order saved!", "success", 2000);
+      return;
+    }
+    if (state.learningMode === 'learn') {
+      runGrading();
+    } else {
+      if (!confirming) {
+        setConfirming(true);
+      } else {
+        runGrading();
+      }
+    }
   };
 
   const handleReset = () => {
-    setItems([...section.items].sort(() => Math.random() - 0.5));
+    const freshItems = [...section.items].sort(() => Math.random() - 0.5);
+    setItems(freshItems);
     setSubmitted(false);
+    setConfirming(false);
+    saveSectionAnswers(state.currentPageIndex, sectionIndex, freshItems);
   };
 
   const getItemStatus = (item: typeof section.items[0], index: number) => {
-    if (!submitted) return '';
+    if (!activeSubmitted) return '';
     if (item.correctOrder === index + 1) return 'correct';
     return 'wrong';
   };
 
-  const correctCount = submitted
+  const correctCount = activeSubmitted
     ? items.filter((item, i) => item.correctOrder === i + 1).length
     : 0;
 
@@ -129,7 +198,7 @@ export default function SortingSection({ section }: SortingSectionProps) {
         marginBottom: '0.75rem',
       }}>{section.title}</h2>}
 
-      {submitted && (
+      {activeSubmitted && (
         <div style={{
           padding: '0.625rem 1rem',
           backgroundColor: 'var(--accent-light)',
@@ -149,16 +218,16 @@ export default function SortingSection({ section }: SortingSectionProps) {
         gap: '0.5rem',
       }}>
         {items.map((item, i) => {
-          const status = submitted ? getItemStatus(item, i) : '';
+          const status = activeSubmitted ? getItemStatus(item, i) : '';
           const isDragging = dragIndex === i;
           const isDragOver = dragOverIndex === i;
-          const correctPos = submitted ? item.correctOrder : null;
+          const correctPos = activeSubmitted ? item.correctOrder : null;
 
           return (
             <div
               key={`${item.text}-${i}`}
               ref={(el) => { itemRefs.current[i] = el; }}
-              draggable={!submitted}
+              draggable={!activeSubmitted}
               onDragStart={() => handleDragStart(i)}
               onDragOver={(e) => handleDragOver(e, i)}
               onDrop={() => handleDrop(i)}
@@ -171,13 +240,13 @@ export default function SortingSection({ section }: SortingSectionProps) {
                 backgroundColor: itemBg(status, isDragging, isDragOver),
                 border: itemBorder(status, isDragging, isDragOver),
                 borderRadius: '6px',
-                cursor: submitted ? 'default' : 'grab',
+                cursor: activeSubmitted ? 'default' : 'grab',
                 transition: 'background-color 150ms ease, border-color 150ms ease, opacity 150ms ease',
                 opacity: isDragging ? 0.6 : 1,
               }}
             >
               <span style={{
-                cursor: submitted ? 'default' : 'grab',
+                cursor: activeSubmitted ? 'default' : 'grab',
                 color: 'var(--text-muted)',
                 fontSize: '1.2rem',
                 userSelect: 'none',
@@ -190,7 +259,7 @@ export default function SortingSection({ section }: SortingSectionProps) {
               }}>
                 {item.text}
               </span>
-              {submitted && correctPos !== i + 1 && (
+              {activeSubmitted && correctPos !== i + 1 && (
                 <span style={{
                   fontSize: '0.8rem',
                   color: 'var(--text-muted)',
@@ -209,7 +278,7 @@ export default function SortingSection({ section }: SortingSectionProps) {
         gap: '0.5rem',
         marginTop: '1rem',
       }}>
-        {!submitted ? (
+        {!activeSubmitted ? (
           <button
             onClick={handleSubmit}
             className="btn-base"
@@ -217,34 +286,36 @@ export default function SortingSection({ section }: SortingSectionProps) {
               padding: '0.5rem 1.25rem',
               border: 'none',
               borderRadius: '6px',
-              backgroundColor: 'var(--accent)',
+              backgroundColor: confirming ? 'var(--warning)' : 'var(--accent)',
               color: '#fff',
               cursor: 'pointer',
-              fontWeight: 500,
+              fontWeight: 600,
               fontSize: '0.875rem',
               transition: 'var(--transition-fast)',
             }}
           >
-            Check Order
+            {isExamMode ? (isSavedText ? 'Order Saved ✓' : 'Save Order') : (confirming ? 'Confirm Submit?' : 'Check Order')}
           </button>
         ) : (
-          <button
-            onClick={handleReset}
-            className="btn-base"
-            style={{
-              padding: '0.5rem 1.25rem',
-              border: '1px solid var(--border-color)',
-              borderRadius: '6px',
-              backgroundColor: 'var(--bg-secondary)',
-              color: 'var(--text-primary)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '0.875rem',
-              transition: 'var(--transition-fast)',
-            }}
-          >
-            Reset & Reshuffle
-          </button>
+          state.learningMode !== 'exam' && (
+            <button
+              onClick={handleReset}
+              className="btn-base"
+              style={{
+                padding: '0.5rem 1.25rem',
+                border: '1px solid var(--border-color)',
+                borderRadius: '6px',
+                backgroundColor: 'var(--bg-secondary)',
+                color: 'var(--text-primary)',
+                cursor: 'pointer',
+                fontWeight: 500,
+                fontSize: '0.875rem',
+                transition: 'var(--transition-fast)',
+              }}
+            >
+              Reset & Reshuffle
+            </button>
+          )
         )}
       </div>
     </div>
