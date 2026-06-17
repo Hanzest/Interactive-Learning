@@ -101,6 +101,9 @@ function validateSection(section: any, path: string): { valid: boolean; error?: 
     if (!Array.isArray(section.questions)) {
       return { valid: false, error: `"${path}.questions" must be an array` };
     }
+    if (section.questions.length < 5) {
+      return { valid: false, error: `"${path}.questions" must contain at least 5 questions (found ${section.questions.length})` };
+    }
     for (let j = 0; j < section.questions.length; j++) {
       const q = section.questions[j];
       if (!q || typeof q !== 'object' || Array.isArray(q)) {
@@ -143,6 +146,9 @@ function validateSection(section: any, path: string): { valid: boolean; error?: 
     if (!Array.isArray(section.sentences)) {
       return { valid: false, error: `"${path}.sentences" must be an array` };
     }
+    if (section.sentences.length < 4) {
+      return { valid: false, error: `"${path}.sentences" must contain at least 4 sentences (found ${section.sentences.length})` };
+    }
     if (section.instantFeedback !== undefined && typeof section.instantFeedback !== 'boolean') {
       return { valid: false, error: `"${path}.instantFeedback" must be a boolean` };
     }
@@ -162,6 +168,9 @@ function validateSection(section: any, path: string): { valid: boolean; error?: 
     if (!Array.isArray(section.pairs)) {
       return { valid: false, error: `"${path}.pairs" must be an array` };
     }
+    if (section.pairs.length < 3) {
+      return { valid: false, error: `"${path}.pairs" must contain at least 3 matching pairs (found ${section.pairs.length})` };
+    }
     for (let j = 0; j < section.pairs.length; j++) {
       const pair = section.pairs[j];
       if (!pair || typeof pair !== 'object' || Array.isArray(pair)) {
@@ -177,6 +186,9 @@ function validateSection(section: any, path: string): { valid: boolean; error?: 
   } else if (type === 'sorting') {
     if (!Array.isArray(section.items)) {
       return { valid: false, error: `"${path}.items" must be an array` };
+    }
+    if (section.items.length < 4) {
+      return { valid: false, error: `"${path}.items" must contain at least 4 items to sort (found ${section.items.length})` };
     }
     for (let j = 0; j < section.items.length; j++) {
       const item = section.items[j];
@@ -212,6 +224,9 @@ function validateSection(section: any, path: string): { valid: boolean; error?: 
     }
     if (!Array.isArray(section.blanks)) {
       return { valid: false, error: `"${path}.blanks" must be an array` };
+    }
+    if (section.blanks.length < 4) {
+      return { valid: false, error: `"${path}.blanks" must contain at least 4 cloze blanks (found ${section.blanks.length})` };
     }
     for (let j = 0; j < section.blanks.length; j++) {
       const blank = section.blanks[j];
@@ -253,68 +268,74 @@ export function validateLearningPage(data: any): { valid: boolean; error?: strin
     return { valid: false, error: 'JSON content must be an object' };
   }
 
-  // 1. Validate page metadata
-  if (!data.page && !data.sections && !data.test) {
-    return { valid: false, error: 'Root object must contain "page", "sections", or "test"' };
+  // 1. Validate required fields presence
+  if (!data.page) {
+    return { valid: false, error: 'Root object must contain a "page" metadata object' };
+  }
+  if (!data.learn) {
+    return { valid: false, error: 'Root object must contain a "learn" sections array' };
+  }
+  if (!data.practice) {
+    return { valid: false, error: 'Root object must contain a "practice" sections array' };
+  }
+  if (!data.exam) {
+    return { valid: false, error: 'Root object must contain an "exam" sections array' };
   }
 
-  if (data.page) {
-    if (typeof data.page !== 'object' || Array.isArray(data.page)) {
-      return { valid: false, error: '"page" property must be an object' };
-    }
-    if (data.page.title !== undefined && typeof data.page.title !== 'string') {
-      return { valid: false, error: '"page.title" must be a string' };
-    }
-    if (data.page.description !== undefined && typeof data.page.description !== 'string') {
-      return { valid: false, error: '"page.description" must be a string' };
-    }
-    if (data.page.tags !== undefined) {
-      if (!Array.isArray(data.page.tags)) {
-        return { valid: false, error: '"page.tags" must be an array of strings' };
-      }
-      for (let i = 0; i < data.page.tags.length; i++) {
-        if (typeof data.page.tags[i] !== 'string') {
-          return { valid: false, error: `"page.tags[${i}]" must be a string` };
-        }
-      }
-    }
-    if (data.page.icon !== undefined && typeof data.page.icon !== 'string') {
-      return { valid: false, error: '"page.icon" must be a string' };
-    }
+  // 2. Validate page metadata
+  if (typeof data.page !== 'object' || Array.isArray(data.page)) {
+    return { valid: false, error: '"page" property must be an object' };
   }
-
-  // 2. Validate sections array
-  if (data.sections) {
-    if (!Array.isArray(data.sections)) {
-      return { valid: false, error: '"sections" property must be an array' };
+  if (data.page.title !== undefined && typeof data.page.title !== 'string') {
+    return { valid: false, error: '"page.title" must be a string' };
+  }
+  if (data.page.description !== undefined && typeof data.page.description !== 'string') {
+    return { valid: false, error: '"page.description" must be a string' };
+  }
+  if (data.page.tags !== undefined) {
+    if (!Array.isArray(data.page.tags)) {
+      return { valid: false, error: '"page.tags" must be an array of strings' };
     }
-
-    for (let i = 0; i < data.sections.length; i++) {
-      const res = validateSection(data.sections[i], `sections[${i}]`);
-      if (!res.valid) {
-        return res;
+    for (let i = 0; i < data.page.tags.length; i++) {
+      if (typeof data.page.tags[i] !== 'string') {
+        return { valid: false, error: `"page.tags[${i}]" must be a string` };
       }
     }
   }
+  if (data.page.icon !== undefined && typeof data.page.icon !== 'string') {
+    return { valid: false, error: '"page.icon" must be a string' };
+  }
 
-  // 3. Validate test object if present
-  if (data.test) {
-    if (typeof data.test !== 'object' || Array.isArray(data.test)) {
-      return { valid: false, error: '"test" property must be an object' };
+  // 3. Validate learn array
+  if (!Array.isArray(data.learn)) {
+    return { valid: false, error: '"learn" property must be an array' };
+  }
+  for (let i = 0; i < data.learn.length; i++) {
+    const res = validateSection(data.learn[i], `learn[${i}]`);
+    if (!res.valid) {
+      return res;
     }
-    if (data.test.title !== undefined && typeof data.test.title !== 'string') {
-      return { valid: false, error: '"test.title" must be a string' };
+  }
+
+  // 4. Validate practice array
+  if (!Array.isArray(data.practice)) {
+    return { valid: false, error: '"practice" property must be an array' };
+  }
+  for (let i = 0; i < data.practice.length; i++) {
+    const res = validateSection(data.practice[i], `practice[${i}]`);
+    if (!res.valid) {
+      return res;
     }
-    if (data.test.subsections) {
-      if (!Array.isArray(data.test.subsections)) {
-        return { valid: false, error: '"test.subsections" must be an array' };
-      }
-      for (let i = 0; i < data.test.subsections.length; i++) {
-        const res = validateSection(data.test.subsections[i], `test.subsections[${i}]`);
-        if (!res.valid) {
-          return res;
-        }
-      }
+  }
+
+  // 5. Validate exam array
+  if (!Array.isArray(data.exam)) {
+    return { valid: false, error: '"exam" property must be an array' };
+  }
+  for (let i = 0; i < data.exam.length; i++) {
+    const res = validateSection(data.exam[i], `exam[${i}]`);
+    if (!res.valid) {
+      return res;
     }
   }
 

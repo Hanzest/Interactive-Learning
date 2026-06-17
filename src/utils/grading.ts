@@ -14,24 +14,28 @@ export interface PageGradingResult {
 
 export function gradePageSections(
   page: any,
-  pageIndex: number,
-  sectionAnswers: Record<number, Record<number, any>>,
-  useTestSubsections: boolean = false
+  pageKey: string,
+  sectionAnswers: Record<string, Record<number, any>>,
+  mode: 'learn' | 'practice' | 'exam' = 'learn'
 ): PageGradingResult {
   let totalCorrect = 0;
   let totalItems = 0;
   const sectionScores: SectionScore[] = [];
 
-  const targetSections = useTestSubsections
-    ? (page.test?.subsections || [])
-    : (page.sections || []);
+  const targetSections = !page
+    ? []
+    : (mode === 'learn'
+        ? (page.learn || [])
+        : mode === 'practice'
+        ? (page.practice || [])
+        : (page.exam || []));
 
   if (!page || !targetSections) {
     return { correct: 0, total: 0, sectionScores };
   }
 
   targetSections.forEach((sec: any, secIdx: number) => {
-    const saved = sectionAnswers[pageIndex]?.[secIdx];
+    const saved = sectionAnswers[pageKey]?.[secIdx];
     let secCorrect = 0;
     let secTotal = 0;
     const isGraded = ['quiz', 'fill-blank', 'matching', 'sorting', 'cloze'].includes(sec.type);

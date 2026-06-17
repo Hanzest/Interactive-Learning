@@ -213,13 +213,15 @@ export default function FlashcardsSection({ section, sectionIndex }: FlashcardsS
             cursor: 'pointer',
             transformStyle: 'preserve-3d',
             transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-            transition: 'transform 0.6s ease',
+            transition: 'transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)',
+            willChange: 'transform',
           }}
         >
           <div className="flashcard-face" style={{
             position: 'absolute',
             inset: 0,
             backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -256,6 +258,7 @@ export default function FlashcardsSection({ section, sectionIndex }: FlashcardsS
             position: 'absolute',
             inset: 0,
             backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
             transform: 'rotateY(180deg)',
             display: 'flex',
             alignItems: 'flex-start',

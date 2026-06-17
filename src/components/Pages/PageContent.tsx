@@ -5,7 +5,7 @@ import { gradePageSections } from '../../utils/grading';
 import styles from './PageContent.module.css';
 
 export default function PageContent() {
-  const { state, submitExam, retryExam, updateExamTimeLeft, addToast } = useAppContext();
+  const { state, submitExam, retryExam, updateExamTimeLeft, toggleExamPause, setExamPause, setLearningMode, addToast } = useAppContext();
   const [currentSlide, setCurrentSlide] = useState(0);
   const slideDirection = useRef(1);
   const [animClass, setAnimClass] = useState('');
@@ -18,11 +18,21 @@ export default function PageContent() {
   const [editingDuration, setEditingDuration] = useState(false);
   const [durationInput, setDurationInput] = useState('');
   const [showRetryConfirm, setShowRetryConfirm] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
 
   const page = state.currentPageIndex >= 0 && state.currentPageIndex < state.pages.length
     ? state.pages[state.currentPageIndex]
     : null;
+
+  const currentPageId = page?._meta?.id || String(state.currentPageIndex);
+
+  const isPaused = !!state.examPaused[currentPageId];
+  const setIsPaused = useCallback((val: boolean | ((prev: boolean) => boolean)) => {
+    if (typeof val === 'function') {
+      setExamPause(state.currentPageIndex, val(isPaused));
+    } else {
+      setExamPause(state.currentPageIndex, val);
+    }
+  }, [state.currentPageIndex, isPaused, setExamPause]);
 
   // Reset slide position when navigating between pages or switching modes
   useEffect(() => {
@@ -36,8 +46,10 @@ export default function PageContent() {
 
   const sections = page
     ? (state.learningMode === 'learn'
-        ? (page.sections || [])
-        : (page.test?.subsections || []))
+        ? (page.learn || [])
+        : state.learningMode === 'practice'
+        ? (page.practice || [])
+        : (page.exam || []))
     : [];
 
   const totalSlides = sections.length;
@@ -54,13 +66,13 @@ export default function PageContent() {
 
   // ── Exam mode: page-wide timer ─────────────────────────────────────────────
   const isExamMode = state.learningMode === 'exam';
-  const isPageExamSubmitted = isExamMode && !!state.examSubmittedPages[state.currentPageIndex];
+  const isPageExamSubmitted = isExamMode && !!state.examSubmittedPages[currentPageId];
 
   // Calculate the auto total exam time for the entire page (sum of all graded components)
   const pageExamAutoTime = useMemo(() => {
     if (!isExamMode || !page) return 0;
     let total = 0;
-    (page.test?.subsections || []).forEach((sec) => {
+    (page.exam || []).forEach((sec) => {
       const isGradedSec = ['quiz', 'fill-blank', 'matching', 'sorting', 'cloze'].includes(sec.type);
       if (!isGradedSec) return;
       if (sec.type === 'quiz' && 'questions' in sec) total += ((sec as any).questions?.length || 1) * 30;
@@ -91,7 +103,7 @@ export default function PageContent() {
       }
       return;
     }
-    const persisted = state.examTimeLeft[state.currentPageIndex];
+    const persisted = state.examTimeLeft[currentPageId];
     const initialTime = persisted !== undefined ? persisted : pageExamMaxTime;
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -179,8 +191,8 @@ export default function PageContent() {
   // Compute page exam score for the review summary
   const pageExamResult = useMemo(() => {
     if (!isPageExamSubmitted || !page) return null;
-    return gradePageSections(page, state.currentPageIndex, state.sectionAnswers, true);
-  }, [isPageExamSubmitted, page, state.currentPageIndex, state.sectionAnswers]);
+    return gradePageSections(page, currentPageId, state.sectionAnswers, 'exam');
+  }, [isPageExamSubmitted, page, currentPageId, state.sectionAnswers]);
 
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60).toString().padStart(2, '0');
@@ -408,18 +420,15 @@ export default function PageContent() {
             backgroundColor: timerUrgent ? 'rgba(239,68,68,0.08)' : undefined,
             borderColor: timerUrgent ? 'var(--error)' : undefined,
           }}>
-            {/* Top row: Title and Digits */}
+            {/* Top row: Title */}
             <div className={styles.timerTitleRow}>
               <div className={styles.timerTitleGroup} style={{ color: timerUrgent ? 'var(--error)' : undefined }}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} width={16} height={16}>
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
-                <span>Exam Mode • Page Timer</span>
+                <span>Exam Mode Controls</span>
               </div>
-              <span className={styles.timerDigits} style={{ color: timerUrgent ? 'var(--error)' : undefined }}>
-                {formatTime(timeLeft)}
-              </span>
             </div>
 
             {/* Middle row: Progress Bar */}
@@ -859,13 +868,127 @@ export default function PageContent() {
               section={section}
               sectionIndex={
                 state.learningMode === 'learn'
-                  ? (page.sections ? page.sections.indexOf(section) : activeSlideIndex)
-                  : (page.test?.subsections ? page.test.subsections.indexOf(section) : activeSlideIndex)
+                  ? (page.learn ? page.learn.indexOf(section) : activeSlideIndex)
+                  : state.learningMode === 'practice'
+                  ? (page.practice ? page.practice.indexOf(section) : activeSlideIndex)
+                  : (page.exam ? page.exam.indexOf(section) : activeSlideIndex)
               }
               forceSubmit={forceSubmit}
               isConfirmed={isConfirmed}
               onGraded={isExamMode ? undefined : handleGraded}
             />
+
+            {/* Navigation options to other modes on the last slide */}
+            {isLastSlide && (
+              <div style={{
+                marginTop: 32,
+                padding: '24px',
+                borderRadius: 16,
+                background: 'var(--bg-secondary)',
+                border: '1.5px dashed var(--accent-mid)',
+                boxShadow: 'var(--shadow-sm)',
+                textAlign: 'center',
+              }}>
+                <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.75rem' }}>🎓</span>
+                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  {state.learningMode === 'learn' && "Congratulations! You've finished learning."}
+                  {state.learningMode === 'practice' && "Great job! You've completed the practice."}
+                  {state.learningMode === 'exam' && "Congratulations! You've completed the exam."}
+                </h3>
+                <p style={{ margin: '8px 0 24px 0', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                  {state.learningMode === 'learn' && "Ready to practice or take a timed exam on these concepts?"}
+                  {state.learningMode === 'practice' && "Ready to review the learning material or take a timed exam?"}
+                  {state.learningMode === 'exam' && "Ready to review the learning material or practice the concepts?"}
+                </p>
+                <div style={{
+                  display: 'flex',
+                  gap: 16,
+                  justifyContent: 'center',
+                  flexWrap: 'wrap',
+                }}>
+                  {state.learningMode !== 'learn' && (page.learn || []).length > 0 && (
+                    <button
+                      onClick={() => {
+                        setLearningMode('learn');
+                        addToast('📖 Switched to Learn Mode. Happy studying!', 'info', 3000);
+                      }}
+                      className="btn-base"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        padding: '0.625rem 1.5rem',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: 10,
+                        background: 'var(--bg-primary)',
+                        color: 'var(--text-primary)',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        fontSize: '0.9rem',
+                        transition: 'all 0.15s ease',
+                        boxShadow: 'var(--shadow-sm)',
+                      }}
+                    >
+                      📖 Learn Mode
+                    </button>
+                  )}
+
+                  {state.learningMode !== 'practice' && (page.practice || []).length > 0 && (
+                    <button
+                      onClick={() => {
+                        setLearningMode('practice');
+                        addToast('✍️ Switched to Practice Mode. Try answering the questions!', 'info', 3000);
+                      }}
+                      className="btn-base"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        padding: '0.625rem 1.5rem',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: 10,
+                        background: 'var(--bg-primary)',
+                        color: 'var(--text-primary)',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        fontSize: '0.9rem',
+                        transition: 'all 0.15s ease',
+                        boxShadow: 'var(--shadow-sm)',
+                      }}
+                    >
+                      ✍️ Practice Mode
+                    </button>
+                  )}
+
+                  {state.learningMode !== 'exam' && (page.exam || []).length > 0 && (
+                    <button
+                      onClick={() => {
+                        setLearningMode('exam');
+                        addToast('⏱️ Switched to Exam Mode. The page timer has started!', 'info', 3000);
+                      }}
+                      className="btn-base"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        padding: '0.625rem 1.5rem',
+                        border: 'none',
+                        borderRadius: 10,
+                        background: 'var(--accent)',
+                        color: '#fff',
+                        cursor: 'pointer',
+                        fontWeight: 700,
+                        fontSize: '0.9rem',
+                        transition: 'all 0.15s ease',
+                        boxShadow: '0 4px 12px var(--accent-shadow)',
+                      }}
+                    >
+                      ⏱️ Take Exam
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Exam mode: Confirm & Submit on last slide */}
             {isExamMode && isLastSlide && !isPageExamSubmitted && (

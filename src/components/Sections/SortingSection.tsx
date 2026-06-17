@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import type { SortingSection as SortingSectionType } from '../../types/schema';
 import { useAppContext } from '../../context/AppContext';
+import { renderMarkdown } from '../../utils/renderContent';
 
 interface SortingSectionProps {
   section: SortingSectionType;
@@ -29,12 +30,13 @@ export default function SortingSection({
   const animFrameRef = useRef<number>(0);
 
   const isExamMode = state.learningMode === 'exam';
-  const isExamSubmitted = isExamMode && !!state.examSubmittedPages[state.currentPageIndex];
+  const currentPageId = state.pages[state.currentPageIndex]?._meta?.id || String(state.currentPageIndex);
+  const isExamSubmitted = isExamMode && !!state.examSubmittedPages[currentPageId];
   const activeSubmitted = isExamMode ? isExamSubmitted : submitted;
 
   // Load saved answers
   useEffect(() => {
-    const saved = state.sectionAnswers[state.currentPageIndex]?.[sectionIndex];
+    const saved = state.sectionAnswers[currentPageId]?.[sectionIndex];
     if (saved) {
       setItems(saved);
     } else {
@@ -47,7 +49,7 @@ export default function SortingSection({
     if (!isExamMode) {
       setSubmitted(false);
     }
-  }, [state.currentPageIndex, sectionIndex, isExamMode, state.sectionAnswers]);
+  }, [currentPageId, sectionIndex, isExamMode, state.sectionAnswers]);
 
   const saveAndSetItems = useCallback((newItems: typeof section.items) => {
     setItems(newItems);
@@ -254,12 +256,13 @@ export default function SortingSection({
               }} title="Drag to reorder">
                 ⠿
               </span>
-              <span style={{
-                flex: 1,
-                color: 'var(--text-primary)',
-              }}>
-                {item.text}
-              </span>
+              <span
+                style={{
+                  flex: 1,
+                  color: 'var(--text-primary)',
+                }}
+                dangerouslySetInnerHTML={{ __html: renderMarkdown(item.text) }}
+              />
               {activeSubmitted && correctPos !== i + 1 && (
                 <span style={{
                   fontSize: '0.8rem',

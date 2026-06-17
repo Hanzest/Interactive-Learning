@@ -236,8 +236,9 @@ export default function DashboardOverlay() {
       let totalPageScores = 0;
       let submittedCount = 0;
       pages.forEach((page, i) => {
-        if (state.examSubmittedPages[i]) {
-          const res = gradePageSections(page, i, state.sectionAnswers, true);
+        const pageId = page._meta?.id || String(i);
+        if (state.examSubmittedPages[pageId]) {
+          const res = gradePageSections(page, pageId, state.sectionAnswers, 'exam');
           if (res.total > 0) {
             totalPageScores += res.correct / res.total;
             submittedCount++;
@@ -390,12 +391,13 @@ export default function DashboardOverlay() {
           <div style={s.pageListScroll}>
             {pages.map((page, i) => {
               const isExamMode = state.learningMode === 'exam';
-              const examSubmitted = isExamMode && !!state.examSubmittedPages[i];
+              const pageId = page._meta?.id || String(i);
+              const examSubmitted = isExamMode && !!state.examSubmittedPages[pageId];
               let statusLabel = '';
               let badgeStyle = s.statusNew;
 
               if (examSubmitted) {
-                const results = gradePageSections(page, i, state.sectionAnswers, true);
+                const results = gradePageSections(page, pageId, state.sectionAnswers, 'exam');
                 statusLabel = results.total > 0 ? `Exam: ${results.correct}/${results.total}` : 'Exam: Done';
                 badgeStyle = s.statusDone;
               } else {

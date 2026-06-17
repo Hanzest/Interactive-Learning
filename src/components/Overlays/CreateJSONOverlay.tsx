@@ -1,0 +1,843 @@
+import React, { useState } from 'react';
+import { useAppContext } from '../../context/AppContext';
+
+type PromptMode = 'fast' | 'tailored';
+
+type ContextType = 'Exam' | 'Academic' | 'Professional/Working' | 'Daily Life' | 'Strategic';
+type DepthType = 'Low' | 'Medium' | 'High';
+
+const contextExplanations: Record<ContextType, string> = {
+  Exam: 'Optimized for exam prep: focuses on core testing points, definitions, active recall flashcards, and multiple-choice questions.',
+  Academic: 'Focused on academic rigor: includes in-depth concepts, theoretical explanations, historical timeline context, and structured tabs.',
+  'Professional/Working': 'Practical and application-oriented: uses real-world scenarios, professional checklists, sorting steps, and hands-on coding/process guides.',
+  'Daily Life': 'Casual and general understanding: uses simplified language, everyday examples, basic flashcards, and interactive checklists.',
+  Strategic: 'High-level overview and systems thinking: outlines strategic steps, timeline milestones, comparative tables, and Cloze tests for concepts.',
+};
+
+const depthExplanations: Record<DepthType, string> = {
+  Low: 'A brief, high-level overview of the main topics. Best for a quick read, basic introduction, or a fast refresher.',
+  Medium: 'A balanced approach with core concepts, simple illustrations, and moderate detail. Suitable for most learners.',
+  High: 'An exhaustive resource covering advanced mechanics, edge cases, extensive flashcard sets, in-depth quizzes, and matching terms. Best for mastery.',
+};
+
+const s = {
+  overlay: {
+    position: 'fixed' as const,
+    inset: 0,
+    zIndex: 300,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    backdropFilter: 'blur(6px)',
+    animation: 'fadeIn 200ms ease',
+    padding: '1rem',
+  } as React.CSSProperties,
+  card: {
+    background: 'var(--bg-primary)',
+    color: 'var(--text-primary)',
+    borderRadius: 16,
+    boxShadow: 'var(--shadow-lg)',
+    width: '100%',
+    maxWidth: 480,
+    maxHeight: '90vh',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    overflow: 'hidden',
+    animation: 'slideUp 250ms ease',
+  } as React.CSSProperties,
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '1.25rem 1.5rem',
+    borderBottom: '1px solid var(--border-color)',
+  } as React.CSSProperties,
+  title: {
+    fontSize: '1.25rem',
+    fontWeight: 700,
+    margin: 0,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+  } as React.CSSProperties,
+  closeBtn: {
+    background: 'none',
+    border: 'none',
+    color: 'var(--text-secondary)',
+    fontSize: '1.25rem',
+    cursor: 'pointer',
+    width: 32,
+    height: 32,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+    transition: 'background var(--transition-fast), color var(--transition-fast)',
+  } as React.CSSProperties,
+  body: {
+    padding: '1.5rem',
+    overflowY: 'auto' as const,
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '1.25rem',
+  } as React.CSSProperties,
+  tabsContainer: {
+    display: 'flex',
+    borderRadius: 8,
+    background: 'var(--bg-tertiary)',
+    padding: 4,
+    border: '1px solid var(--border-color)',
+  } as React.CSSProperties,
+  tabButton: (active: boolean) => ({
+    flex: 1,
+    padding: '0.5rem 1rem',
+    border: 'none',
+    borderRadius: 6,
+    fontSize: '0.875rem',
+    fontWeight: 600,
+    cursor: 'pointer',
+    background: active ? 'var(--bg-primary)' : 'transparent',
+    color: active ? 'var(--accent)' : 'var(--text-secondary)',
+    boxShadow: active ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+    transition: 'all 0.15s ease',
+  }) as React.CSSProperties,
+  stepIndicator: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '0 0.5rem',
+    marginBottom: '0.5rem',
+  } as React.CSSProperties,
+  stepDot: (active: boolean, completed: boolean) => ({
+    width: 24,
+    height: 24,
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '0.75rem',
+    fontWeight: 700,
+    background: active ? 'var(--accent)' : completed ? 'var(--accent-light)' : 'var(--bg-tertiary)',
+    color: active ? '#fff' : completed ? 'var(--accent)' : 'var(--text-muted)',
+    border: active ? '2px solid var(--accent)' : '2px solid var(--border-color)',
+    transition: 'all 0.2s ease',
+  }) as React.CSSProperties,
+  stepLabel: {
+    fontSize: '0.75rem',
+    fontWeight: 600,
+    color: 'var(--text-secondary)',
+    marginTop: 4,
+    textAlign: 'center' as const,
+  } as React.CSSProperties,
+  stepConnector: {
+    flex: 1,
+    height: 2,
+    background: 'var(--border-color)',
+    margin: '0 8px',
+  } as React.CSSProperties,
+  label: {
+    fontSize: '0.875rem',
+    fontWeight: 600,
+    color: 'var(--text-primary)',
+    marginBottom: '0.5rem',
+    display: 'block',
+  } as React.CSSProperties,
+  input: {
+    width: '100%',
+    padding: '0.75rem 1rem',
+    borderRadius: 8,
+    border: '1px solid var(--border-color)',
+    background: 'var(--bg-secondary)',
+    color: 'var(--text-primary)',
+    fontSize: '0.9375rem',
+    outline: 'none',
+    transition: 'border-color var(--transition-fast)',
+  } as React.CSSProperties,
+  selectWrapper: {
+    position: 'relative' as const,
+    width: '100%',
+  } as React.CSSProperties,
+  selectButton: {
+    width: '100%',
+    padding: '0.75rem 1rem',
+    borderRadius: 8,
+    border: '1px solid var(--border-color)',
+    background: 'var(--bg-secondary)',
+    color: 'var(--text-primary)',
+    fontSize: '0.9375rem',
+    textAlign: 'left' as const,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    cursor: 'pointer',
+    outline: 'none',
+  } as React.CSSProperties,
+  dropdownMenu: {
+    position: 'absolute' as const,
+    top: '100%',
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    marginTop: 4,
+    background: 'var(--bg-primary)',
+    border: '1px solid var(--border-color)',
+    borderRadius: 8,
+    boxShadow: 'var(--shadow-md)',
+    overflow: 'hidden',
+  } as React.CSSProperties,
+  dropdownItem: (selected: boolean) => ({
+    padding: '0.75rem 1rem',
+    fontSize: '0.875rem',
+    cursor: 'pointer',
+    background: selected ? 'var(--accent-light)' : 'transparent',
+    color: selected ? 'var(--accent)' : 'var(--text-primary)',
+    display: 'block',
+    width: '100%',
+    border: 'none',
+    textAlign: 'left' as const,
+    transition: 'background 0.15s ease',
+  }) as React.CSSProperties,
+  explanationCard: {
+    padding: '1rem',
+    background: 'var(--bg-tertiary)',
+    borderRadius: 8,
+    borderLeft: '4px solid var(--accent)',
+    fontSize: '0.8125rem',
+    lineHeight: 1.5,
+    color: 'var(--text-secondary)',
+  } as React.CSSProperties,
+  textarea: {
+    width: '100%',
+    height: 120,
+    padding: '0.75rem 1rem',
+    borderRadius: 8,
+    border: '1px solid var(--border-color)',
+    background: 'var(--bg-secondary)',
+    color: 'var(--text-primary)',
+    fontSize: '0.8125rem',
+    fontFamily: 'monospace',
+    outline: 'none',
+    resize: 'none' as const,
+  } as React.CSSProperties,
+  footer: {
+    padding: '1.25rem 1.5rem',
+    borderTop: '1px solid var(--border-color)',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: '0.75rem',
+  } as React.CSSProperties,
+  btnBack: {
+    padding: '0.625rem 1.25rem',
+    border: '1px solid var(--border-color)',
+    borderRadius: 8,
+    background: 'var(--bg-secondary)',
+    color: 'var(--text-primary)',
+    fontWeight: 600,
+    fontSize: '0.875rem',
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+  } as React.CSSProperties,
+  btnNext: (disabled: boolean) => ({
+    padding: '0.625rem 1.25rem',
+    border: 'none',
+    borderRadius: 8,
+    background: disabled ? 'var(--border-color)' : 'var(--accent)',
+    color: '#fff',
+    fontWeight: 600,
+    fontSize: '0.875rem',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    opacity: disabled ? 0.6 : 1,
+    transition: 'all 0.15s ease',
+  }) as React.CSSProperties,
+  modelGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '0.75rem',
+    width: '100%',
+  } as React.CSSProperties,
+  modelButton: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '0.75rem',
+    borderRadius: 8,
+    border: '1px solid var(--border-color)',
+    background: 'var(--bg-secondary)',
+    color: 'var(--text-primary)',
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+    gap: 6,
+  } as React.CSSProperties,
+};
+
+export default function CreateJSONOverlay() {
+  const { state, toggleCreatePrompt, addToast } = useAppContext();
+
+  const [mode, setMode] = useState<PromptMode>('fast');
+  const [step, setStep] = useState<number>(1);
+  const [topic, setTopic] = useState<string>('');
+  const [context, setContext] = useState<ContextType>('Academic');
+  const [depth, setDepth] = useState<DepthType>('Medium');
+
+  const [dropdownContextOpen, setDropdownContextOpen] = useState(false);
+  const [dropdownDepthOpen, setDropdownDepthOpen] = useState(false);
+
+  if (!state.showCreatePrompt) return null;
+
+  // Handle step flow
+  const handleNext = () => {
+    if (mode === 'fast') {
+      if (step === 1) setStep(4);
+    } else {
+      if (step < 4) setStep(step + 1);
+    }
+  };
+
+  const handleBack = () => {
+    if (mode === 'fast') {
+      if (step === 4) setStep(1);
+    } else {
+      if (step > 1) setStep(step - 1);
+    }
+  };
+
+  // Generate prompt text
+  const generatePrompt = (): string => {
+    let prompt = `You are a professional educational content creator and expert JSON formatter.
+Please create a comprehensive, highly interactive learning page about the topic: "${topic}".
+`;
+
+    if (mode === 'tailored') {
+      prompt += `
+Tailor the content to the following specifications:
+- Target Context: ${context} (${contextExplanations[context]})
+- Content Depth: ${depth} (${depthExplanations[depth]})
+`;
+    } else {
+      prompt += `
+Keep the content concise, engaging, and suitable for a general audience.
+`;
+    }
+
+    prompt += `
+The response must be ONLY a valid JSON object matching the schema below. Do not add any conversational text before or after the JSON.
+Ensure the JSON is fully compliant, with no syntax errors, no trailing commas, and valid Markdown in string fields.
+
+JSON Schema structure:
+{
+  "page": {
+    "title": "A short, engaging title for the page",
+    "description": "A brief summary of what the user will learn",
+    "tags": ["tag1", "tag2"],
+    "icon": "Optional emoji icon"
+  },
+  "learn": [
+    // Array of interactive study/learning sections (e.g. text, tabs, accordion, timeline, flashcards, checklist, quiz, etc.).
+    // Vary the section types to make the learning experience engaging.
+  ],
+  "practice": [
+    // Array of interactive practice sections containing a separate set of practice questions.
+    // Allowed interactive question types: quiz, fill-blank, matching, sorting, cloze.
+  ],
+  "exam": [
+    // Array of interactive exam sections containing a separate set of exam questions.
+    // Allowed interactive question types: quiz, fill-blank, matching, sorting, cloze.
+  ]
+}
+
+Note: The "page", "learn", "practice", and "exam" fields are strictly REQUIRED.
+Also, the number of items/questions in specific interactive sections MUST satisfy the following minimum limits:
+- quiz: must contain at least 5 questions
+- fill-blank: must contain at least 4 sentences
+- matching: must contain at least 3 matching pairs
+- sorting: must contain at least 4 items to sort
+- cloze: must contain at least 4 blanks
+
+Available Section Types (you MUST format them exactly like this):
+
+1. Text Section:
+{
+  "type": "text",
+  "title": "Section Title",
+  "content": "Rich markdown content. Supports **bold**, *italic*, \`code\`, and lists."
+}
+
+2. Tabs Section:
+{
+  "type": "tabs",
+  "title": "Section Title",
+  "tabs": [
+    { "label": "Tab Title 1", "content": "Markdown content for tab 1" },
+    { "label": "Tab Title 2", "content": "Markdown content for tab 2" }
+  ]
+}
+
+3. Accordion Section:
+{
+  "type": "accordion",
+  "title": "Section Title",
+  "accordionBehavior": "multiple", // or "exclusive"
+  "items": [
+    { "heading": "Question/Heading 1", "content": "Answer/Content 1" },
+    { "heading": "Question/Heading 2", "content": "Answer/Content 2" }
+  ]
+}
+
+4. Timeline Section:
+{
+  "type": "timeline",
+  "title": "Section Title",
+  "layout": "vertical", // or "horizontal"
+  "items": [
+    { "date": "1995", "title": "Created", "description": "Details about creation" },
+    { "date": "2015", "title": "Updated", "description": "Details about update" }
+  ]
+}
+
+5. Flashcards Section:
+{
+  "type": "flashcards",
+  "title": "Key Vocabulary",
+  "cards": [
+    { "front": "Term 1", "back": "Definition 1" },
+    { "front": "Term 2", "back": "Definition 2" }
+  ]
+}
+
+6. Quiz Section:
+{
+  "type": "quiz",
+  "title": "Concept Check",
+  "questions": [
+    {
+      "question": "Question 1 text?",
+      "options": ["Option A", "Option B", "Option C"],
+      "correctIndex": 1, // 0-based index of correct option
+      "explanation": "Why Option B is correct",
+      "optionExplanations": ["Incorrect explanation", "Correct explanation", "Incorrect explanation"] // optional, matching options length
+    },
+    {
+      "question": "Question 2 text?",
+      "options": ["Option A", "Option B", "Option C"],
+      "correctIndex": 0,
+      "explanation": "Why Option A is correct"
+    },
+    {
+      "question": "Question 3 text?",
+      "options": ["Option A", "Option B", "Option C"],
+      "correctIndex": 2,
+      "explanation": "Why Option C is correct"
+    },
+    {
+      "question": "Question 4 text?",
+      "options": ["Option A", "Option B", "Option C"],
+      "correctIndex": 1,
+      "explanation": "Why Option B is correct"
+    },
+    {
+      "question": "Question 5 text?",
+      "options": ["Option A", "Option B", "Option C"],
+      "correctIndex": 0,
+      "explanation": "Why Option A is correct"
+    }
+  ]
+}
+
+7. Fill-blank Section:
+{
+  "type": "fill-blank",
+  "title": "Complete the Sentences",
+  "instantFeedback": true, // or false
+  "sentences": [
+    { "text": "The sun ___ in the east.", "answer": "rises" },
+    { "text": "Water boils at ___ degrees Celsius.", "answer": "100" },
+    { "text": "Earth has ___ natural satellite.", "answer": "one" },
+    { "text": "Light travels in a ___ line.", "answer": "straight" }
+  ]
+}
+
+8. Matching Section:
+{
+  "type": "matching",
+  "title": "Match the Pairs",
+  "pairs": [
+    { "left": "Item Left 1", "right": "Matching Item Right 1" },
+    { "left": "Item Left 2", "right": "Matching Item Right 2" },
+    { "left": "Item Left 3", "right": "Matching Item Right 3" }
+  ]
+}
+
+9. Sorting Section:
+{
+  "type": "sorting",
+  "title": "Order the Steps",
+  "items": [
+    { "text": "Step 1", "correctOrder": 0 },
+    { "text": "Step 2", "correctOrder": 1 },
+    { "text": "Step 3", "correctOrder": 2 },
+    { "text": "Step 4", "correctOrder": 3 }
+  ]
+}
+
+10. Checklist Section:
+{
+  "type": "checklist",
+  "title": "Required Steps",
+  "items": [
+    { "text": "Essential step", "optional": false },
+    { "text": "Extra credit step", "optional": true }
+  ]
+}
+
+11. Cloze Section:
+{
+  "type": "cloze",
+  "title": "Fill the Paragraph",
+  "text": "The quick brown {{animal1}} jumps over the lazy {{animal2}}. The sky is {{color}} and the grass is {{green}}.",
+  "blanks": [
+    { "id": "animal1", "options": ["fox", "bear"], "correctIndex": 0, "correctAnswer": "fox", "hint": "Orange-furred wild canine" },
+    { "id": "animal2", "options": ["cat", "dog"], "correctIndex": 1, "correctAnswer": "dog", "hint": "Man's best friend" },
+    { "id": "color", "options": ["blue", "red"], "correctIndex": 0, "correctAnswer": "blue", "hint": "Color of a clear daytime sky" },
+    { "id": "green", "options": ["green", "yellow"], "correctIndex": 0, "correctAnswer": "green", "hint": "Standard color of healthy grass" }
+  ]
+}
+
+Please generate the JSON file for the topic "${topic}" now. Make sure the response is wrapped only in a \`\`\`json ... \`\`\` block.`;
+
+    return prompt;
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      const p = generatePrompt();
+      await navigator.clipboard.writeText(p);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleOpenChatbot = async (provider: string, url: string) => {
+    const success = await copyToClipboard();
+    if (success) {
+      addToast(`Prompt copied to clipboard! Opening ${provider}...`, 'success', 3000);
+    } else {
+      addToast(`Opening ${provider}...`, 'info', 2000);
+    }
+    window.open(url, '_blank');
+  };
+
+  const renderSteps = () => {
+    if (mode === 'fast') {
+      return (
+        <div style={s.stepIndicator}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={s.stepDot(step === 1, step > 1)}>1</div>
+            <span style={s.stepLabel}>Topic</span>
+          </div>
+          <div style={s.stepConnector} />
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={s.stepDot(step === 4, false)}>2</div>
+            <span style={s.stepLabel}>Ready</span>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div style={s.stepIndicator}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={s.stepDot(step === 1, step > 1)}>1</div>
+          <span style={s.stepLabel}>Topic</span>
+        </div>
+        <div style={s.stepConnector} />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={s.stepDot(step === 2, step > 2)}>2</div>
+          <span style={s.stepLabel}>Context</span>
+        </div>
+        <div style={s.stepConnector} />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={s.stepDot(step === 3, step > 3)}>3</div>
+          <span style={s.stepLabel}>Depth</span>
+        </div>
+        <div style={s.stepConnector} />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={s.stepDot(step === 4, false)}>4</div>
+          <span style={s.stepLabel}>Ready</span>
+        </div>
+      </div>
+    );
+  };
+
+  const isNextDisabled = () => {
+    if (step === 1 && !topic.trim()) return true;
+    return false;
+  };
+
+  return (
+    <div style={s.overlay} onClick={toggleCreatePrompt}>
+      <div style={s.card} onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div style={s.header}>
+          <h2 style={s.title}>✨ Prompt Wizard</h2>
+          <button style={s.closeBtn} onClick={toggleCreatePrompt} aria-label="Close wizard">
+            ✕
+          </button>
+        </div>
+
+        {/* Body */}
+        <div style={s.body}>
+          {/* Fast/Tailored Mode Selector at the top (only editable in step 1) */}
+          {step === 1 && (
+            <div style={s.tabsContainer}>
+              <button
+                type="button"
+                style={s.tabButton(mode === 'fast')}
+                onClick={() => setMode('fast')}
+              >
+                Fast Prompt
+              </button>
+              <button
+                type="button"
+                style={s.tabButton(mode === 'tailored')}
+                onClick={() => setMode('tailored')}
+              >
+                Tailored Prompt
+              </button>
+            </div>
+          )}
+
+          {/* Steps Visualizer */}
+          {renderSteps()}
+
+          {/* Step 1: Topic */}
+          {step === 1 && (
+            <div>
+              <label style={s.label} htmlFor="topic-input">
+                What topic do you want to learn?
+              </label>
+              <input
+                id="topic-input"
+                style={s.input}
+                type="text"
+                placeholder="e.g., React Hooks, Photosynthesis, WW2 History"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && topic.trim()) {
+                    handleNext();
+                  }
+                }}
+                autoFocus
+              />
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 8, lineHeight: 1.4 }}>
+                Enter the subject you want to cover. The AI Chatbot will generate an uploadable JSON file with structured, interactive sections.
+              </p>
+            </div>
+          )}
+
+          {/* Step 2: Target Context */}
+          {step === 2 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={s.label}>Target Learning Context</label>
+                <div style={s.selectWrapper}>
+                  <button
+                    type="button"
+                    style={s.selectButton}
+                    onClick={() => setDropdownContextOpen(!dropdownContextOpen)}
+                  >
+                    <span>{context}</span>
+                    <span>▼</span>
+                  </button>
+                  {dropdownContextOpen && (
+                    <div style={s.dropdownMenu}>
+                      {(['Exam', 'Academic', 'Professional/Working', 'Daily Life', 'Strategic'] as ContextType[]).map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          style={s.dropdownItem(context === opt)}
+                          onClick={() => {
+                            setContext(opt);
+                            setDropdownContextOpen(false);
+                          }}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Dynamic Explanation */}
+              <div style={s.explanationCard}>
+                <strong>💡 explanation:</strong>
+                <p style={{ margin: '4px 0 0 0' }}>{contextExplanations[context]}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Content Depth */}
+          {step === 3 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={s.label}>Content Detail Depth</label>
+                <div style={s.selectWrapper}>
+                  <button
+                    type="button"
+                    style={s.selectButton}
+                    onClick={() => setDropdownDepthOpen(!dropdownDepthOpen)}
+                  >
+                    <span>{depth}</span>
+                    <span>▼</span>
+                  </button>
+                  {dropdownDepthOpen && (
+                    <div style={s.dropdownMenu}>
+                      {(['Low', 'Medium', 'High'] as DepthType[]).map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          style={s.dropdownItem(depth === opt)}
+                          onClick={() => {
+                            setDepth(opt);
+                            setDropdownDepthOpen(false);
+                          }}
+                        >
+                          {opt} Depth
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Dynamic Explanation */}
+              <div style={s.explanationCard}>
+                <strong>💡 explanation:</strong>
+                <p style={{ margin: '4px 0 0 0' }}>{depthExplanations[depth]}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Ready & AI Model Redirection */}
+          {step === 4 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={s.label}>Generated Prompt</label>
+                <textarea
+                  style={s.textarea}
+                  readOnly
+                  value={generatePrompt()}
+                  onClick={(e) => (e.target as HTMLTextAreaElement).select()}
+                />
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const success = await copyToClipboard();
+                    if (success) {
+                      addToast('Copied prompt to clipboard!', 'success', 2000);
+                    } else {
+                      addToast('Failed to copy prompt', 'error', 2000);
+                    }
+                  }}
+                  style={{
+                    padding: '0.75rem',
+                    border: 'none',
+                    borderRadius: 8,
+                    background: 'var(--accent)',
+                    color: '#fff',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8,
+                    fontSize: '0.9375rem',
+                  }}
+                >
+                  📋 Copy Prompt to Clipboard
+                </button>
+
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', margin: '4px 0' }}>
+                  Or click below to copy & open directly in a Chatbot:
+                </div>
+
+                <div style={s.modelGrid}>
+                  <button
+                    type="button"
+                    style={s.modelButton}
+                    onClick={() => handleOpenChatbot('Claude', 'https://claude.ai/')}
+                  >
+                    <span style={{ fontSize: '1.25rem' }}>🤖</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Claude</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    style={s.modelButton}
+                    onClick={() => handleOpenChatbot('Gemini', 'https://gemini.google.com/')}
+                  >
+                    <span style={{ fontSize: '1.25rem' }}>✨</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Gemini</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    style={s.modelButton}
+                    onClick={() => handleOpenChatbot('ChatGPT', 'https://chatgpt.com/')}
+                  >
+                    <span style={{ fontSize: '1.25rem' }}>💬</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>ChatGPT</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    style={s.modelButton}
+                    onClick={() => handleOpenChatbot('Deepseek', 'https://chat.deepseek.com/')}
+                  >
+                    <span style={{ fontSize: '1.25rem' }}>🐋</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Deepseek</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div style={s.footer}>
+          {step > 1 ? (
+            <button type="button" style={s.btnBack} onClick={handleBack}>
+              ◀ Back
+            </button>
+          ) : (
+            <div />
+          )}
+
+          {step < 4 ? (
+            <button
+              type="button"
+              style={s.btnNext(isNextDisabled())}
+              onClick={handleNext}
+              disabled={isNextDisabled()}
+            >
+              Next ▶
+            </button>
+          ) : (
+            <button type="button" style={s.btnBack} onClick={toggleCreatePrompt}>
+              Close
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

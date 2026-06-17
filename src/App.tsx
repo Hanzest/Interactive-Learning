@@ -8,6 +8,7 @@ import Footer from './components/Layout/Footer';
 import ContentArea from './components/Layout/ContentArea';
 import DashboardOverlay from './components/Overlays/DashboardOverlay';
 import KeyboardShortcutsOverlay from './components/Overlays/KeyboardShortcutsOverlay';
+import CreateJSONOverlay from './components/Overlays/CreateJSONOverlay';
 import ContextMenu from './components/UI/ContextMenu';
 import ToastContainer from './components/UI/ToastContainer';
 
@@ -93,6 +94,7 @@ function AppShell() {
       {/* Overlays */}
       <DashboardOverlay />
       <KeyboardShortcutsOverlay />
+      <CreateJSONOverlay />
 
       {/* Right-click Context Menu for sidebar items */}
       <ContextMenu />

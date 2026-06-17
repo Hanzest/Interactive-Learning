@@ -3,16 +3,12 @@
    See: ../SCHEMA.md (v1) for the full schema documentation
    ========================================================================== */
 
-export interface TestSection {
-  title?: string;
-  subsections?: Section[];
-}
-
 /** Top-level learning page */
 export interface LearningPage {
-  page?: PageMeta;
-  sections?: Section[];
-  test?: TestSection;
+  page: PageMeta;
+  learn: Section[];
+  practice: Section[];
+  exam: Section[];
   _meta?: PageMetaData;
 }
 
@@ -27,6 +23,7 @@ export interface PageMeta {
 
 /** Internal metadata (not from JSON) */
 export interface PageMetaData {
+  id?: string;
   completed?: boolean;
   notes?: Record<number, string>;
   quizAttempts?: Record<number, QuizAttempt[]>;

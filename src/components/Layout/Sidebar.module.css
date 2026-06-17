@@ -86,3 +86,32 @@
     backdrop-filter: blur(4px);
   }
 }
+
+.createBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.625rem;
+  margin-top: 0.75rem;
+  border: 1.5px dashed var(--accent);
+  border-radius: 0.5rem;
+  background: var(--bg-primary);
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast) ease-in-out;
+}
+
+.createBtn:hover {
+  background: var(--accent);
+  color: #ffffff;
+  border-style: solid;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.createBtn:active {
+  transform: translateY(0);
+}

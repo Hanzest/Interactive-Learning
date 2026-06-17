@@ -27,12 +27,13 @@ export default function QuizSection({
   const [isSavedText, setIsSavedText] = useState(false);
 
   const isExamMode = state.learningMode === 'exam';
-  const isExamSubmitted = isExamMode && !!state.examSubmittedPages[state.currentPageIndex];
+  const currentPageId = state.pages[state.currentPageIndex]?._meta?.id || String(state.currentPageIndex);
+  const isExamSubmitted = isExamMode && !!state.examSubmittedPages[currentPageId];
   const activeSubmitted = isExamMode ? isExamSubmitted : submitted;
 
   // Load saved answers
   useEffect(() => {
-    const saved = state.sectionAnswers[state.currentPageIndex]?.[sectionIndex];
+    const saved = state.sectionAnswers[currentPageId]?.[sectionIndex];
     if (saved) {
       setAnswers(saved);
     } else {
@@ -41,7 +42,7 @@ export default function QuizSection({
     if (!isExamMode) {
       setSubmitted(false);
     }
-  }, [state.currentPageIndex, sectionIndex, isExamMode, state.sectionAnswers]);
+  }, [currentPageId, sectionIndex, isExamMode, state.sectionAnswers]);
 
   const runGrading = useCallback(() => {
     let correct = 0;
@@ -261,13 +262,13 @@ export default function QuizSection({
         }}>
           Question {currentQ + 1} of {totalQuestions}
         </div>
-        <p style={{
+        <div style={{
           color: 'var(--text-primary)',
           fontWeight: 600,
           fontSize: '1.05rem',
           marginBottom: '1rem',
           lineHeight: 1.5,
-        }}>{current.question}</p>
+        }} dangerouslySetInnerHTML={{ __html: renderMarkdown(current.question) }} />
 
         <div style={{
           display: 'flex',
@@ -360,19 +361,23 @@ export default function QuizSection({
                 </div>
 
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <span style={{
-                    color: 'var(--text-primary)',
-                    lineHeight: 1.5,
-                  }}>{opt}</span>
+                  <div
+                    style={{
+                      color: 'var(--text-primary)',
+                      lineHeight: 1.5,
+                    }}
+                    dangerouslySetInnerHTML={{ __html: renderMarkdown(opt) }}
+                  />
                   {activeSubmitted && current.optionExplanations?.[oi] && (
-                    <span style={{
-                      fontSize: '0.85rem',
-                      color: 'var(--text-secondary)',
-                      fontStyle: 'italic',
-                      marginTop: '0.25rem',
-                    }}>
-                      {current.optionExplanations[oi]}
-                    </span>
+                    <div
+                      style={{
+                        fontSize: '0.85rem',
+                        color: 'var(--text-secondary)',
+                        fontStyle: 'italic',
+                        marginTop: '0.25rem',
+                      }}
+                      dangerouslySetInnerHTML={{ __html: renderMarkdown(current.optionExplanations[oi]) }}
+                    />
                   )}
                 </div>
               </label>
@@ -406,7 +411,10 @@ export default function QuizSection({
           }}>
             <span>💡 Explanation</span>
           </div>
-          <p style={{ margin: 0, color: 'var(--text-primary)', lineHeight: 1.5 }}>{current.explanation}</p>
+          <div
+            style={{ margin: 0, color: 'var(--text-primary)', lineHeight: 1.5 }}
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(current.explanation) }}
+          />
         </div>
       )}
 

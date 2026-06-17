@@ -451,3 +451,25 @@ a:hover {
     display: none !important;
   }
 }
+
+.footer-creator {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  margin-right: 0.5rem;
+}
+
+@media (max-width: 500px) {
+  .footer-creator {
+    display: none !important;
+  }
+  .footer-viewed-count {
+    display: none !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .footer-progress-bar-track {
+    display: none !important;
+  }
+}

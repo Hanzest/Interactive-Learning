@@ -28,12 +28,13 @@ export default function ClozeSection({
   const prevAnswersRef = useRef<Record<string, string>>({});
 
   const isExamMode = state.learningMode === 'exam';
-  const isExamSubmitted = isExamMode && !!state.examSubmittedPages[state.currentPageIndex];
+  const currentPageId = state.pages[state.currentPageIndex]?._meta?.id || String(state.currentPageIndex);
+  const isExamSubmitted = isExamMode && !!state.examSubmittedPages[currentPageId];
   const activeSubmitted = isExamMode ? isExamSubmitted : submitted;
 
   // Load saved answers
   useEffect(() => {
-    const saved = state.sectionAnswers[state.currentPageIndex]?.[sectionIndex];
+    const saved = state.sectionAnswers[currentPageId]?.[sectionIndex];
     if (saved) {
       setAnswers(saved);
     } else {
@@ -42,7 +43,7 @@ export default function ClozeSection({
     if (!isExamMode) {
       setSubmitted(false);
     }
-  }, [state.currentPageIndex, sectionIndex, isExamMode, state.sectionAnswers]);
+  }, [currentPageId, sectionIndex, isExamMode, state.sectionAnswers]);
 
   const handleAnswerChange = useCallback(
     (blankId: string, value: string) => {
@@ -161,12 +162,12 @@ export default function ClozeSection({
     return parts.map((part, i) => {
       const match = part.match(/^\{\{([a-zA-Z0-9_-]+)\}\}$/);
       if (!match) {
-        return <span key={i}>{part}</span>;
+        return <span key={i} dangerouslySetInnerHTML={{ __html: renderMarkdown(part) }} />;
       }
       const blankId = match[1];
       const blank = section.blanks.find((b) => b.id === blankId);
       if (!blank) {
-        return <span key={i}>{part}</span>;
+        return <span key={i} dangerouslySetInnerHTML={{ __html: renderMarkdown(part) }} />;
       }
 
       const isCorrect = checkBlank(blank);

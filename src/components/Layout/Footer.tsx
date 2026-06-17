@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
+import DonationOverlay from '../Overlays/DonationOverlay';
 
 export default function Footer() {
   const {
@@ -8,6 +9,8 @@ export default function Footer() {
     prevPage,
     completedPercent,
   } = useAppContext();
+
+  const [showDonate, setShowDonate] = useState(false);
 
   const totalPages = state.pages.length;
   const currentIndex = state.currentPageIndex;
@@ -19,137 +22,198 @@ export default function Footer() {
   // Viewed count
   const viewedCount = state.viewedPages.length;
 
-  const footerStyle: React.CSSProperties & { [key: string]: string | number | undefined } = {
-    position: 'sticky',
-    bottom: 0,
-    zIndex: 10,
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    padding: '0.5rem 1rem',
-    background: 'color-mix(in srgb, var(--bg-primary) 85%, transparent)',
-    backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)',
-    borderTop: '1px solid var(--border-color)',
-    minHeight: '3rem',
-    transition: 'background-color var(--transition-normal)',
-  };
-
-  const navButtonStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '2rem',
-    height: '2rem',
-    border: '1px solid var(--border-color)',
-    borderRadius: '0.375rem',
-    background: 'var(--bg-secondary)',
-    color: 'var(--text-secondary)',
-    cursor: 'pointer',
-    fontSize: '1rem',
-    transition: 'background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast)',
-    flexShrink: 0,
-  };
-
-  const navButtonDisabledStyle: React.CSSProperties = {
-    ...navButtonStyle,
-    opacity: 0.4,
-    cursor: 'not-allowed',
-  };
-
-  const pagePositionStyle: React.CSSProperties = {
-    fontSize: '0.8125rem',
-    color: 'var(--text-muted)',
-    whiteSpace: 'nowrap',
-    minWidth: '3rem',
-    textAlign: 'center',
-    fontVariantNumeric: 'tabular-nums',
-  };
-
-  const spacerStyle: React.CSSProperties = {
-    flex: 1,
-  };
-
-  const progressBarWrapperStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    minWidth: '8rem',
-  };
-
-  const progressBarStyle: React.CSSProperties = {
-    flex: 1,
-    height: '0.375rem',
-    borderRadius: '0.25rem',
-    background: 'var(--bg-tertiary)',
-    overflow: 'hidden',
-  };
-
-  const progressFillStyle: React.CSSProperties = {
-    height: '100%',
-    borderRadius: '0.25rem',
-    background: 'var(--accent)',
-    transition: 'width var(--transition-normal)',
-    width: `${completedPercent}%`,
-  };
-
-  const progressLabelStyle: React.CSSProperties = {
-    fontSize: '0.75rem',
-    color: 'var(--text-muted)',
-    whiteSpace: 'nowrap',
-    fontVariantNumeric: 'tabular-nums',
-  };
-
-  const viewedCountStyle: React.CSSProperties = {
-    fontSize: '0.75rem',
-    color: 'var(--text-muted)',
-    whiteSpace: 'nowrap',
-  };
-
   return (
-    <footer style={footerStyle}>
-      {/* Previous */}
-      <button
-        style={(!hasPages || currentIndex <= 0) ? navButtonDisabledStyle : navButtonStyle}
-        onClick={prevPage}
-        disabled={!hasPages || currentIndex <= 0}
-        aria-label="Previous page"
-        title="Previous (←)"
+    <>
+      <footer
+        style={{
+          position: 'sticky',
+          bottom: 0,
+          zIndex: 10,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.375rem',
+          padding: '0.375rem 0.75rem',
+          background: 'color-mix(in srgb, var(--bg-primary) 85%, transparent)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          borderTop: '1px solid var(--border-color)',
+          minHeight: '3.25rem',
+          transition: 'background-color var(--transition-normal)',
+          flexWrap: 'nowrap',
+          overflow: 'hidden',
+        }}
       >
-        ◀
-      </button>
+        {/* Navigation Controls */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', flexShrink: 0 }}>
+          {/* Previous */}
+          <button
+            onClick={prevPage}
+            disabled={!hasPages || currentIndex <= 0}
+            className="btn-base"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '2rem',
+              height: '2rem',
+              border: '1px solid var(--border-color)',
+              borderRadius: '0.375rem',
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-secondary)',
+              cursor: (!hasPages || currentIndex <= 0) ? 'not-allowed' : 'pointer',
+              opacity: (!hasPages || currentIndex <= 0) ? 0.4 : 1,
+              fontSize: '0.9rem',
+              transition: 'all 0.15s ease',
+              flexShrink: 0,
+            }}
+            aria-label="Previous page"
+            title="Previous (←)"
+          >
+            ◀
+          </button>
 
-      {/* Page position */}
-      <span style={pagePositionStyle}>
-        {hasPages ? `${position}/${totalPages}` : '-'}
-      </span>
+          {/* Page position */}
+          <span
+            style={{
+              fontSize: '0.8125rem',
+              color: 'var(--text-muted)',
+              whiteSpace: 'nowrap',
+              minWidth: '2.5rem',
+              textAlign: 'center',
+              fontVariantNumeric: 'tabular-nums',
+            }}
+          >
+            {hasPages ? `${position}/${totalPages}` : '-'}
+          </span>
 
-      {/* Next */}
-      <button
-        style={(!hasPages || currentIndex >= totalPages - 1) ? navButtonDisabledStyle : navButtonStyle}
-        onClick={nextPage}
-        disabled={!hasPages || currentIndex >= totalPages - 1}
-        aria-label="Next page"
-        title="Next (→)"
-      >
-        ▶
-      </button>
-
-      {/* Spacer */}
-      <div style={spacerStyle} />
-
-      {/* Progress bar */}
-      <div style={progressBarWrapperStyle}>
-        <div style={progressBarStyle}>
-          <div style={progressFillStyle} />
+          {/* Next */}
+          <button
+            onClick={nextPage}
+            disabled={!hasPages || currentIndex >= totalPages - 1}
+            className="btn-base"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '2rem',
+              height: '2rem',
+              border: '1px solid var(--border-color)',
+              borderRadius: '0.375rem',
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-secondary)',
+              cursor: (!hasPages || currentIndex >= totalPages - 1) ? 'not-allowed' : 'pointer',
+              opacity: (!hasPages || currentIndex >= totalPages - 1) ? 0.4 : 1,
+              fontSize: '0.9rem',
+              transition: 'all 0.15s ease',
+              flexShrink: 0,
+            }}
+            aria-label="Next page"
+            title="Next (→)"
+          >
+            ▶
+          </button>
         </div>
-        <span style={progressLabelStyle}>{completedPercent}%</span>
-      </div>
 
-      {/* Viewed count */}
-      <span style={viewedCountStyle}>
-        {viewedCount} viewed
-      </span>
-    </footer>
+        {/* Support/Donate button */}
+        <button
+          onClick={() => setShowDonate(true)}
+          className="btn-base"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.25rem',
+            padding: '0.375rem 0.625rem',
+            border: '1px solid rgba(239, 68, 68, 0.2)',
+            borderRadius: '6px',
+            background: 'rgba(239, 68, 68, 0.08)',
+            color: 'var(--error)',
+            cursor: 'pointer',
+            fontWeight: 600,
+            fontSize: '0.75rem',
+            transition: 'all 0.15s ease',
+            flexShrink: 0,
+            marginLeft: '0.25rem',
+          }}
+          title="Support the creator"
+        >
+          ❤️ Donate
+        </button>
+
+        {/* Spacer to push progress bar/creator details to the right */}
+        <div style={{ flex: 1 }} />
+
+        {/* Creator Credit - hides globally on narrow screen via global.css .footer-creator */}
+        <span className="footer-creator" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+          Created by{' '}
+          <a
+            href="https://github.com/Hanzest"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: 'var(--accent)',
+              textDecoration: 'none',
+              fontWeight: 600,
+            }}
+          >
+            Mingsy Hồ
+          </a>
+        </span>
+
+        {/* Progress bar and Viewed Stats */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+          {/* Progress bar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', minWidth: '4rem' }}>
+            {/* The progress bar line itself (hide/shrink on very small screens to fit 400px width) */}
+            <div
+              style={{
+                width: '3.5rem',
+                height: '0.375rem',
+                borderRadius: '0.25rem',
+                background: 'var(--bg-tertiary)',
+                overflow: 'hidden',
+                display: 'block',
+              }}
+              className="footer-progress-bar-track"
+            >
+              <div
+                style={{
+                  height: '100%',
+                  borderRadius: '0.25rem',
+                  background: 'var(--accent)',
+                  transition: 'width var(--transition-normal)',
+                  width: `${completedPercent}%`,
+                }}
+              />
+            </div>
+            <span
+              style={{
+                fontSize: '0.75rem',
+                color: 'var(--text-muted)',
+                whiteSpace: 'nowrap',
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              {completedPercent}%
+            </span>
+          </div>
+
+          {/* Viewed count */}
+          <span
+            style={{
+              fontSize: '0.75rem',
+              color: 'var(--text-muted)',
+              whiteSpace: 'nowrap',
+            }}
+            className="footer-viewed-count"
+          >
+            {viewedCount} viewed
+          </span>
+        </div>
+      </footer>
+
+      {showDonate && (
+        <DonationOverlay onClose={() => setShowDonate(false)} />
+      )}
+    </>
   );
 }

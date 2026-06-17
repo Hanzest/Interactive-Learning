@@ -66,7 +66,8 @@ export default function PageListItem({ page, index, isActive, isCompleted, isVie
 
   const statusIndicator = () => {
     const isExamMode = state.learningMode === 'exam';
-    const examSubmitted = isExamMode && !!state.examSubmittedPages[index];
+    const pageId = page._meta?.id || String(index);
+    const examSubmitted = isExamMode && !!state.examSubmittedPages[pageId];
     if (isExamMode && examSubmitted) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: '50%', background: 'var(--success)', color: '#fff', fontSize: 10, fontWeight: 700, flexShrink: 0 }} title="Exam completed">
@@ -166,77 +167,161 @@ export default function PageListItem({ page, index, isActive, isCompleted, isVie
         </div>
       )}
 
-      {/* Hover action buttons */}
-      {hovered && !renaming && (
-        <div
-          style={{
-            display: 'flex',
-            gap: 2,
-            position: 'absolute',
-            right: 8,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            background: 'var(--bg-primary)',
-            padding: '2px 4px',
-            borderRadius: 6,
-            border: '1px solid var(--border-color)',
-            boxShadow: 'var(--shadow-sm)',
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            title={isCompleted ? 'Mark incomplete' : 'Mark complete'}
-            onClick={() => togglePageComplete(index)}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: 2,
-              fontSize: 13,
-              color: isCompleted ? 'var(--success)' : 'var(--text-muted)',
-              borderRadius: 4,
-              lineHeight: 1,
-            }}
-            type="button"
-          >
-            {isCompleted ? '↩' : '✓'}
-          </button>
-          <button
-            title="Rename"
-            onClick={() => { setRenaming(true); setRenameValue(title); setRenamingIndex(index); }}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: 2,
-              fontSize: 13,
-              color: 'var(--text-muted)',
-              borderRadius: 4,
-              lineHeight: 1,
-            }}
-            type="button"
-          >
-            ✎
-          </button>
-          <button
-            title="Delete"
-            onClick={() => removePage(index)}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: 2,
-              fontSize: 13,
-              color: 'var(--text-muted)',
-              borderRadius: 4,
-              lineHeight: 1,
-            }}
-            type="button"
-          >
-            ✕
-          </button>
-        </div>
-      )}
+      {/* Touch device detection */}
+      {(() => {
+        const [isTouch, setIsTouch] = useState(false);
+        const [showMobileActions, setShowMobileActions] = useState(false);
+        const menuRef = useRef<HTMLDivElement>(null);
+
+        useEffect(() => {
+          setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0);
+        }, []);
+
+        useEffect(() => {
+          if (!showMobileActions) return;
+          const handleOutsideClick = (e: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+              setShowMobileActions(false);
+            }
+          };
+          document.addEventListener('mousedown', handleOutsideClick);
+          return () => document.removeEventListener('mousedown', handleOutsideClick);
+        }, [showMobileActions]);
+
+        if (renaming) return null;
+
+        if (hovered || showMobileActions) {
+          return (
+            <div
+              ref={menuRef}
+              style={{
+                display: 'flex',
+                gap: 4,
+                position: 'absolute',
+                right: 8,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'var(--bg-primary)',
+                padding: '4px 6px',
+                borderRadius: 8,
+                border: '1px solid var(--border-color)',
+                boxShadow: 'var(--shadow-md)',
+                zIndex: 10,
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                title={isCompleted ? 'Mark incomplete' : 'Mark complete'}
+                onClick={() => {
+                  togglePageComplete(index);
+                  setShowMobileActions(false);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '4px 6px',
+                  fontSize: 13,
+                  color: isCompleted ? 'var(--success)' : 'var(--text-secondary)',
+                  borderRadius: 4,
+                  lineHeight: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: 'var(--bg-secondary)',
+                }}
+                type="button"
+              >
+                {isCompleted ? '↩' : '✓'}
+              </button>
+              <button
+                title="Rename"
+                onClick={() => {
+                  setRenaming(true);
+                  setRenameValue(title);
+                  setRenamingIndex(index);
+                  setShowMobileActions(false);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '4px 6px',
+                  fontSize: 13,
+                  color: 'var(--text-secondary)',
+                  borderRadius: 4,
+                  lineHeight: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: 'var(--bg-secondary)',
+                }}
+                type="button"
+              >
+                ✎
+              </button>
+              <button
+                title="Delete"
+                onClick={() => {
+                  removePage(index);
+                  setShowMobileActions(false);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '4px 6px',
+                  fontSize: 13,
+                  color: 'var(--error-text, #ef4444)',
+                  borderRadius: 4,
+                  lineHeight: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: 'var(--bg-secondary)',
+                }}
+                type="button"
+              >
+                ✕
+              </button>
+            </div>
+          );
+        }
+
+        if (isTouch) {
+          return (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMobileActions(true);
+              }}
+              style={{
+                background: 'none',
+                border: '1px solid var(--border-color)',
+                backgroundColor: 'var(--bg-secondary)',
+                cursor: 'pointer',
+                padding: '2px 6px',
+                fontSize: 14,
+                fontWeight: 'bold',
+                color: 'var(--text-secondary)',
+                borderRadius: 6,
+                lineHeight: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginLeft: 'auto',
+                flexShrink: 0,
+              }}
+              title="Options"
+              type="button"
+            >
+              ⋮
+            </button>
+          );
+        }
+
+        return null;
+      })()}
     </div>
   );
 }

@@ -15,6 +15,7 @@ export interface AppState {
   error: string | null;
   showShortcuts: boolean;
   showDashboard: boolean;
+  showCreatePrompt: boolean;
   sidebarOpen: boolean;
   searchQuery: string;
   renamingIndex: number | null;
@@ -36,9 +37,10 @@ export interface AppState {
   pomodoroSeconds: number;
   pomodoroIsRunning: boolean;
   learningMode: LearningMode;
-  sectionAnswers: Record<number, Record<number, any>>;
-  examSubmittedPages: Record<number, boolean>;
-  examTimeLeft: Record<number, number>;
+  sectionAnswers: Record<string, Record<number, any>>;
+  examSubmittedPages: Record<string, boolean>;
+  examTimeLeft: Record<string, number>;
+  examPaused: Record<string, boolean>;
 }
 
 /* ==========================================================================
@@ -61,6 +63,7 @@ export type AppAction =
   | { type: 'SET_DARK_MODE'; payload: boolean }
   | { type: 'TOGGLE_SHORTCUTS' }
   | { type: 'TOGGLE_DASHBOARD' }
+  | { type: 'TOGGLE_CREATE_PROMPT' }
   | { type: 'TOGGLE_SIDEBAR' }
   | { type: 'SET_SIDEBAR'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
@@ -86,7 +89,9 @@ export type AppAction =
   | { type: 'SAVE_SECTION_ANSWERS'; payload: { pageIndex: number; sectionIndex: number; answers: any } }
   | { type: 'SUBMIT_EXAM'; payload: { pageIndex: number } }
   | { type: 'RETRY_EXAM'; payload: { pageIndex: number } }
-  | { type: 'UPDATE_EXAM_TIME_LEFT'; payload: { pageIndex: number; timeLeft: number } };
+  | { type: 'UPDATE_EXAM_TIME_LEFT'; payload: { pageIndex: number; timeLeft: number } }
+  | { type: 'TOGGLE_EXAM_PAUSE'; payload: { pageIndex: number } }
+  | { type: 'SET_EXAM_PAUSE'; payload: { pageIndex: number; paused: boolean } };
 
 /* ==========================================================================
    Derived / Computed State (not stored, computed from state)

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback, useMemo, useState } from 'react';
 import type { AppState, AppAction } from '../types/state';
 import { initialState, appReducer, getVisibleIndices } from './appReducer';
 import type { LearningPage, Toast, LearningMode } from '../types/schema';
@@ -52,6 +52,7 @@ interface AppContextValue {
   toggleDarkMode: () => void;
   toggleShortcuts: () => void;
   toggleDashboard: () => void;
+  toggleCreatePrompt: () => void;
   toggleSidebar: () => void;
   setLearningMode: (mode: LearningMode) => void;
   setError: (err: string | null) => void;
@@ -72,6 +73,8 @@ interface AppContextValue {
   submitExam: (pageIndex: number) => void;
   retryExam: (pageIndex: number) => void;
   updateExamTimeLeft: (pageIndex: number, timeLeft: number) => void;
+  toggleExamPause: (pageIndex: number) => void;
+  setExamPause: (pageIndex: number, paused: boolean) => void;
   getQuizAttemptHistory: (pageIndex: number, sectionIndex: number) => { attempts: number; bestCorrect: number; bestTotal: number };
 }
 
@@ -93,6 +96,7 @@ interface AppProviderProps {
 
 export function AppProvider({ children }: AppProviderProps) {
   const [state, dispatch] = useReducer(appReducer, initialState);
+  const [isSessionLoaded, setIsSessionLoaded] = useState(false);
 
   // Load saved theme on mount
   useEffect(() => {
@@ -136,6 +140,7 @@ export function AppProvider({ children }: AppProviderProps) {
         },
       });
     }
+    setIsSessionLoaded(true);
   }, []);
 
   // Load pomodoro state
@@ -156,9 +161,9 @@ export function AppProvider({ children }: AppProviderProps) {
 
   // Save session on relevant state changes
   useEffect(() => {
-    if (state.pages.length === 0) return;
+    if (!isSessionLoaded) return;
     saveSessionToStorage(state);
-  }, [state.pages, state.pageHashes, state.currentPageIndex, state.viewedPages, state.quizScores]);
+  }, [state.pages, state.pageHashes, state.currentPageIndex, state.viewedPages, state.quizScores, isSessionLoaded]);
 
   // Derived values
   const visibleIndices = useMemo(() => getVisibleIndices(state), [state.pages, state.searchQuery]);
@@ -240,6 +245,7 @@ export function AppProvider({ children }: AppProviderProps) {
   const toggleDarkMode = useCallback(() => dispatch({ type: 'TOGGLE_DARK_MODE' }), []);
   const toggleShortcuts = useCallback(() => dispatch({ type: 'TOGGLE_SHORTCUTS' }), []);
   const toggleDashboard = useCallback(() => dispatch({ type: 'TOGGLE_DASHBOARD' }), []);
+  const toggleCreatePrompt = useCallback(() => dispatch({ type: 'TOGGLE_CREATE_PROMPT' }), []);
   const toggleSidebar = useCallback(() => dispatch({ type: 'TOGGLE_SIDEBAR' }), []);
   const setError = useCallback((err: string | null) => dispatch({ type: 'SET_ERROR', payload: err }), []);
   const setRenamingIndex = useCallback((idx: number | null) => dispatch({ type: 'SET_RENAMING_INDEX', payload: idx }), []);
@@ -287,6 +293,14 @@ export function AppProvider({ children }: AppProviderProps) {
     dispatch({ type: 'UPDATE_EXAM_TIME_LEFT', payload: { pageIndex, timeLeft } });
   }, []);
 
+  const toggleExamPause = useCallback((pageIndex: number) => {
+    dispatch({ type: 'TOGGLE_EXAM_PAUSE', payload: { pageIndex } });
+  }, []);
+
+  const setExamPause = useCallback((pageIndex: number, paused: boolean) => {
+    dispatch({ type: 'SET_EXAM_PAUSE', payload: { pageIndex, paused } });
+  }, []);
+
   // setPageConfidence removed
 
   const addToastFn = useCallback((
@@ -307,12 +321,13 @@ export function AppProvider({ children }: AppProviderProps) {
     return !!(state.pages[index]?._meta?.completed);
   }, [state.pages]);
   const isQuizCompleted = useCallback((index: number) => {
+    const pageId = state.pages[index]?._meta?.id || String(index);
     const scores = state.quizScores || {};
     for (const key in scores) {
-      if (key.startsWith(`${index}-`)) return true;
+      if (key.startsWith(`${pageId}-`)) return true;
     }
     return false;
-  }, [state.quizScores]);
+  }, [state.pages, state.quizScores]);
 
   const saveSession = useCallback(() => {
     saveSessionToStorage(state);
@@ -358,12 +373,15 @@ export function AppProvider({ children }: AppProviderProps) {
     toggleDarkMode,
     toggleShortcuts,
     toggleDashboard,
+    toggleCreatePrompt,
     toggleSidebar,
     setLearningMode,
     saveSectionAnswers,
     submitExam,
     retryExam,
     updateExamTimeLeft,
+    toggleExamPause,
+    setExamPause,
     setError,
     setRenamingIndex,
     setContextMenu,
@@ -383,8 +401,9 @@ export function AppProvider({ children }: AppProviderProps) {
     state, visibleIndices, visibleCount, currentPage, completedCount, completedPercent,
     isCurrentPageVisible, addPage, removePage, removeAllPages, renamePage,
     togglePageComplete, movePage, goToPage, nextPage, prevPage, goToRandomPage,
-    setSearchQuery, toggleDarkMode, toggleShortcuts, toggleDashboard, toggleSidebar,
+    setSearchQuery, toggleDarkMode, toggleShortcuts, toggleDashboard, toggleCreatePrompt, toggleSidebar,
     setLearningMode, saveSectionAnswers, submitExam, retryExam, updateExamTimeLeft,
+    toggleExamPause, setExamPause,
     setError, setRenamingIndex, setContextMenu, saveNote, getNote, recordQuizScore,
     saveChecklist, saveFlashcardProgress, addToastFn, dismissToast, isPageViewed, isPageCompleted,
     isQuizCompleted, saveSession, getQuizAttemptHistory,

@@ -28,12 +28,13 @@ export default function FillBlankSection({
   const prevAnswersRef = useRef<Record<number, string>>({});
 
   const isExamMode = state.learningMode === 'exam';
-  const isExamSubmitted = isExamMode && !!state.examSubmittedPages[state.currentPageIndex];
+  const currentPageId = state.pages[state.currentPageIndex]?._meta?.id || String(state.currentPageIndex);
+  const isExamSubmitted = isExamMode && !!state.examSubmittedPages[currentPageId];
   const activeSubmitted = isExamMode ? isExamSubmitted : submitted;
 
   // Load saved answers
   useEffect(() => {
-    const saved = state.sectionAnswers[state.currentPageIndex]?.[sectionIndex];
+    const saved = state.sectionAnswers[currentPageId]?.[sectionIndex];
     if (saved) {
       setAnswers(saved);
     } else {
@@ -42,7 +43,7 @@ export default function FillBlankSection({
     if (!isExamMode) {
       setSubmitted(false);
     }
-  }, [state.currentPageIndex, sectionIndex, isExamMode, state.sectionAnswers]);
+  }, [currentPageId, sectionIndex, isExamMode, state.sectionAnswers]);
 
   const instantFeedback = section.instantFeedback ?? false;
 
@@ -145,7 +146,7 @@ export default function FillBlankSection({
       <span key={index}>
         {parts.map((part, pi) => (
           <React.Fragment key={pi}>
-            {part}
+            <span dangerouslySetInnerHTML={{ __html: renderMarkdown(part) }} />
             {pi < parts.length - 1 && (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', margin: '0 0.125rem', position: 'relative' }}>
                 <input

@@ -13,6 +13,7 @@ export default function Header() {
     toggleShortcuts,
     setLearningMode,
     setSearchQuery,
+    toggleExamPause,
   } = useAppContext();
 
   const [mobileSearchActive, setMobileSearchActive] = useState(false);
@@ -30,6 +31,44 @@ export default function Header() {
     media.addEventListener('change', listener);
     return () => media.removeEventListener('change', listener);
   }, []);
+
+  // Exam timer calculations for top-nav display
+  const page = state.currentPageIndex >= 0 && state.currentPageIndex < state.pages.length
+    ? state.pages[state.currentPageIndex]
+    : null;
+
+  const currentPageId = page?._meta?.id || String(state.currentPageIndex);
+
+  const isExamMode = state.learningMode === 'exam';
+  const isPageExamSubmitted = isExamMode && !!state.examSubmittedPages[currentPageId];
+
+  const pageExamAutoTime = React.useMemo(() => {
+    if (!isExamMode || !page) return 0;
+    let total = 0;
+    (page.exam || []).forEach((sec) => {
+      const isGradedSec = ['quiz', 'fill-blank', 'matching', 'sorting', 'cloze'].includes(sec.type);
+      if (!isGradedSec) return;
+      if (sec.type === 'quiz' && 'questions' in sec) total += ((sec as any).questions?.length || 1) * 30;
+      else if (sec.type === 'fill-blank' && 'sentences' in sec) total += ((sec as any).sentences?.length || 1) * 30;
+      else if (sec.type === 'matching' && 'pairs' in sec) total += ((sec as any).pairs?.length || 1) * 20;
+      else if (sec.type === 'sorting' && 'items' in sec) total += ((sec as any).items?.length || 1) * 30;
+      else if (sec.type === 'cloze') total += 60;
+    });
+    return Math.max(total, 60);
+  }, [isExamMode, page, state.currentPageIndex]);
+
+  const persistedTime = state.examTimeLeft[currentPageId];
+  const timeLeft = persistedTime !== undefined ? persistedTime : pageExamAutoTime;
+  const isPaused = !!state.examPaused[currentPageId];
+  const isExamActive = isExamMode && page && !isPageExamSubmitted;
+
+  const formatTime = (secs: number) => {
+    const m = Math.floor(secs / 60).toString().padStart(2, '0');
+    const s = (secs % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
+  const timerUrgent = timeLeft > 0 && timeLeft < 30;
 
   const iconBtnBase: React.CSSProperties = {
     display: 'flex',
@@ -161,6 +200,58 @@ export default function Header() {
 
       {/* Right Group (Mode Switcher + Actions) */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        {/* Header Exam Timer Pill */}
+        {isExamActive && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.375rem',
+            padding: '4px 10px',
+            borderRadius: '8px',
+            background: timerUrgent ? 'rgba(239, 68, 68, 0.1)' : 'var(--bg-secondary)',
+            border: `1.5px solid ${timerUrgent ? 'var(--error)' : 'var(--accent)'}`,
+            color: timerUrgent ? 'var(--error)' : 'var(--accent)',
+            fontSize: '0.8125rem',
+            fontWeight: 700,
+            transition: 'all 0.2s',
+            boxShadow: timerUrgent ? '0 0 8px rgba(239, 68, 68, 0.2)' : 'none',
+          }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} width={13} height={13} style={{ flexShrink: 0 }}>
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatTime(timeLeft)}</span>
+            <button
+              onClick={() => toggleExamPause(state.currentPageIndex)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'inherit',
+                cursor: 'pointer',
+                padding: '2px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: 0.85,
+                transition: 'transform 0.1s',
+              }}
+              className="btn-base"
+              title={isPaused ? 'Resume Exam' : 'Pause Exam'}
+            >
+              {isPaused ? (
+                <svg viewBox="0 0 24 24" fill="currentColor" width={11} height={11}>
+                  <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="currentColor" width={11} height={11}>
+                  <rect x="6" y="4" width="4" height="16" />
+                  <rect x="14" y="4" width="4" height="16" />
+                </svg>
+              )}
+            </button>
+          </div>
+        )}
+
         {/* Mode Switcher */}
         <div style={{
           display: 'flex',
@@ -204,7 +295,7 @@ export default function Header() {
           gap: 6,
         }}>
           {/* Mobile search toggle */}
-          {isMobile && (
+          {isMobile && !isExamActive && (
             <button
               onClick={() => setMobileSearchActive(true)}
               aria-label="Search pages"
@@ -231,37 +322,39 @@ export default function Header() {
           {!isMobile && <PomodoroTimer />}
 
           {/* Dashboard button */}
-          <button
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 36,
-              height: 36,
-              padding: 0,
-              border: '1px solid var(--border-color)',
-              borderRadius: 8,
-              background: state.showDashboard ? 'var(--accent-light)' : 'var(--bg-secondary)',
-              color: state.showDashboard ? 'var(--accent)' : 'var(--text-secondary)',
-              borderColor: state.showDashboard ? 'var(--accent)' : 'var(--border-color)',
-              cursor: 'pointer',
-              transition: 'background 0.15s, color 0.15s, border-color 0.15s',
-              flexShrink: 0,
-            }}
-            onClick={toggleDashboard}
-            aria-label="Dashboard"
-            title="Dashboard"
-            type="button"
-            className="btn-base header-icon-btn"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width={20} height={20}>
-              <line x1="18" y1="20" x2="18" y2="10" />
-              <line x1="12" y1="20" x2="12" y2="4" />
-              <line x1="6" y1="20" x2="6" y2="14" />
-            </svg>
-          </button>
+          {(!isMobile || !isExamActive) && (
+            <button
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 36,
+                height: 36,
+                padding: 0,
+                border: '1px solid var(--border-color)',
+                borderRadius: 8,
+                background: state.showDashboard ? 'var(--accent-light)' : 'var(--bg-secondary)',
+                color: state.showDashboard ? 'var(--accent)' : 'var(--text-secondary)',
+                borderColor: state.showDashboard ? 'var(--accent)' : 'var(--border-color)',
+                cursor: 'pointer',
+                transition: 'background 0.15s, color 0.15s, border-color 0.15s',
+                flexShrink: 0,
+              }}
+              onClick={toggleDashboard}
+              aria-label="Dashboard"
+              title="Dashboard"
+              type="button"
+              className="btn-base header-icon-btn"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width={20} height={20}>
+                <line x1="18" y1="20" x2="18" y2="10" />
+                <line x1="12" y1="20" x2="12" y2="4" />
+                <line x1="6" y1="20" x2="6" y2="14" />
+              </svg>
+            </button>
+          )}
 
-          <DarkModeToggle />
+          {(!isMobile || !isExamActive) && <DarkModeToggle />}
 
           {/* Keyboard shortcuts */}
           {!isMobile && (
@@ -304,7 +397,7 @@ export default function Header() {
           )}
 
           {/* Upload */}
-          <UploadButton />
+          {(!isMobile || !isExamActive) && <UploadButton />}
         </div>
       </div>
     </header>

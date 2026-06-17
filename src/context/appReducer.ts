@@ -3,9 +3,14 @@ import type { LearningPage, LearningMode } from '../types/schema';
 import { computeContentHash } from '../utils/contentHash';
 import { storage } from '../utils/storage';
 
-/** Ensure a page has _meta */
+/** Ensure a page has _meta and a unique ID */
 function ensureMeta(page: LearningPage): LearningPage {
   if (!page._meta) page._meta = {};
+  if (!page._meta.id) {
+    page._meta.id = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+  }
   return page;
 }
 
@@ -17,6 +22,7 @@ export const initialState: AppState = {
   error: null,
   showShortcuts: false,
   showDashboard: false,
+  showCreatePrompt: false,
   sidebarOpen: false,
   searchQuery: '',
   renamingIndex: null,
@@ -32,9 +38,10 @@ export const initialState: AppState = {
   pomodoroSeconds: 0,
   pomodoroIsRunning: false,
   learningMode: storage.load<LearningMode>('learningMode', 'learn'),
-  sectionAnswers: storage.load<Record<number, Record<number, any>>>('sectionAnswers', {}),
-  examSubmittedPages: storage.load<Record<number, boolean>>('examSubmittedPages', {}),
-  examTimeLeft: storage.load<Record<number, number>>('examTimeLeft', {}),
+  sectionAnswers: storage.load<Record<string, Record<number, any>>>('sectionAnswers', {}),
+  examSubmittedPages: storage.load<Record<string, boolean>>('examSubmittedPages', {}),
+  examTimeLeft: storage.load<Record<string, number>>('examTimeLeft', {}),
+  examPaused: {},
 };
 
 export function appReducer(state: AppState, action: AppAction): AppState {
@@ -209,10 +216,11 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 
     case 'SAVE_SECTION_ANSWERS': {
       const { pageIndex, sectionIndex, answers } = action.payload;
-      const pageAnswers = state.sectionAnswers[pageIndex] || {};
+      const pageId = state.pages[pageIndex]?._meta?.id || String(pageIndex);
+      const pageAnswers = state.sectionAnswers[pageId] || {};
       const newAnswers = {
         ...state.sectionAnswers,
-        [pageIndex]: {
+        [pageId]: {
           ...pageAnswers,
           [sectionIndex]: answers
         }
@@ -226,9 +234,10 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 
     case 'SUBMIT_EXAM': {
       const { pageIndex } = action.payload;
+      const pageId = state.pages[pageIndex]?._meta?.id || String(pageIndex);
       const newSubmitted = {
         ...state.examSubmittedPages,
-        [pageIndex]: true
+        [pageId]: true
       };
       storage.save('examSubmittedPages', newSubmitted);
       return {
@@ -239,15 +248,17 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 
     case 'RETRY_EXAM': {
       const { pageIndex } = action.payload;
+      const pageId = state.pages[pageIndex]?._meta?.id || String(pageIndex);
       // Remove the submitted flag for this page
       const newSubmitted = { ...state.examSubmittedPages };
-      delete newSubmitted[pageIndex];
+      delete newSubmitted[pageId];
       // Clear all section answers for this page
       const newAnswers = { ...state.sectionAnswers };
-      delete newAnswers[pageIndex];
+      delete newAnswers[pageId];
       // Reset the timer for this page
       const newTimeLeft = { ...state.examTimeLeft };
-      delete newTimeLeft[pageIndex];
+      delete newTimeLeft[pageId];
+      const newPaused = { ...state.examPaused, [pageId]: true };
       storage.save('examSubmittedPages', newSubmitted);
       storage.save('sectionAnswers', newAnswers);
       storage.save('examTimeLeft', newTimeLeft);
@@ -256,14 +267,16 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         examSubmittedPages: newSubmitted,
         sectionAnswers: newAnswers,
         examTimeLeft: newTimeLeft,
+        examPaused: newPaused,
       };
     }
 
     case 'UPDATE_EXAM_TIME_LEFT': {
       const { pageIndex, timeLeft } = action.payload;
+      const pageId = state.pages[pageIndex]?._meta?.id || String(pageIndex);
       const newTimeLeft = {
         ...state.examTimeLeft,
-        [pageIndex]: timeLeft
+        [pageId]: timeLeft
       };
       storage.save('examTimeLeft', newTimeLeft);
       return {
@@ -272,13 +285,38 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
     }
 
+    case 'TOGGLE_EXAM_PAUSE': {
+      const { pageIndex } = action.payload;
+      const pageId = state.pages[pageIndex]?._meta?.id || String(pageIndex);
+      return {
+        ...state,
+        examPaused: {
+          ...state.examPaused,
+          [pageId]: !state.examPaused[pageId],
+        },
+      };
+    }
 
+    case 'SET_EXAM_PAUSE': {
+      const { pageIndex, paused } = action.payload;
+      const pageId = state.pages[pageIndex]?._meta?.id || String(pageIndex);
+      return {
+        ...state,
+        examPaused: {
+          ...state.examPaused,
+          [pageId]: paused,
+        },
+      };
+    }
 
     case 'TOGGLE_SHORTCUTS':
       return { ...state, showShortcuts: !state.showShortcuts };
 
     case 'TOGGLE_DASHBOARD':
       return { ...state, showDashboard: !state.showDashboard };
+
+    case 'TOGGLE_CREATE_PROMPT':
+      return { ...state, showCreatePrompt: !state.showCreatePrompt };
 
     case 'TOGGLE_SIDEBAR':
       return { ...state, sidebarOpen: !state.sidebarOpen };
@@ -319,7 +357,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     /* ---- Quiz Scores ---- */
     case 'RECORD_QUIZ_SCORE': {
       const { pageIndex, sectionIndex, correct, total } = action.payload;
-      const key = `${pageIndex}-${sectionIndex}`;
+      const pageId = state.pages[pageIndex]?._meta?.id || String(pageIndex);
+      const key = `${pageId}-${sectionIndex}`;
       const newScores = { ...state.quizScores, [key]: { correct, total } };
       storage.save('quizScores', newScores);
       return { ...state, quizScores: newScores };
@@ -394,13 +433,84 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         }
         return updated;
       });
+
+      // Migrate legacy numerical keys in sectionAnswers, examSubmittedPages, examTimeLeft
+      const migratedAnswers: Record<string, Record<number, any>> = {};
+      const migratedSubmitted: Record<string, boolean> = {};
+      const migratedTimeLeft: Record<string, number> = {};
+      const migratedScores: Record<string, { correct: number; total: number }> = {};
+
+      restoredPages.forEach((page, idx) => {
+        const pageId = page._meta!.id!; // guaranteed by ensureMeta
+        
+        // 1. sectionAnswers
+        const oldAnswers = state.sectionAnswers[idx] || state.sectionAnswers[pageId];
+        if (oldAnswers) {
+          migratedAnswers[pageId] = oldAnswers;
+        }
+
+        // 2. examSubmittedPages
+        const oldSubmitted = state.examSubmittedPages[idx] !== undefined ? state.examSubmittedPages[idx] : state.examSubmittedPages[pageId];
+        if (oldSubmitted !== undefined) {
+          migratedSubmitted[pageId] = oldSubmitted;
+        }
+
+        // 3. examTimeLeft
+        const oldTimeLeft = state.examTimeLeft[idx] !== undefined ? state.examTimeLeft[idx] : state.examTimeLeft[pageId];
+        if (oldTimeLeft !== undefined) {
+          migratedTimeLeft[pageId] = oldTimeLeft;
+        }
+      });
+
+      // 4. quizScores (keys look like `${pageIndex}-${sectionIndex}` or `${pageId}-${sectionIndex}`)
+      const rawScores = quizScores || {};
+      Object.entries(rawScores).forEach(([key, val]) => {
+        const parts = key.split('-');
+        if (parts.length === 2) {
+          const [prefix, secIdx] = parts;
+          const idxNum = Number(prefix);
+          if (!isNaN(idxNum) && restoredPages[idxNum]) {
+            const pageId = restoredPages[idxNum]._meta!.id!;
+            migratedScores[`${pageId}-${secIdx}`] = val as any;
+          } else {
+            // Already a string key/pageId key, keep it
+            migratedScores[key] = val as any;
+          }
+        }
+      });
+
+      // Clean up any remaining non-migrated items that might already be using the correct string IDs
+      Object.entries(state.sectionAnswers).forEach(([key, val]) => {
+        if (isNaN(Number(key)) && !migratedAnswers[key]) {
+          migratedAnswers[key] = val;
+        }
+      });
+      Object.entries(state.examSubmittedPages).forEach(([key, val]) => {
+        if (isNaN(Number(key)) && !migratedSubmitted[key]) {
+          migratedSubmitted[key] = val;
+        }
+      });
+      Object.entries(state.examTimeLeft).forEach(([key, val]) => {
+        if (isNaN(Number(key)) && !migratedTimeLeft[key]) {
+          migratedTimeLeft[key] = val;
+        }
+      });
+
+      // Save migrated data to localStorage
+      storage.save('sectionAnswers', migratedAnswers);
+      storage.save('examSubmittedPages', migratedSubmitted);
+      storage.save('examTimeLeft', migratedTimeLeft);
+
       return {
         ...state,
         pages: restoredPages,
         pageHashes: hashes,
         currentPageIndex,
         viewedPages,
-        quizScores,
+        sectionAnswers: migratedAnswers,
+        examSubmittedPages: migratedSubmitted,
+        examTimeLeft: migratedTimeLeft,
+        quizScores: migratedScores,
       };
     }
 

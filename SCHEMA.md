@@ -7,8 +7,9 @@ Each JSON file represents a **single learning page**. Upload one or more files v
 ```jsonc
 {
   "page": { /* page metadata - see below */ },
-  "sections": [ /* array of content sections for Learn Mode - see types below */ ],
-  "test": { /* optional test configuration for Practice/Exam Mode - see below */ }
+  "learn": [ /* array of content sections for Learn Mode - see types below */ ],
+  "practice": [ /* array of content sections for Practice Mode - see types below */ ],
+  "exam": [ /* array of content sections for Exam Mode - see types below */ ]
 }
 ```
 
@@ -24,18 +25,11 @@ Each JSON file represents a **single learning page**. Upload one or more files v
 | `title` | string | ✅ | Page title (displayed in sidebar + header) |
 | `description` | string | ❌ | Short summary of the page |
 | `tags` | string[] | ❌ | Filterable tags for search |
+| `icon` | string | ❌ | Optional emoji icon |
 
-### `test` Object
+### `learn`, `practice`, and `exam` Arrays
 
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `title` | string | ❌ | Title for the practice/exam section |
-| `subsections` | array | ✅ | Array of section objects (same types as `sections` below) rendered specifically in Practice and Exam modes |
-
-### `sections` Array
-
-Each section object in the `sections` array (or `test.subsections` array) requires at least:
-
+Each section object inside the `learn`, `practice`, or `exam` arrays requires at least:
 
 | Field | Type | Required | Description |
 |---|---|---|---|
@@ -296,12 +290,13 @@ See [`test/fixtures/valid-full.json`](./test/fixtures/valid-full.json) for a com
 
 ## Validation
 
-All uploaded JSON files are validated against this schema before rendering. Errors are displayed in a red panel with field paths (e.g., `sections[2].content`).
+All uploaded JSON files are validated against this schema before rendering. Errors are displayed in a red panel with field paths (e.g., `learn[2].content`).
 
-To validate programmatically (Node.js):
-
-```js
-const { validateLearningPage } = require('./js/schema-validator.cjs');
-const result = validateLearningPage(yourJsonObject);
-console.log(result.valid ? '✅ Valid' : '❌ Invalid', result.errors);
-```
+The validator enforces:
+1. **Required Fields**: Every uploaded JSON file must contain a `page` object, and `learn`, `practice`, and `exam` arrays.
+2. **Item Count Constraints**:
+   - `quiz` sections: Must contain at least **5 questions**
+   - `fill-blank` sections: Must contain at least **4 sentences**
+   - `matching` sections: Must contain at least **3 pairs**
+   - `sorting` sections: Must contain at least **4 items**
+   - `cloze` sections: Must contain at least **4 blanks**

@@ -6,7 +6,7 @@ import SidebarProgress from '../UI/SidebarProgress';
 import PageList from '../UI/PageList';
 
 export default function Sidebar() {
-  const { state, toggleSidebar } = useAppContext();
+  const { state, toggleSidebar, toggleCreatePrompt } = useAppContext();
 
   const isOpen = state.sidebarOpen;
 
@@ -46,6 +46,14 @@ export default function Sidebar() {
         <div style={sidebarContentStyle}>
           <div style={dropZoneSectionStyle}>
             <FileUploadDropZone />
+            <button
+              className={styles.createBtn}
+              onClick={toggleCreatePrompt}
+              title="Create prompt to generate JSON"
+              type="button"
+            >
+              <span>✨ Create JSON</span>
+            </button>
           </div>
           <div style={progressSectionStyle}>
             <SidebarProgress />

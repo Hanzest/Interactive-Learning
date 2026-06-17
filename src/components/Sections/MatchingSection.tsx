@@ -34,12 +34,13 @@ export default function MatchingSection({
   const svgRef = useRef<SVGSVGElement>(null);
 
   const isExamMode = state.learningMode === 'exam';
-  const isExamSubmitted = isExamMode && !!state.examSubmittedPages[state.currentPageIndex];
+  const currentPageId = state.pages[state.currentPageIndex]?._meta?.id || String(state.currentPageIndex);
+  const isExamSubmitted = isExamMode && !!state.examSubmittedPages[currentPageId];
   const activeSubmitted = isExamMode ? isExamSubmitted : submitted;
 
   // Load saved answers and layout
   useEffect(() => {
-    const saved = state.sectionAnswers[state.currentPageIndex]?.[sectionIndex];
+    const saved = state.sectionAnswers[currentPageId]?.[sectionIndex];
     if (saved) {
       setMatches(saved.matches || {});
       setShuffledRight(saved.shuffledRight || shuffle(section.pairs.map(p => p.right)));
@@ -54,7 +55,7 @@ export default function MatchingSection({
     if (!isExamMode) {
       setSubmitted(false);
     }
-  }, [state.currentPageIndex, sectionIndex, isExamMode, state.sectionAnswers]);
+  }, [currentPageId, sectionIndex, isExamMode, state.sectionAnswers]);
 
   const saveAndSetMatches = useCallback((newMatches: Record<number, number>) => {
     setMatches(newMatches);
