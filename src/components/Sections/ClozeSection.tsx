@@ -47,7 +47,8 @@ export default function ClozeSection({
   const handleAnswerChange = useCallback(
     (blankId: string, value: string) => {
       if (activeSubmitted || showAnswer) return;
-      const newAnswers = { ...answers, [blankId]: value };
+      const cappedValue = value.slice(0, 100);
+      const newAnswers = { ...answers, [blankId]: cappedValue };
       setAnswers(newAnswers);
       saveSectionAnswers(state.currentPageIndex, sectionIndex, newAnswers);
     },
@@ -218,6 +219,7 @@ export default function ClozeSection({
           ) : (
             <input
               type="text"
+              maxLength={100}
               style={inputStyle}
               value={answers[blankId] || ''}
               onChange={(e) => handleAnswerChange(blankId, e.target.value)}

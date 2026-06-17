@@ -237,7 +237,7 @@ export default function DashboardOverlay() {
       let submittedCount = 0;
       pages.forEach((page, i) => {
         if (state.examSubmittedPages[i]) {
-          const res = gradePageSections(page, i, state.sectionAnswers);
+          const res = gradePageSections(page, i, state.sectionAnswers, true);
           if (res.total > 0) {
             totalPageScores += res.correct / res.total;
             submittedCount++;
@@ -395,7 +395,7 @@ export default function DashboardOverlay() {
               let badgeStyle = s.statusNew;
 
               if (examSubmitted) {
-                const results = gradePageSections(page, i, state.sectionAnswers);
+                const results = gradePageSections(page, i, state.sectionAnswers, true);
                 statusLabel = results.total > 0 ? `Exam: ${results.correct}/${results.total}` : 'Exam: Done';
                 badgeStyle = s.statusDone;
               } else {

@@ -34,10 +34,9 @@ export default function PageContent() {
   }, [state.currentPageIndex, state.learningMode]);
 
   const sections = page
-    ? (page.sections || []).filter((sec) => {
-        if (state.learningMode === 'learn') return true;
-        return ['text', 'quiz', 'fill-blank', 'matching', 'sorting', 'cloze'].includes(sec.type);
-      })
+    ? (state.learningMode === 'learn'
+        ? (page.sections || [])
+        : (page.test?.subsections || []))
     : [];
 
   const totalSlides = sections.length;
@@ -60,7 +59,7 @@ export default function PageContent() {
   const pageExamAutoTime = useMemo(() => {
     if (!isExamMode || !page) return 0;
     let total = 0;
-    (page.sections || []).forEach((sec) => {
+    (page.test?.subsections || []).forEach((sec) => {
       const isGradedSec = ['quiz', 'fill-blank', 'matching', 'sorting', 'cloze'].includes(sec.type);
       if (!isGradedSec) return;
       if (sec.type === 'quiz' && 'questions' in sec) total += ((sec as any).questions?.length || 1) * 30;
@@ -179,7 +178,7 @@ export default function PageContent() {
   // Compute page exam score for the review summary
   const pageExamResult = useMemo(() => {
     if (!isPageExamSubmitted || !page) return null;
-    return gradePageSections(page, state.currentPageIndex, state.sectionAnswers);
+    return gradePageSections(page, state.currentPageIndex, state.sectionAnswers, true);
   }, [isPageExamSubmitted, page, state.currentPageIndex, state.sectionAnswers]);
 
   const formatTime = (secs: number) => {
@@ -856,7 +855,11 @@ export default function PageContent() {
             <SectionRenderer
               key={`${state.currentPageIndex}-${activeSlideIndex}`}
               section={section}
-              sectionIndex={page.sections ? page.sections.indexOf(section) : activeSlideIndex}
+              sectionIndex={
+                state.learningMode === 'learn'
+                  ? (page.sections ? page.sections.indexOf(section) : activeSlideIndex)
+                  : (page.test?.subsections ? page.test.subsections.indexOf(section) : activeSlideIndex)
+              }
               forceSubmit={forceSubmit}
               isConfirmed={isConfirmed}
               onGraded={isExamMode ? undefined : handleGraded}

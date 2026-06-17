@@ -120,10 +120,10 @@ describe('validateLearningPage', () => {
       expect(validateLearningPage([]).valid).toBe(false);
     });
 
-    it('should reject object with missing page and sections', () => {
+    it('should reject object with missing page, sections, and test', () => {
       const result = validateLearningPage({});
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('must contain "page" or "sections"');
+      expect(result.error).toContain('must contain "page", "sections", or "test"');
     });
   });
 
@@ -324,6 +324,54 @@ describe('validateLearningPage', () => {
       });
       expect(result.valid).toBe(false);
       expect(result.error).toContain('correctIndex');
+    });
+  });
+
+  describe('test object checks', () => {
+    it('should reject non-object test property', () => {
+      const result = validateLearningPage({ test: 'not-an-obj' });
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('"test" property must be an object');
+    });
+
+    it('should reject non-string test title', () => {
+      const result = validateLearningPage({ test: { title: 123 } });
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('"test.title" must be a string');
+    });
+
+    it('should reject non-array test subsections', () => {
+      const result = validateLearningPage({ test: { subsections: 'not-an-array' } });
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('"test.subsections" must be an array');
+    });
+
+    it('should reject invalid section inside test subsections', () => {
+      const result = validateLearningPage({
+        test: {
+          subsections: [
+            { type: 'invalid-type', title: 'Invalid' }
+          ]
+        }
+      });
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('"test.subsections[0].type" must be one of');
+    });
+
+    it('should validate a correct test subsections structure', () => {
+      const result = validateLearningPage({
+        test: {
+          title: 'Exam 1',
+          subsections: [
+            {
+              type: 'text',
+              title: 'Welcome',
+              content: 'Instructions go here.'
+            }
+          ]
+        }
+      });
+      expect(result.valid).toBe(true);
     });
   });
 });

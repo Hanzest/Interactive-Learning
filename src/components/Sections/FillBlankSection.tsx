@@ -50,7 +50,8 @@ export default function FillBlankSection({
     (index: number, value: string) => {
       if (showAnswer) return;
       if (activeSubmitted && !instantFeedback) return;
-      const newAnswers = { ...answers, [index]: value };
+      const cappedValue = value.slice(0, 100);
+      const newAnswers = { ...answers, [index]: cappedValue };
       setAnswers(newAnswers);
       saveSectionAnswers(state.currentPageIndex, sectionIndex, newAnswers);
       if (instantFeedback) {
@@ -149,6 +150,7 @@ export default function FillBlankSection({
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', margin: '0 0.125rem', position: 'relative' }}>
                 <input
                   type="text"
+                  maxLength={100}
                   style={{
                     padding: '0.25rem 0.5rem',
                     border: `2px solid ${isCorrect ? 'var(--success)' : isWrong ? 'var(--error)' : 'var(--border-color)'}`,

@@ -3,12 +3,19 @@
    See: ../SCHEMA.md (v1) for the full schema documentation
    ========================================================================== */
 
+export interface TestSection {
+  title?: string;
+  subsections?: Section[];
+}
+
 /** Top-level learning page */
 export interface LearningPage {
   page?: PageMeta;
   sections?: Section[];
+  test?: TestSection;
   _meta?: PageMetaData;
 }
+
 
 /** Page metadata */
 export interface PageMeta {

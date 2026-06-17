@@ -7,7 +7,8 @@ Each JSON file represents a **single learning page**. Upload one or more files v
 ```jsonc
 {
   "page": { /* page metadata - see below */ },
-  "sections": [ /* array of content sections - see types below */ ]
+  "sections": [ /* array of content sections for Learn Mode - see types below */ ],
+  "test": { /* optional test configuration for Practice/Exam Mode - see below */ }
 }
 ```
 
@@ -19,14 +20,22 @@ Each JSON file represents a **single learning page**. Upload one or more files v
 ### `page` Object
 
 | Field | Type | Required | Description |
-|---|---|---|---|---|
+|---|---|---|---|
 | `title` | string | ✅ | Page title (displayed in sidebar + header) |
 | `description` | string | ❌ | Short summary of the page |
 | `tags` | string[] | ❌ | Filterable tags for search |
 
+### `test` Object
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `title` | string | ❌ | Title for the practice/exam section |
+| `subsections` | array | ✅ | Array of section objects (same types as `sections` below) rendered specifically in Practice and Exam modes |
+
 ### `sections` Array
 
-Each section object requires at least:
+Each section object in the `sections` array (or `test.subsections` array) requires at least:
+
 
 | Field | Type | Required | Description |
 |---|---|---|---|

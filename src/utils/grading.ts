@@ -15,17 +15,22 @@ export interface PageGradingResult {
 export function gradePageSections(
   page: any,
   pageIndex: number,
-  sectionAnswers: Record<number, Record<number, any>>
+  sectionAnswers: Record<number, Record<number, any>>,
+  useTestSubsections: boolean = false
 ): PageGradingResult {
   let totalCorrect = 0;
   let totalItems = 0;
   const sectionScores: SectionScore[] = [];
 
-  if (!page || !page.sections) {
+  const targetSections = useTestSubsections
+    ? (page.test?.subsections || [])
+    : (page.sections || []);
+
+  if (!page || !targetSections) {
     return { correct: 0, total: 0, sectionScores };
   }
 
-  page.sections.forEach((sec: any, secIdx: number) => {
+  targetSections.forEach((sec: any, secIdx: number) => {
     const saved = sectionAnswers[pageIndex]?.[secIdx];
     let secCorrect = 0;
     let secTotal = 0;

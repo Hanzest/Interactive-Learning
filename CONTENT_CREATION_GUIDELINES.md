@@ -14,6 +14,18 @@ To maximize knowledge retention, structure your pages around four key cognitive 
 
 ---
 
+## 🔄 Separating Learn and Practice/Exam Content
+
+To ensure the best learning outcome, content creators must separate study material from assessment material:
+- **Learn Mode (placed in the root `sections` array)**:
+  - Contains expository components (`text`, `tabs`, `accordion`, `timeline`, `flashcards`, `checklist`) that explain the concepts step-by-step.
+  - May also include interactive/graded components (`quiz`, `fill-blank`, `matching`, `sorting`, `cloze`) to facilitate active recall, quick self-checks, and revision of concepts before starting the exam.
+- **Practice & Exam Mode (placed in the `test.subsections` array)**:
+  - Contains assessment components (`quiz`, `fill-blank`, `matching`, `sorting`, `cloze`) designed to evaluate the learner's comprehension.
+  - Switch to Practice or Exam Mode to render these components exclusively. This prevents mixing active reading with test execution.
+
+---
+
 ## 🛠️ Component Guidelines & Best Practices
 
 ### 1. `text` (Content Blocks)
