@@ -1,9 +1,11 @@
 import React from 'react';
 import { useAppContext } from '../../context/AppContext';
 import FileUploadDropZone from '../UI/FileUploadDropZone';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export default function WelcomePage() {
   const { toggleCreatePrompt } = useAppContext();
+  const { t } = useTranslation();
 
   // Premium, responsive styles
   const containerStyle: React.CSSProperties = {
@@ -163,47 +165,47 @@ export default function WelcomePage() {
     <div style={containerStyle}>
       {/* Badge */}
       <div style={badgeStyle}>
-        <span>✨</span> 100% Free & Interactive
+        <span>✨</span> {t('welcomePage.badge')}
       </div>
 
       {/* Hero Header */}
-      <h1 style={titleStyle}>Interactive Learning, Made Effortless</h1>
+      <h1 style={titleStyle}>{t('welcomePage.title')}</h1>
       <p style={subtitleStyle}>
-        Boost your learning efficiency with active recall. Upload study JSON files to dynamically render interactive cards, practice quizzes, timelines, and games. Statically built and local-first.
+        {t('welcomePage.subtitle')}
       </p>
 
       {/* Features Grid */}
       <div style={gridStyle}>
         <div style={cardStyle} className="card-base">
           <span style={cardIconStyle}>💡</span>
-          <h3 style={cardTitleStyle}>Free & Local-First</h3>
+          <h3 style={cardTitleStyle}>{t('welcomePage.feat1Title')}</h3>
           <p style={cardTextStyle}>
-            No subscriptions, no accounts, and no paywalls. All learning progress and pages are processed locally in your browser for absolute speed and privacy.
+            {t('welcomePage.feat1Desc')}
           </p>
         </div>
 
         <div style={cardStyle} className="card-base">
           <span style={cardIconStyle}>⚡</span>
-          <h3 style={cardTitleStyle}>11 Interactive Section Types</h3>
+          <h3 style={cardTitleStyle}>{t('welcomePage.feat2Title')}</h3>
           <p style={cardTextStyle}>
-            Study using 3D Flashcards, Matching games, Cloze tests, drag-and-drop Sorting, Fill-in-the-blank sentences, Tab comparisons, and multi-option Quizzes.
+            {t('welcomePage.feat2Desc')}
           </p>
         </div>
 
         <div style={cardStyle} className="card-base">
           <span style={cardIconStyle}>🎯</span>
-          <h3 style={cardTitleStyle}>Improve Study Efficiency</h3>
+          <h3 style={cardTitleStyle}>{t('welcomePage.feat3Title')}</h3>
           <p style={cardTextStyle}>
-            Maximize memory retention using integrated practice/exam modes with automated timers, performance analytics, and a built-in focus Pomodoro timer.
+            {t('welcomePage.feat3Desc')}
           </p>
         </div>
       </div>
 
       {/* Upload & Prompt Area */}
       <div style={actionBoxStyle}>
-        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem', fontWeight: 700 }}>Get Started Now</h3>
+        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem', fontWeight: 700 }}>{t('welcomePage.getStarted')}</h3>
         <p style={{ margin: '0 0 1rem 0', fontSize: '0.875rem', color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.5 }}>
-          Drag & drop a learning page JSON file here, or click to upload one from your computer.
+          {t('welcomePage.uploadPrompt')}
         </p>
 
         <div style={{ width: '100%' }}>
@@ -212,7 +214,7 @@ export default function WelcomePage() {
 
         <div style={flexBtnContainer}>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', margin: '4px 0' }}>
-            Don't have a JSON file? Generate one using AI:
+            {t('welcomePage.aiPrompt')}
           </div>
           <button
             type="button"
@@ -220,14 +222,14 @@ export default function WelcomePage() {
             onClick={toggleCreatePrompt}
             className="btn-base"
           >
-            ✨ Create JSON with Prompt Wizard
+            ✨ {t('welcomePage.wizardBtn')}
           </button>
         </div>
       </div>
 
       {/* Creator Attribution */}
       <div style={creatorCreditStyle}>
-        Created by{' '}
+        {t('welcomePage.createdBy')}{' '}
         <a
           href="https://github.com/Hanzest"
           target="_blank"
@@ -247,10 +249,10 @@ export default function WelcomePage() {
       {/* Keyboard Shortcuts Reminder */}
       <div style={shortcutsContainerStyle}>
         <p style={{ margin: 0 }}>
-          Press <kbd style={kbdStyle}>?</kbd> for keyboard shortcuts overlay
+          {t('welcomePage.press')} <kbd style={kbdStyle}>?</kbd> {t('welcomePage.shortcutHint1End')}
         </p>
         <p style={{ margin: 0 }}>
-          Use <kbd style={kbdStyle}>←</kbd> and <kbd style={kbdStyle}>→</kbd> arrows to navigate between active pages
+          {t('welcomePage.use')} <kbd style={kbdStyle}>←</kbd> {t('welcomePage.shortcutHint2And')} <kbd style={kbdStyle}>→</kbd> {t('welcomePage.shortcutHint2End')}
         </p>
       </div>
     </div>

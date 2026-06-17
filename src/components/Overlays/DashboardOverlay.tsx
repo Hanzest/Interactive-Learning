@@ -2,6 +2,7 @@ import { useEffect, useRef, useMemo, useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import Chart from 'chart.js/auto';
 import { gradePageSections } from '../../utils/grading';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const s = {
   overlay: {
@@ -220,6 +221,7 @@ export default function DashboardOverlay() {
     isPageViewed,
     isPageCompleted,
   } = useAppContext();
+  const { t, language } = useTranslation();
 
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart<'doughnut'> | null>(null);
@@ -269,7 +271,7 @@ export default function DashboardOverlay() {
     chartInstance.current = new Chart(chartRef.current, {
       type: 'doughnut',
       data: {
-        labels: ['Completed', 'Remaining'],
+        labels: [t('dashboard.chartCompleted'), t('dashboard.chartRemaining')],
         datasets: [
           {
             data: [completedCount, remaining],
@@ -287,7 +289,14 @@ export default function DashboardOverlay() {
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (ctx) => `${ctx.label}: ${ctx.parsed} page${ctx.parsed !== 1 ? 's' : ''}`,
+              label: (ctx) => {
+                const label = ctx.label;
+                const count = ctx.parsed;
+                const suffix = count !== 1 ? 's' : '';
+                return language === 'en'
+                  ? `${label}: ${count} page${suffix}`
+                  : `${label}: ${count} trang`;
+              },
             },
           },
         },
@@ -297,12 +306,12 @@ export default function DashboardOverlay() {
     return () => {
       if (chartInstance.current) chartInstance.current.destroy();
     };
-  }, [totalPages, completedCount, state.darkMode]);
+  }, [totalPages, completedCount, state.darkMode, language, t]);
 
   const getStatusLabel = (index: number): { label: string; style: React.CSSProperties } => {
-    if (isPageCompleted(index)) return { label: '✓ Done', style: s.statusDone };
-    if (isPageViewed(index)) return { label: 'Viewed', style: s.statusViewed };
-    return { label: 'New', style: s.statusNew };
+    if (isPageCompleted(index)) return { label: t('dashboard.statusDone'), style: s.statusDone };
+    if (isPageViewed(index)) return { label: t('dashboard.statusViewed'), style: s.statusViewed };
+    return { label: t('dashboard.statusNew'), style: s.statusNew };
   };
 
   const handlePageClick = (index: number) => {
@@ -318,11 +327,11 @@ export default function DashboardOverlay() {
       <div style={s.overlay} onClick={toggleDashboard}>
         <div style={s.card} onClick={(e) => e.stopPropagation()}>
           <div style={s.header}>
-            <h2 style={s.title}>📊 Progress Dashboard</h2>
+            <h2 style={s.title}>📊 {t('dashboard.title')}</h2>
             <button
               style={{ ...s.closeBtn, ...(closeHovered ? { background: 'var(--bg-tertiary)', color: 'var(--text-primary)' } : {}) }}
               onClick={toggleDashboard}
-              aria-label="Close dashboard"
+              aria-label={t('dashboard.close')}
               onMouseEnter={() => setCloseHovered(true)}
               onMouseLeave={() => setCloseHovered(false)}
             >
@@ -330,7 +339,7 @@ export default function DashboardOverlay() {
             </button>
           </div>
           <div style={s.emptyMessage}>
-            Upload a JSON file to get started!
+            {t('dashboard.emptyMessage')}
           </div>
         </div>
       </div>
@@ -342,8 +351,8 @@ export default function DashboardOverlay() {
       <div style={s.card} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div style={s.header}>
-          <h2 style={s.title}>📊 Progress Dashboard</h2>
-          <button style={s.closeBtn} onClick={toggleDashboard} aria-label="Close dashboard">
+          <h2 style={s.title}>📊 {t('dashboard.title')}</h2>
+          <button style={s.closeBtn} onClick={toggleDashboard} aria-label={t('dashboard.close')}>
             ✕
           </button>
         </div>
@@ -352,19 +361,19 @@ export default function DashboardOverlay() {
         <div style={s.statsGrid}>
           <div style={s.statCard}>
             <span style={s.statValue}>{totalPages}</span>
-            <span style={s.statLabel}>Total Pages</span>
+            <span style={s.statLabel}>{t('dashboard.totalPages')}</span>
           </div>
           <div style={s.statCard}>
             <span style={s.statValue}>{completedPercent}%</span>
-            <span style={s.statLabel}>Completed</span>
+            <span style={s.statLabel}>{t('dashboard.completed')}</span>
           </div>
           <div style={s.statCard}>
             <span style={s.statValue}>{viewedCount}</span>
-            <span style={s.statLabel}>Viewed</span>
+            <span style={s.statLabel}>{t('dashboard.viewed')}</span>
           </div>
           <div style={s.statCard}>
             <span style={s.statValue}>{avgQuizPercent}%</span>
-            <span style={s.statLabel}>{state.learningMode === 'exam' ? 'Avg Exam %' : 'Avg Quiz %'}</span>
+            <span style={s.statLabel}>{state.learningMode === 'exam' ? t('dashboard.avgExam') : t('dashboard.avgQuiz')}</span>
           </div>
         </div>
 
@@ -376,18 +385,18 @@ export default function DashboardOverlay() {
           <div style={s.chartLegend}>
             <div style={s.legendItem}>
               <span style={{ ...s.legendDot, backgroundColor: 'var(--success)' }} />
-              <span>Completed ({completedCount})</span>
+              <span>{t('dashboard.legendCompleted', { count: completedCount })}</span>
             </div>
             <div style={s.legendItem}>
               <span style={{ ...s.legendDot, backgroundColor: 'var(--border-color)' }} />
-              <span>Remaining ({totalPages - completedCount})</span>
+              <span>{t('dashboard.legendRemaining', { count: totalPages - completedCount })}</span>
             </div>
           </div>
         </div>
 
         {/* Page details list */}
         <div style={s.pageList}>
-          <h3 style={s.pageListTitle}>Pages</h3>
+          <h3 style={s.pageListTitle}>{t('dashboard.pages')}</h3>
           <div style={s.pageListScroll}>
             {pages.map((page, i) => {
               const isExamMode = state.learningMode === 'exam';
@@ -398,7 +407,7 @@ export default function DashboardOverlay() {
 
               if (examSubmitted) {
                 const results = gradePageSections(page, pageId, state.sectionAnswers, 'exam');
-                statusLabel = results.total > 0 ? `Exam: ${results.correct}/${results.total}` : 'Exam: Done';
+                statusLabel = results.total > 0 ? t('dashboard.examScore', { correct: results.correct, total: results.total }) : t('dashboard.examDone');
                 badgeStyle = s.statusDone;
               } else {
                 const status = getStatusLabel(i);

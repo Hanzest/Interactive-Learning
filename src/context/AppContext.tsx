@@ -76,6 +76,7 @@ interface AppContextValue {
   toggleExamPause: (pageIndex: number) => void;
   setExamPause: (pageIndex: number, paused: boolean) => void;
   getQuizAttemptHistory: (pageIndex: number, sectionIndex: number) => { attempts: number; bestCorrect: number; bestTotal: number };
+  setLanguage: (lang: 'en' | 'vi') => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -301,6 +302,10 @@ export function AppProvider({ children }: AppProviderProps) {
     dispatch({ type: 'SET_EXAM_PAUSE', payload: { pageIndex, paused } });
   }, []);
 
+  const setLanguage = useCallback((lang: 'en' | 'vi') => {
+    dispatch({ type: 'SET_LANGUAGE', payload: lang });
+  }, []);
+
   // setPageConfidence removed
 
   const addToastFn = useCallback((
@@ -382,6 +387,7 @@ export function AppProvider({ children }: AppProviderProps) {
     updateExamTimeLeft,
     toggleExamPause,
     setExamPause,
+    setLanguage,
     setError,
     setRenamingIndex,
     setContextMenu,
@@ -403,7 +409,7 @@ export function AppProvider({ children }: AppProviderProps) {
     togglePageComplete, movePage, goToPage, nextPage, prevPage, goToRandomPage,
     setSearchQuery, toggleDarkMode, toggleShortcuts, toggleDashboard, toggleCreatePrompt, toggleSidebar,
     setLearningMode, saveSectionAnswers, submitExam, retryExam, updateExamTimeLeft,
-    toggleExamPause, setExamPause,
+    toggleExamPause, setExamPause, setLanguage,
     setError, setRenamingIndex, setContextMenu, saveNote, getNote, recordQuizScore,
     saveChecklist, saveFlashcardProgress, addToastFn, dismissToast, isPageViewed, isPageCompleted,
     isQuizCompleted, saveSession, getQuizAttemptHistory,

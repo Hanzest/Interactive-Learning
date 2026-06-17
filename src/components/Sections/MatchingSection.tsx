@@ -3,6 +3,7 @@ import type { MatchingSection as MatchingSectionType } from '../../types/schema'
 import { renderMarkdown } from '../../utils/renderContent';
 import { shuffle } from '../../utils/shuffle';
 import { useAppContext } from '../../context/AppContext';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface MatchingSectionProps {
   section: MatchingSectionType;
@@ -20,6 +21,7 @@ export default function MatchingSection({
   isConfirmed,
 }: MatchingSectionProps) {
   const { state, saveSectionAnswers, addToast } = useAppContext();
+  const { t } = useTranslation();
   const [shuffledRight, setShuffledRight] = useState<string[]>([]);
   const [selectedLeft, setSelectedLeft] = useState<number | null>(null);
   const [selectedRight, setSelectedRight] = useState<number | null>(null);
@@ -114,14 +116,14 @@ export default function MatchingSection({
   const handleSubmit = useCallback(() => {
     const allMatched = Object.keys(matches).length === section.pairs.length;
     if (!allMatched) {
-      alert("Please match all pairs before submitting.");
+      alert(t('interactive.pleaseMatchAll'));
       return;
     }
     if (isExamMode) {
       saveSectionAnswers(state.currentPageIndex, sectionIndex, { matches, shuffledRight });
       setIsSavedText(true);
       setTimeout(() => setIsSavedText(false), 2000);
-      addToast("Answers saved!", "success", 2000);
+      addToast(t('interactive.answersSaved'), "success", 2000);
       return;
     }
     if (state.learningMode === 'learn') {
@@ -233,7 +235,7 @@ export default function MatchingSection({
           color: 'var(--accent)',
           fontSize: '0.9rem',
         }}>
-          {lines.filter((l) => l.correct).length} / {section.pairs.length} correct
+          {t('interactive.score')}: {lines.filter((l) => l.correct).length} / {section.pairs.length} {t('interactive.correct')}
         </div>
       )}
 
@@ -356,7 +358,7 @@ stroke={activeSubmitted ? (line.correct ? 'var(--success)' : 'var(--error)') : '
             transition: 'var(--transition-fast)',
           }}
         >
-          {isExamMode ? (isSavedText ? 'Answers Saved ✓' : 'Save Answers') : (confirming ? 'Confirm Submit?' : 'Submit')}
+          {isExamMode ? (isSavedText ? t('interactive.answersSaved') : t('interactive.saveAnswers')) : (confirming ? t('interactive.confirmSubmit') : t('interactive.submit'))}
         </button>
         {state.learningMode !== 'exam' && (
           <>
@@ -375,7 +377,7 @@ stroke={activeSubmitted ? (line.correct ? 'var(--success)' : 'var(--error)') : '
                 transition: 'var(--transition-fast)',
               }}
             >
-              Reset
+              {t('interactive.reset')}
             </button>
             <button
               onClick={handleShowAnswer}
@@ -392,7 +394,7 @@ stroke={activeSubmitted ? (line.correct ? 'var(--success)' : 'var(--error)') : '
                 transition: 'var(--transition-fast)',
               }}
             >
-              {showAnswer ? 'Hide Answer' : 'Show Answer'}
+              {showAnswer ? t('interactive.hideAnswer') : t('interactive.showAnswer')}
             </button>
           </>
         )}

@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import type { FlashcardsSection as FlashcardsSectionType, FlashcardProgress } from '../../types/schema';
 import { useAppContext } from '../../context/AppContext';
 import { renderMarkdown } from '../../utils/renderContent';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface FlashcardsSectionProps {
   section: FlashcardsSectionType;
@@ -10,6 +11,7 @@ interface FlashcardsSectionProps {
 
 export default function FlashcardsSection({ section, sectionIndex }: FlashcardsSectionProps) {
   const { state, saveFlashcardProgress } = useAppContext();
+  const { t } = useTranslation();
   const [currentCard, setCurrentCard] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -110,7 +112,7 @@ export default function FlashcardsSection({ section, sectionIndex }: FlashcardsS
         }}>{section.title}</h2>}
         <div>
           <span style={{ fontSize: '3rem', display: 'block', marginBottom: '0.5rem' }}>🎉</span>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', marginBottom: '1rem' }}>All cards mastered!</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', marginBottom: '1rem' }}>{t('flashcard.allMastered')}</p>
           <button
             onClick={handleResetProgress}
             className="btn-base"
@@ -126,7 +128,7 @@ export default function FlashcardsSection({ section, sectionIndex }: FlashcardsS
               transition: 'var(--transition-fast)',
             }}
           >
-            Reset Progress
+            {t('flashcard.resetProgress')}
           </button>
         </div>
       </div>
@@ -196,7 +198,7 @@ export default function FlashcardsSection({ section, sectionIndex }: FlashcardsS
         color: 'var(--text-muted)',
         marginBottom: '1rem',
       }}>
-        {masteredCount} / {section.cards.length} mastered
+        {masteredCount} / {section.cards.length} {t('flashcard.mastered')}
       </div>
 
       {/* Card */}
@@ -249,7 +251,7 @@ export default function FlashcardsSection({ section, sectionIndex }: FlashcardsS
                 padding: '0.25rem 0.5rem',
                 borderRadius: '4px',
               }}>
-                ✓ Mastered
+                ✓ {t('flashcard.masteredBadge')}
               </span>
             )}
             <div dangerouslySetInnerHTML={{ __html: renderMarkdown(currentCardData.front) }} />
@@ -287,7 +289,7 @@ export default function FlashcardsSection({ section, sectionIndex }: FlashcardsS
                 padding: '0.25rem 0.5rem',
                 borderRadius: '4px',
               }}>
-                ✓ Mastered
+                ✓ {t('flashcard.masteredBadge')}
               </span>
             )}
             <div dangerouslySetInnerHTML={{ __html: renderMarkdown(currentCardData.back) }} />
@@ -318,7 +320,7 @@ export default function FlashcardsSection({ section, sectionIndex }: FlashcardsS
               transition: 'var(--transition-fast)',
             }}
           >
-            ❌ Study Again
+            ❌ {t('flashcard.studyAgain')}
           </button>
           <button
             onClick={() => handleMarkProgress(true)}
@@ -335,7 +337,7 @@ export default function FlashcardsSection({ section, sectionIndex }: FlashcardsS
               transition: 'var(--transition-fast)',
             }}
           >
-            ✓ Got It!
+            ✓ {t('flashcard.gotIt')}
           </button>
         </div>
       )}
@@ -365,7 +367,7 @@ export default function FlashcardsSection({ section, sectionIndex }: FlashcardsS
             transition: 'var(--transition-fast)',
           }}
         >
-          ◀ Prev
+          ◀ {t('interactive.prev')}
         </button>
         <span style={{
           fontSize: '0.875rem',
@@ -391,7 +393,7 @@ export default function FlashcardsSection({ section, sectionIndex }: FlashcardsS
             transition: 'var(--transition-fast)',
           }}
         >
-          Next ▶
+          {t('interactive.next')} ▶
         </button>
       </div>
 
@@ -413,13 +415,13 @@ export default function FlashcardsSection({ section, sectionIndex }: FlashcardsS
           const isCurrent = idx === currentCard;
           
           let dotBg = 'var(--text-muted)';
-          let dotTitle = `Card ${idx + 1}: Unseen`;
+          let dotTitle = t('flashcard.unseenCard', { num: idx + 1 });
           if (status === true) {
             dotBg = 'var(--success)';
-            dotTitle = `Card ${idx + 1}: Mastered`;
+            dotTitle = t('flashcard.masteredCard', { num: idx + 1 });
           } else if (status === false) {
             dotBg = 'var(--error)';
-            dotTitle = `Card ${idx + 1}: Still Learning`;
+            dotTitle = t('flashcard.learningCard', { num: idx + 1 });
           }
 
           return (

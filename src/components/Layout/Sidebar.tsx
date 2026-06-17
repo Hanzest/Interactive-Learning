@@ -4,9 +4,11 @@ import { useAppContext } from '../../context/AppContext';
 import FileUploadDropZone from '../UI/FileUploadDropZone';
 import SidebarProgress from '../UI/SidebarProgress';
 import PageList from '../UI/PageList';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export default function Sidebar() {
   const { state, toggleSidebar, toggleCreatePrompt } = useAppContext();
+  const { t } = useTranslation();
 
   const isOpen = state.sidebarOpen;
 
@@ -49,10 +51,10 @@ export default function Sidebar() {
             <button
               className={styles.createBtn}
               onClick={toggleCreatePrompt}
-              title="Create prompt to generate JSON"
+              title={t('sidebar.createPromptTitle')}
               type="button"
             >
-              <span>✨ Create JSON</span>
+              <span>✨ {t('sidebar.createPrompt')}</span>
             </button>
           </div>
           <div style={progressSectionStyle}>

@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import type { QuizSection as QuizSectionType, QuizAttempt } from '../../types/schema';
 import { useAppContext } from '../../context/AppContext';
 import { renderMarkdown } from '../../utils/renderContent';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface QuizSectionProps {
   section: QuizSectionType;
@@ -19,6 +20,7 @@ export default function QuizSection({
   isConfirmed,
 }: QuizSectionProps) {
   const { state, recordQuizScore, saveSectionAnswers, addToast } = useAppContext();
+  const { t } = useTranslation();
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [submitted, setSubmitted] = useState(false);
@@ -86,14 +88,14 @@ export default function QuizSection({
   const handleSubmit = useCallback(() => {
     const answeredAll = section.questions.every((_, i) => answers[i] !== undefined);
     if (!answeredAll) {
-      alert("Please answer all questions before submitting.");
+      alert(t('interactive.pleaseAnswerAll'));
       return;
     }
     if (isExamMode) {
       saveSectionAnswers(state.currentPageIndex, sectionIndex, answers);
       setIsSavedText(true);
       setTimeout(() => setIsSavedText(false), 2000);
-      addToast("Answers saved!", "success", 2000);
+      addToast(t('interactive.answersSaved'), "success", 2000);
       return;
     }
     if (state.learningMode === 'learn') {
@@ -162,7 +164,7 @@ export default function QuizSection({
           color: 'var(--accent)',
           fontSize: '0.9rem',
         }}>
-          Score: {correctCount} / {section.questions.length}
+          {t('interactive.score')}: {correctCount} / {section.questions.length}
           {prevAttempts > 0 && (
             <span style={{ marginLeft: '0.5rem', fontWeight: 400, color: 'var(--text-muted)' }}>
               (Attempts: {prevAttempts})
@@ -442,7 +444,7 @@ export default function QuizSection({
             transition: 'var(--transition-fast)',
           }}
         >
-          ◀ Prev
+          ◀ {t('interactive.prev')}
         </button>
 
         {!activeSubmitted ? (
@@ -462,7 +464,7 @@ export default function QuizSection({
               transition: 'var(--transition-fast)',
             }}
           >
-            {isExamMode ? (isSavedText ? 'Answers Saved ✓' : 'Save Answers') : (confirming ? 'Confirm Submit?' : 'Submit')}
+            {isExamMode ? (isSavedText ? t('interactive.answersSaved') : t('interactive.saveAnswers')) : (confirming ? t('interactive.confirmSubmit') : t('interactive.submit'))}
           </button>
         ) : (
           state.learningMode !== 'exam' && (
@@ -481,7 +483,7 @@ export default function QuizSection({
                 transition: 'var(--transition-fast)',
               }}
             >
-              Reset
+              {t('interactive.reset')}
             </button>
           )
         )}
@@ -503,7 +505,7 @@ export default function QuizSection({
             transition: 'var(--transition-fast)',
           }}
         >
-          Next ▶
+          {t('interactive.next')} ▶
         </button>
       </div>
     </div>

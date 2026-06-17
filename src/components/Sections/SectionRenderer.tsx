@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Section } from '../../types/schema';
 import { useAppContext } from '../../context/AppContext';
+import { useTranslation } from '../../hooks/useTranslation';
 import TextSection from './TextSection';
 import TabsSection from './TabsSection';
 import AccordionSection from './AccordionSection';
@@ -29,6 +30,7 @@ export default function SectionRenderer({
   isConfirmed,
 }: SectionRendererProps) {
   const { saveNote, getNote, state } = useAppContext();
+  const { t } = useTranslation();
   const [showNoteEditor, setShowNoteEditor] = React.useState(false);
   const [noteText, setNoteText] = React.useState('');
 
@@ -109,7 +111,7 @@ export default function SectionRenderer({
           />
         );
       default:
-        return <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Unknown section type</div>;
+        return <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('notes.unknownType')}</div>;
     }
   };
 
@@ -131,7 +133,7 @@ export default function SectionRenderer({
         <div style={{ position: 'relative' }}>
           <button
             onClick={() => setShowNoteEditor(!showNoteEditor)}
-            title={savedNote ? 'Edit note' : 'Add note'}
+            title={savedNote ? t('notes.editNoteTitle') : t('notes.addNoteTitle')}
             className="btn-base"
             style={{
               padding: '6px 12px',
@@ -149,7 +151,7 @@ export default function SectionRenderer({
             }}
           >
             <span>{savedNote ? '📝' : '📌'}</span>
-            <span>{savedNote ? 'Edit Note' : 'Add Note'}</span>
+            <span>{savedNote ? t('notes.editNote') : t('notes.addNote')}</span>
           </button>
 
           {showNoteEditor && (
@@ -169,7 +171,7 @@ export default function SectionRenderer({
               <textarea
                 value={noteText}
                 onChange={(e) => setNoteText(e.target.value)}
-                placeholder="Write your note here..."
+                placeholder={t('notes.placeholder')}
                 rows={4}
                 style={{
                   width: '100%',
@@ -202,7 +204,7 @@ export default function SectionRenderer({
                     fontSize: '0.8rem',
                   }}
                 >
-                  Save
+                  {t('notes.save')}
                 </button>
                 <button
                   onClick={() => {
@@ -220,7 +222,7 @@ export default function SectionRenderer({
                     fontSize: '0.8rem',
                   }}
                 >
-                  Cancel
+                  {t('notes.cancel')}
                 </button>
               </div>
             </div>

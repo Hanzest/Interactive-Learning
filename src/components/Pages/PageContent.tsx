@@ -3,10 +3,12 @@ import { useAppContext } from '../../context/AppContext';
 import SectionRenderer from '../Sections/SectionRenderer';
 import { gradePageSections } from '../../utils/grading';
 import { renderMarkdown } from '../../utils/renderContent';
+import { useTranslation } from '../../hooks/useTranslation';
 import styles from './PageContent.module.css';
 
 export default function PageContent() {
   const { state, submitExam, retryExam, updateExamTimeLeft, toggleExamPause, setExamPause, setLearningMode, addToast } = useAppContext();
+  const { t } = useTranslation();
   const [currentSlide, setCurrentSlide] = useState(0);
   const slideDirection = useRef(1);
   const [animClass, setAnimClass] = useState('');
@@ -327,11 +329,9 @@ export default function PageContent() {
           }}>
             <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>🔄</div>
             <h2 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-              Retry This Exam?
+              {t('pageContent.retryExamTitle')}
             </h2>
-            <p style={{ color: 'var(--text-secondary)', marginTop: 8, marginBottom: 24, fontSize: '0.95rem', lineHeight: 1.6 }}>
-              This will <strong>clear all your answers</strong> and reset the timer for this page. Your progress cannot be recovered.
-            </p>
+            <p style={{ color: 'var(--text-secondary)', marginTop: 8, marginBottom: 24, fontSize: '0.95rem', lineHeight: 1.6 }} dangerouslySetInnerHTML={{ __html: t('pageContent.retryExamDesc') }} />
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
               <button
                 onClick={() => setShowRetryConfirm(false)}
@@ -347,7 +347,7 @@ export default function PageContent() {
                   fontSize: '0.9rem',
                 }}
               >
-                Cancel
+                {t('pageContent.cancel')}
               </button>
               <button
                 onClick={handleRetryExam}
@@ -364,7 +364,7 @@ export default function PageContent() {
                   boxShadow: '0 2px 8px rgba(239,68,68,0.35)',
                 }}
               >
-                Yes, Retry Exam
+                {t('pageContent.yesRetry')}
               </button>
             </div>
           </div>
@@ -429,7 +429,7 @@ export default function PageContent() {
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
-                <span>Exam Mode Controls</span>
+                <span>{t('pageContent.examControls')}</span>
               </div>
             </div>
 
@@ -524,7 +524,7 @@ export default function PageContent() {
                       cursor: 'pointer',
                     }}
                   >
-                    Cancel
+                    {t('pageContent.cancel')}
                   </button>
                 </form>
               ) : (
@@ -554,7 +554,7 @@ export default function PageContent() {
                     <path d="M12 20h9" />
                     <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
                   </svg>
-                  <span>Duration ({Math.ceil(pageExamMaxTime / 60)}m)</span>
+                  <span>{t('pageContent.duration', { min: Math.ceil(pageExamMaxTime / 60) })}</span>
                 </button>
               )}
 
@@ -583,7 +583,7 @@ export default function PageContent() {
                     <svg viewBox="0 0 24 24" fill="currentColor" width={13} height={13}>
                       <polygon points="5 3 19 12 5 21 5 3" />
                     </svg>
-                    <span>Resume Exam</span>
+                    <span>{t('pageContent.resumeExam')}</span>
                   </>
                 ) : (
                   <>
@@ -591,7 +591,7 @@ export default function PageContent() {
                       <rect x="6" y="4" width="4" height="16" />
                       <rect x="14" y="4" width="4" height="16" />
                     </svg>
-                    <span>Pause Exam</span>
+                    <span>{t('pageContent.pauseExam')}</span>
                   </>
                 )}
               </button>
@@ -620,7 +620,7 @@ export default function PageContent() {
                   <path d="M23 4v6h-6" />
                   <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
                 </svg>
-                <span>Restart</span>
+                <span>{t('pageContent.restart')}</span>
               </button>
             </div>
           </div>
@@ -641,10 +641,10 @@ export default function PageContent() {
           }}>
             <div>
               <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--success-text)', marginBottom: 2 }}>
-                ✅ Exam Submitted — Review Mode
+                {t('pageContent.examSubmittedTitle')}
               </div>
               <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                Navigate slides to review your answers.
+                {t('pageContent.examSubmittedDesc')}
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
@@ -670,7 +670,7 @@ export default function PageContent() {
               <button
                 onClick={() => setShowRetryConfirm(true)}
                 className="btn-base"
-                title="Retry this exam (clears all answers)"
+                title={t('pageContent.retryExamTitle')}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -689,7 +689,7 @@ export default function PageContent() {
                   whiteSpace: 'nowrap',
                 }}
               >
-                🔄 Retry
+                {t('pageContent.retry')}
               </button>
             </div>
           </div>
@@ -766,9 +766,9 @@ export default function PageContent() {
               overflowY: 'auto',
             }}>
               <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>⏸️</div>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>Exam Paused</h2>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{t('pageContent.examPausedTitle')}</h2>
               <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginTop: 8, marginBottom: 24, maxWidth: 320 }}>
-                The exam timer is currently paused. Resume when you are ready to continue.
+                {t('pageContent.examPausedDesc')}
               </p>
               <button
                 onClick={() => setIsPaused(false)}
@@ -786,7 +786,7 @@ export default function PageContent() {
                   transition: 'transform 0.2s',
                 }}
               >
-                Resume Exam
+                {t('pageContent.resumeExam')}
               </button>
             </div>
           )}
@@ -826,7 +826,7 @@ export default function PageContent() {
                 gap: 6,
                 marginBottom: 16,
               }}>
-                ✨ Practice Mode • Unlimited Time • Graded Component
+                {t('pageContent.practiceModeBadge')}
               </div>
             )}
 
@@ -846,10 +846,10 @@ export default function PageContent() {
               }}>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700 }}>
-                    🎉 Slide Score Summary
+                    {t('pageContent.slideScoreSummary')}
                   </h3>
                   <p style={{ margin: '4px 0 0 0', fontSize: '0.9rem', opacity: 0.9 }}>
-                    You got {slideScore.score} out of {slideScore.total} correct!
+                    {t('pageContent.slideScoreDetail', { score: slideScore.score, total: slideScore.total })}
                   </p>
                 </div>
                 <div style={{
@@ -893,14 +893,14 @@ export default function PageContent() {
               }}>
                 <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.75rem' }}>🎓</span>
                 <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                  {state.learningMode === 'learn' && "Congratulations! You've finished learning."}
-                  {state.learningMode === 'practice' && "Great job! You've completed the practice."}
-                  {state.learningMode === 'exam' && "Congratulations! You've completed the exam."}
+                  {state.learningMode === 'learn' && t('pageContent.congratsLearn')}
+                  {state.learningMode === 'practice' && t('pageContent.congratsPractice')}
+                  {state.learningMode === 'exam' && t('pageContent.congratsExam')}
                 </h3>
                 <p style={{ margin: '8px 0 24px 0', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                  {state.learningMode === 'learn' && "Ready to practice or take a timed exam on these concepts?"}
-                  {state.learningMode === 'practice' && "Ready to review the learning material or take a timed exam?"}
-                  {state.learningMode === 'exam' && "Ready to review the learning material or practice the concepts?"}
+                  {state.learningMode === 'learn' && t('pageContent.readyLearn')}
+                  {state.learningMode === 'practice' && t('pageContent.readyPractice')}
+                  {state.learningMode === 'exam' && t('pageContent.readyExam')}
                 </p>
                 <div style={{
                   display: 'flex',
@@ -912,7 +912,7 @@ export default function PageContent() {
                     <button
                       onClick={() => {
                         setLearningMode('learn');
-                        addToast('📖 Switched to Learn Mode. Happy studying!', 'info', 3000);
+                        addToast(t('pageContent.switchLearnToast'), 'info', 3000);
                       }}
                       className="btn-base"
                       style={{
@@ -931,7 +931,7 @@ export default function PageContent() {
                         boxShadow: 'var(--shadow-sm)',
                       }}
                     >
-                      📖 Learn Mode
+                      {t('pageContent.btnLearn')}
                     </button>
                   )}
 
@@ -939,7 +939,7 @@ export default function PageContent() {
                     <button
                       onClick={() => {
                         setLearningMode('practice');
-                        addToast('✍️ Switched to Practice Mode. Try answering the questions!', 'info', 3000);
+                        addToast(t('pageContent.switchPracticeToast'), 'info', 3000);
                       }}
                       className="btn-base"
                       style={{
@@ -958,7 +958,7 @@ export default function PageContent() {
                         boxShadow: 'var(--shadow-sm)',
                       }}
                     >
-                      ✍️ Practice Mode
+                      {t('pageContent.btnPractice')}
                     </button>
                   )}
 
@@ -966,7 +966,7 @@ export default function PageContent() {
                     <button
                       onClick={() => {
                         setLearningMode('exam');
-                        addToast('⏱️ Switched to Exam Mode. The page timer has started!', 'info', 3000);
+                        addToast(t('pageContent.switchExamToast'), 'info', 3000);
                       }}
                       className="btn-base"
                       style={{
@@ -985,7 +985,7 @@ export default function PageContent() {
                         boxShadow: '0 4px 12px var(--accent-shadow)',
                       }}
                     >
-                      ⏱️ Take Exam
+                      {t('pageContent.btnTakeExam')}
                     </button>
                   )}
                 </div>
@@ -1007,10 +1007,10 @@ export default function PageContent() {
               }}>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)', marginBottom: 4 }}>
-                    Ready to submit?
+                    {t('pageContent.readyToSubmit')}
                   </div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                    Make sure you've saved answers for all slides. After confirming, answers are locked and you can review them.
+                    {t('pageContent.submitDetails')}
                   </div>
                 </div>
                 <button
@@ -1030,7 +1030,7 @@ export default function PageContent() {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  Confirm & Submit →
+                  {t('pageContent.confirmSubmitBtn')}
                 </button>
               </div>
             )}
@@ -1054,7 +1054,7 @@ export default function PageContent() {
                     opacity: activeSlideIndex === 0 ? 0.5 : 1,
                   }}
                 >
-                  ← Prev Slide
+                  {t('pageContent.prevSlide')}
                 </button>
                 <button
                   onClick={goNext}
@@ -1072,7 +1072,7 @@ export default function PageContent() {
                     opacity: activeSlideIndex === totalSlides - 1 ? 0.5 : 1,
                   }}
                 >
-                  Next Slide →
+                  {t('pageContent.nextSlide')}
                 </button>
               </div>
             )}
@@ -1098,7 +1098,7 @@ export default function PageContent() {
         </div>
       ) : (
         <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: 32 }}>
-          This page has no sections.
+          {t('pageContent.noSections')}
         </p>
       )}
 

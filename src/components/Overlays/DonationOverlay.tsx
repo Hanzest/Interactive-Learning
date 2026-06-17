@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface DonationOverlayProps {
   onClose: () => void;
@@ -13,6 +14,7 @@ const AMOUNTS = [
 ];
 
 export default function DonationOverlay({ onClose }: DonationOverlayProps) {
+  const { t } = useTranslation();
   const [method, setMethod] = useState<'vietqr' | 'coffee'>('vietqr');
   const [amount, setAmount] = useState<number>(50000);
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
@@ -81,7 +83,7 @@ export default function DonationOverlay({ onClose }: DonationOverlayProps) {
               gap: '0.5rem',
             }}
           >
-            <span>❤️</span> Support Project
+            <span>❤️</span> {t('donation.title')}
           </h2>
           <button
             onClick={onClose}
@@ -99,7 +101,7 @@ export default function DonationOverlay({ onClose }: DonationOverlayProps) {
               borderRadius: 8,
               transition: 'background var(--transition-fast), color var(--transition-fast)',
             }}
-            title="Close"
+            title={t('donation.close')}
           >
             ✕
           </button>
@@ -141,7 +143,7 @@ export default function DonationOverlay({ onClose }: DonationOverlayProps) {
                 transition: 'all 0.15s ease',
               }}
             >
-              🇻🇳 VietQR
+              {t('donation.vietqr')}
             </button>
             <button
               onClick={() => setMethod('coffee')}
@@ -159,7 +161,7 @@ export default function DonationOverlay({ onClose }: DonationOverlayProps) {
                 transition: 'all 0.15s ease',
               }}
             >
-              ☕ Buy me a Coffee
+              {t('donation.coffee')}
             </button>
           </div>
 
@@ -182,7 +184,7 @@ export default function DonationOverlay({ onClose }: DonationOverlayProps) {
               >
                 ☕
               </div>
-              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600 }}>Buy me a Coffee</h3>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600 }}>{t('donation.coffeeTitle')}</h3>
               <p
                 style={{
                   margin: 0,
@@ -191,7 +193,7 @@ export default function DonationOverlay({ onClose }: DonationOverlayProps) {
                   lineHeight: 1.5,
                 }}
               >
-                Buy me a Coffee payment gateway is currently under construction and will be ready soon. Thank you for your kindness!
+                {t('donation.coffeeUnderConstruction')}
               </p>
             </div>
           ) : (
@@ -206,7 +208,7 @@ export default function DonationOverlay({ onClose }: DonationOverlayProps) {
                     textTransform: 'uppercase',
                   }}
                 >
-                  Select Donation Amount
+                  {t('donation.selectAmount')}
                 </label>
                 <div style={{ position: 'relative' }}>
                   <select
@@ -288,15 +290,15 @@ export default function DonationOverlay({ onClose }: DonationOverlayProps) {
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>Bank:</span>
+                  <span style={{ color: 'var(--text-secondary)' }}>{t('donation.bank')}</span>
                   <span style={{ fontWeight: 600 }}>ABBank</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>Account Name:</span>
+                  <span style={{ color: 'var(--text-secondary)' }}>{t('donation.accountName')}</span>
                   <span style={{ fontWeight: 600 }}>HO QUOC KHANH</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>Account Number:</span>
+                  <span style={{ color: 'var(--text-secondary)' }}>{t('donation.accountNumber')}</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                     <span style={{ fontWeight: 600, fontFamily: 'monospace' }}>0211036332095</span>
                     <button
@@ -312,12 +314,12 @@ export default function DonationOverlay({ onClose }: DonationOverlayProps) {
                         fontWeight: 500,
                       }}
                     >
-                      {copySuccess === 'acc' ? 'Copied ✓' : 'Copy'}
+                      {copySuccess === 'acc' ? t('donation.copied') : t('donation.copy')}
                     </button>
                   </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>Message:</span>
+                  <span style={{ color: 'var(--text-secondary)' }}>{t('donation.message')}</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                     <span style={{ fontWeight: 600, fontSize: '0.75rem', fontFamily: 'monospace' }}>INTERACTIVE LEARN DONATE</span>
                     <button
@@ -333,7 +335,7 @@ export default function DonationOverlay({ onClose }: DonationOverlayProps) {
                         fontWeight: 500,
                       }}
                     >
-                      {copySuccess === 'msg' ? 'Copied ✓' : 'Copy'}
+                      {copySuccess === 'msg' ? t('donation.copied') : t('donation.copy')}
                     </button>
                   </div>
                 </div>
@@ -353,7 +355,7 @@ export default function DonationOverlay({ onClose }: DonationOverlayProps) {
             color: 'var(--text-muted)',
           }}
         >
-          Thank you for keeping this platform alive and free!
+          {t('donation.thankYou')}
         </div>
       </div>
     </div>

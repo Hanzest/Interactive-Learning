@@ -4,6 +4,7 @@ import SearchBar from '../UI/SearchBar';
 import PomodoroTimer from '../UI/PomodoroTimer';
 import DarkModeToggle from '../UI/DarkModeToggle';
 import UploadButton from '../UI/UploadButton';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export default function Header() {
   const {
@@ -16,20 +17,36 @@ export default function Header() {
     toggleExamPause,
   } = useAppContext();
 
+  const { t, language, setLanguage } = useTranslation();
+
   const [mobileSearchActive, setMobileSearchActive] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isVerySmall, setIsVerySmall] = useState(false);
 
   useEffect(() => {
-    const media = window.matchMedia('(max-width: 600px)');
-    setIsMobile(media.matches);
-    const listener = (e: MediaQueryListEvent) => {
+    const mediaMobile = window.matchMedia('(max-width: 600px)');
+    const mediaVerySmall = window.matchMedia('(max-width: 440px)');
+    
+    setIsMobile(mediaMobile.matches);
+    setIsVerySmall(mediaVerySmall.matches);
+
+    const listenerMobile = (e: MediaQueryListEvent) => {
       setIsMobile(e.matches);
       if (!e.matches) {
         setMobileSearchActive(false);
       }
     };
-    media.addEventListener('change', listener);
-    return () => media.removeEventListener('change', listener);
+    const listenerVerySmall = (e: MediaQueryListEvent) => {
+      setIsVerySmall(e.matches);
+    };
+
+    mediaMobile.addEventListener('change', listenerMobile);
+    mediaVerySmall.addEventListener('change', listenerVerySmall);
+    
+    return () => {
+      mediaMobile.removeEventListener('change', listenerMobile);
+      mediaVerySmall.removeEventListener('change', listenerVerySmall);
+    };
   }, []);
 
   // Exam timer calculations for top-nav display
@@ -178,7 +195,8 @@ export default function Header() {
           alignItems: 'center',
           gap: 6,
         }}>
-          📚 Learn
+          <span>📚</span>
+          {!isMobile && <span>{t('header.title')}</span>}
         </h1>
       </div>
 
@@ -263,13 +281,15 @@ export default function Header() {
         }}>
           {(['learn', 'practice', 'exam'] as const).map((m) => {
             const isActive = state.learningMode === m;
+            const labelKey = `header.mode${m.charAt(0).toUpperCase() + m.slice(1)}`;
+            const shortLabelKey = `${labelKey}Short`;
             return (
               <button
                 key={m}
                 onClick={() => setLearningMode(m)}
                 className={`btn-base mode-btn ${isActive ? 'active' : ''}`}
                 style={{
-                  padding: '4px 10px',
+                  padding: isMobile ? '4px 6px' : '4px 10px',
                   border: 'none',
                   borderRadius: 6,
                   backgroundColor: isActive ? 'var(--bg-primary)' : 'transparent',
@@ -279,10 +299,9 @@ export default function Header() {
                   cursor: 'pointer',
                   boxShadow: isActive ? 'var(--shadow-sm)' : 'none',
                   transition: 'all var(--transition-fast)',
-                  textTransform: 'capitalize',
                 }}
               >
-                {m}
+                {isVerySmall ? t(shortLabelKey) : t(labelKey)}
               </button>
             );
           })}
@@ -355,6 +374,36 @@ export default function Header() {
           )}
 
           {(!isMobile || !isExamActive) && <DarkModeToggle />}
+
+          {/* Language Switcher */}
+          {(!isMobile || !isExamActive) && (
+            <button
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 36,
+                height: 36,
+                padding: 0,
+                border: '1px solid var(--border-color)',
+                borderRadius: 8,
+                background: 'var(--bg-secondary)',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                transition: 'background 0.15s, color 0.15s, border-color 0.15s',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                flexShrink: 0,
+              }}
+              onClick={() => setLanguage(language === 'en' ? 'vi' : 'en')}
+              aria-label="Toggle language"
+              title={language === 'en' ? 'Switch to Vietnamese' : 'Chuyển sang tiếng Anh'}
+              type="button"
+              className="btn-base header-icon-btn"
+            >
+              {language.toUpperCase()}
+            </button>
+          )}
 
           {/* Keyboard shortcuts */}
           {!isMobile && (

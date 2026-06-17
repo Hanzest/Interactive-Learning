@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import type { FillBlankSection as FillBlankSectionType } from '../../types/schema';
 import { renderMarkdown } from '../../utils/renderContent';
 import { useAppContext } from '../../context/AppContext';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface FillBlankSectionProps {
   section: FillBlankSectionType;
@@ -19,6 +20,7 @@ export default function FillBlankSection({
   isConfirmed,
 }: FillBlankSectionProps) {
   const { state, saveSectionAnswers, addToast } = useAppContext();
+  const { t } = useTranslation();
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [hints, setHints] = useState<Record<number, boolean>>({});
@@ -83,14 +85,14 @@ export default function FillBlankSection({
   const handleCheck = useCallback(() => {
     const answeredCount = Object.keys(answers).length;
     if (answeredCount < section.sentences.length) {
-      alert("Please fill in all blanks before checking.");
+      alert(t('interactive.pleaseFillBlanks'));
       return;
     }
     if (isExamMode) {
       saveSectionAnswers(state.currentPageIndex, sectionIndex, answers);
       setIsSavedText(true);
       setTimeout(() => setIsSavedText(false), 2000);
-      addToast("Answers saved!", "success", 2000);
+      addToast(t('interactive.answersSaved'), "success", 2000);
       return;
     }
     if (state.learningMode === 'learn') {
@@ -256,7 +258,7 @@ export default function FillBlankSection({
           color: 'var(--accent)',
           fontSize: '0.9rem',
         }}>
-          Score: {correctCount} / {section.sentences.length}
+          {t('interactive.score')}: {correctCount} / {section.sentences.length}
         </div>
       )}
 
@@ -303,7 +305,7 @@ export default function FillBlankSection({
             transition: 'var(--transition-fast)',
           }}
         >
-          {isExamMode ? (isSavedText ? 'Answers Saved ✓' : 'Save Answers') : (confirming ? 'Confirm Submit?' : 'Check Answers')}
+          {isExamMode ? (isSavedText ? t('interactive.answersSaved') : t('interactive.saveAnswers')) : (confirming ? t('interactive.confirmSubmit') : t('interactive.checkAnswers'))}
         </button>
         {state.learningMode !== 'exam' && (
           <>
@@ -322,7 +324,7 @@ export default function FillBlankSection({
                 transition: 'var(--transition-fast)',
               }}
             >
-              Reset
+              {t('interactive.reset')}
             </button>
             <button
               onClick={handleShowAnswer}
@@ -339,7 +341,7 @@ export default function FillBlankSection({
                 transition: 'var(--transition-fast)',
               }}
             >
-              {showAnswer ? 'Hide Answer' : 'Show Answer'}
+              {showAnswer ? t('interactive.hideAnswer') : t('interactive.showAnswer')}
             </button>
           </>
         )}

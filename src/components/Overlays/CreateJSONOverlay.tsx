@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
+import { useTranslation } from '../../hooks/useTranslation';
 
 type PromptMode = 'fast' | 'tailored';
 
@@ -276,15 +277,25 @@ const s = {
 
 export default function CreateJSONOverlay() {
   const { state, toggleCreatePrompt, addToast } = useAppContext();
+  const { t, language } = useTranslation();
 
   const [mode, setMode] = useState<PromptMode>('fast');
   const [step, setStep] = useState<number>(1);
   const [topic, setTopic] = useState<string>('');
+  const [outputLang, setOutputLang] = useState<string>('English');
   const [context, setContext] = useState<ContextType>('Academic');
   const [depth, setDepth] = useState<DepthType>('Medium');
 
   const [dropdownContextOpen, setDropdownContextOpen] = useState(false);
   const [dropdownDepthOpen, setDropdownDepthOpen] = useState(false);
+
+  useEffect(() => {
+    if (state.showCreatePrompt) {
+      setStep(1);
+      setTopic('');
+      setOutputLang(language === 'vi' ? 'Tiếng Việt' : 'English');
+    }
+  }, [state.showCreatePrompt, language]);
 
   if (!state.showCreatePrompt) return null;
 
@@ -506,7 +517,7 @@ Available Section Types (you MUST format them exactly like this):
   ]
 }
 
-Please generate the JSON file for the topic "${topic}" now. Make sure the response is wrapped only in a \`\`\`json ... \`\`\` block.`;
+Please generate the JSON file for the topic "${topic}" now. The json value of every string key must be in ${outputLang || 'English'}. Make sure the response is wrapped only in a \`\`\`json ... \`\`\` block.`;
 
     return prompt;
   };
@@ -524,9 +535,9 @@ Please generate the JSON file for the topic "${topic}" now. Make sure the respon
   const handleOpenChatbot = async (provider: string, url: string) => {
     const success = await copyToClipboard();
     if (success) {
-      addToast(`Prompt copied to clipboard! Opening ${provider}...`, 'success', 3000);
+      addToast(t('promptWizard.toastOpening', { provider }), 'success', 3000);
     } else {
-      addToast(`Opening ${provider}...`, 'info', 2000);
+      addToast(t('promptWizard.toastOpeningSimple', { provider }), 'info', 2000);
     }
     window.open(url, '_blank');
   };
@@ -537,12 +548,12 @@ Please generate the JSON file for the topic "${topic}" now. Make sure the respon
         <div style={s.stepIndicator}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={s.stepDot(step === 1, step > 1)}>1</div>
-            <span style={s.stepLabel}>Topic</span>
+            <span style={s.stepLabel}>{t('promptWizard.stepTopic')}</span>
           </div>
           <div style={s.stepConnector} />
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={s.stepDot(step === 4, false)}>2</div>
-            <span style={s.stepLabel}>Ready</span>
+            <span style={s.stepLabel}>{t('promptWizard.stepReady')}</span>
           </div>
         </div>
       );
@@ -552,22 +563,22 @@ Please generate the JSON file for the topic "${topic}" now. Make sure the respon
       <div style={s.stepIndicator}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <div style={s.stepDot(step === 1, step > 1)}>1</div>
-          <span style={s.stepLabel}>Topic</span>
+          <span style={s.stepLabel}>{t('promptWizard.stepTopic')}</span>
         </div>
         <div style={s.stepConnector} />
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <div style={s.stepDot(step === 2, step > 2)}>2</div>
-          <span style={s.stepLabel}>Context</span>
+          <span style={s.stepLabel}>{t('promptWizard.stepContext')}</span>
         </div>
         <div style={s.stepConnector} />
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <div style={s.stepDot(step === 3, step > 3)}>3</div>
-          <span style={s.stepLabel}>Depth</span>
+          <span style={s.stepLabel}>{t('promptWizard.stepDepth')}</span>
         </div>
         <div style={s.stepConnector} />
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <div style={s.stepDot(step === 4, false)}>4</div>
-          <span style={s.stepLabel}>Ready</span>
+          <span style={s.stepLabel}>{t('promptWizard.stepReady')}</span>
         </div>
       </div>
     );
@@ -583,7 +594,7 @@ Please generate the JSON file for the topic "${topic}" now. Make sure the respon
       <div style={s.card} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div style={s.header}>
-          <h2 style={s.title}>✨ Prompt Wizard</h2>
+          <h2 style={s.title}>✨ {t('promptWizard.title')}</h2>
           <button style={s.closeBtn} onClick={toggleCreatePrompt} aria-label="Close wizard">
             ✕
           </button>
@@ -599,14 +610,14 @@ Please generate the JSON file for the topic "${topic}" now. Make sure the respon
                 style={s.tabButton(mode === 'fast')}
                 onClick={() => setMode('fast')}
               >
-                Fast Prompt
+                {t('promptWizard.fastPrompt')}
               </button>
               <button
                 type="button"
                 style={s.tabButton(mode === 'tailored')}
                 onClick={() => setMode('tailored')}
               >
-                Tailored Prompt
+                {t('promptWizard.tailoredPrompt')}
               </button>
             </div>
           )}
@@ -614,28 +625,50 @@ Please generate the JSON file for the topic "${topic}" now. Make sure the respon
           {/* Steps Visualizer */}
           {renderSteps()}
 
-          {/* Step 1: Topic */}
+          {/* Step 1: Topic and Language */}
           {step === 1 && (
-            <div>
-              <label style={s.label} htmlFor="topic-input">
-                What topic do you want to learn?
-              </label>
-              <input
-                id="topic-input"
-                style={s.input}
-                type="text"
-                placeholder="e.g., React Hooks, Photosynthesis, WW2 History"
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && topic.trim()) {
-                    handleNext();
-                  }
-                }}
-                autoFocus
-              />
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 8, lineHeight: 1.4 }}>
-                Enter the subject you want to cover. The AI Chatbot will generate an uploadable JSON file with structured, interactive sections.
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={s.label} htmlFor="topic-input">
+                  {t('promptWizard.questionTopic')}
+                </label>
+                <input
+                  id="topic-input"
+                  style={s.input}
+                  type="text"
+                  placeholder={t('promptWizard.placeholderTopic')}
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && topic.trim()) {
+                      handleNext();
+                    }
+                  }}
+                  autoFocus
+                />
+              </div>
+
+              <div>
+                <label style={s.label} htmlFor="language-input">
+                  {t('promptWizard.questionLanguage')}
+                </label>
+                <input
+                  id="language-input"
+                  style={s.input}
+                  type="text"
+                  placeholder={t('promptWizard.placeholderLanguage')}
+                  value={outputLang}
+                  onChange={(e) => setOutputLang(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && topic.trim()) {
+                      handleNext();
+                    }
+                  }}
+                />
+              </div>
+
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 4, lineHeight: 1.4 }}>
+                {t('promptWizard.descTopic')}
               </p>
             </div>
           )}
@@ -644,14 +677,14 @@ Please generate the JSON file for the topic "${topic}" now. Make sure the respon
           {step === 2 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
-                <label style={s.label}>Target Learning Context</label>
+                <label style={s.label}>{t('promptWizard.labelContext')}</label>
                 <div style={s.selectWrapper}>
                   <button
                     type="button"
                     style={s.selectButton}
                     onClick={() => setDropdownContextOpen(!dropdownContextOpen)}
                   >
-                    <span>{context}</span>
+                    <span>{t(`promptWizard.contexts.${context}`)}</span>
                     <span>▼</span>
                   </button>
                   {dropdownContextOpen && (
@@ -666,7 +699,7 @@ Please generate the JSON file for the topic "${topic}" now. Make sure the respon
                             setDropdownContextOpen(false);
                           }}
                         >
-                          {opt}
+                          {t(`promptWizard.contexts.${opt}`)}
                         </button>
                       ))}
                     </div>
@@ -676,8 +709,8 @@ Please generate the JSON file for the topic "${topic}" now. Make sure the respon
 
               {/* Dynamic Explanation */}
               <div style={s.explanationCard}>
-                <strong>💡 Explanation:</strong>
-                <p style={{ margin: '4px 0 0 0' }}>{contextExplanations[context]}</p>
+                <strong>💡 {t('promptWizard.explanation')}</strong>
+                <p style={{ margin: '4px 0 0 0' }}>{t(`promptWizard.contextExplanations.${context}`)}</p>
               </div>
             </div>
           )}
@@ -686,14 +719,14 @@ Please generate the JSON file for the topic "${topic}" now. Make sure the respon
           {step === 3 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
-                <label style={s.label}>Content Detail Depth</label>
+                <label style={s.label}>{t('promptWizard.labelDepth')}</label>
                 <div style={s.selectWrapper}>
                   <button
                     type="button"
                     style={s.selectButton}
                     onClick={() => setDropdownDepthOpen(!dropdownDepthOpen)}
                   >
-                    <span>{depth}</span>
+                    <span>{t(`promptWizard.depths.${depth}`)}</span>
                     <span>▼</span>
                   </button>
                   {dropdownDepthOpen && (
@@ -708,7 +741,7 @@ Please generate the JSON file for the topic "${topic}" now. Make sure the respon
                             setDropdownDepthOpen(false);
                           }}
                         >
-                          {opt} Depth
+                          {t(`promptWizard.depths.${opt}`)}
                         </button>
                       ))}
                     </div>
@@ -718,8 +751,8 @@ Please generate the JSON file for the topic "${topic}" now. Make sure the respon
 
               {/* Dynamic Explanation */}
               <div style={s.explanationCard}>
-                <strong>💡 Explanation:</strong>
-                <p style={{ margin: '4px 0 0 0' }}>{depthExplanations[depth]}</p>
+                <strong>💡 {t('promptWizard.explanation')}</strong>
+                <p style={{ margin: '4px 0 0 0' }}>{t(`promptWizard.depthExplanations.${depth}`)}</p>
               </div>
             </div>
           )}
@@ -728,7 +761,7 @@ Please generate the JSON file for the topic "${topic}" now. Make sure the respon
           {step === 4 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
-                <label style={s.label}>Generated Prompt</label>
+                <label style={s.label}>{t('promptWizard.labelPrompt')}</label>
                 <textarea
                   style={s.textarea}
                   readOnly
@@ -743,9 +776,9 @@ Please generate the JSON file for the topic "${topic}" now. Make sure the respon
                   onClick={async () => {
                     const success = await copyToClipboard();
                     if (success) {
-                      addToast('Copied prompt to clipboard!', 'success', 2000);
+                      addToast(t('promptWizard.toastCopied'), 'success', 2000);
                     } else {
-                      addToast('Failed to copy prompt', 'error', 2000);
+                      addToast(t('promptWizard.toastCopyFailed'), 'error', 2000);
                     }
                   }}
                   style={{
@@ -763,11 +796,11 @@ Please generate the JSON file for the topic "${topic}" now. Make sure the respon
                     fontSize: '0.9375rem',
                   }}
                 >
-                  📋 Copy Prompt to Clipboard
+                  📋 {t('promptWizard.btnCopy')}
                 </button>
 
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', margin: '4px 0' }}>
-                  Or click below to copy & open directly in a Chatbot:
+                  {t('promptWizard.descChatbot')}
                 </div>
 
                 <div style={s.modelGrid}>
@@ -816,7 +849,7 @@ Please generate the JSON file for the topic "${topic}" now. Make sure the respon
         <div style={s.footer}>
           {step > 1 ? (
             <button type="button" style={s.btnBack} onClick={handleBack}>
-              ◀ Back
+              ◀ {t('promptWizard.btnBack')}
             </button>
           ) : (
             <div />
@@ -829,11 +862,11 @@ Please generate the JSON file for the topic "${topic}" now. Make sure the respon
               onClick={handleNext}
               disabled={isNextDisabled()}
             >
-              Next ▶
+              {t('promptWizard.btnNext')} ▶
             </button>
           ) : (
             <button type="button" style={s.btnBack} onClick={toggleCreatePrompt}>
-              Close
+              {t('promptWizard.btnClose')}
             </button>
           )}
         </div>

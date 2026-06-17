@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import type { LearningPage } from '../../types/schema';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface Props {
   page: LearningPage;
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export default function PageListItem({ page, index, isActive, isCompleted, isViewed, isQuizDone }: Props) {
+  const { t } = useTranslation();
   const {
     goToPage,
     togglePageComplete,
@@ -70,21 +72,21 @@ export default function PageListItem({ page, index, isActive, isCompleted, isVie
     const examSubmitted = isExamMode && !!state.examSubmittedPages[pageId];
     if (isExamMode && examSubmitted) {
       return (
-        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: '50%', background: 'var(--success)', color: '#fff', fontSize: 10, fontWeight: 700, flexShrink: 0 }} title="Exam completed">
+        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: '50%', background: 'var(--success)', color: '#fff', fontSize: 10, fontWeight: 700, flexShrink: 0 }} title={t('sidebar.examCompletedTooltip')}>
           E
         </span>
       );
     }
     if (isCompleted) {
       return (
-        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: '50%', background: 'var(--success)', color: '#fff', fontSize: 10, fontWeight: 700, flexShrink: 0 }} title="Completed">
+        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: '50%', background: 'var(--success)', color: '#fff', fontSize: 10, fontWeight: 700, flexShrink: 0 }} title={t('sidebar.completedTooltip')}>
           ✓
         </span>
       );
     }
     if (isQuizDone) {
       return (
-        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: '50%', background: 'var(--accent)', color: '#fff', fontSize: 9, fontWeight: 700, flexShrink: 0 }} title="Quiz completed">
+        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: '50%', background: 'var(--accent)', color: '#fff', fontSize: 9, fontWeight: 700, flexShrink: 0 }} title={t('sidebar.quizCompletedTooltip')}>
           Q
         </span>
       );
@@ -211,7 +213,7 @@ export default function PageListItem({ page, index, isActive, isCompleted, isVie
               onClick={(e) => e.stopPropagation()}
             >
               <button
-                title={isCompleted ? 'Mark incomplete' : 'Mark complete'}
+                title={isCompleted ? t('sidebar.markIncompleteTooltip') : t('sidebar.markCompleteTooltip')}
                 onClick={() => {
                   togglePageComplete(index);
                   setShowMobileActions(false);
@@ -235,7 +237,7 @@ export default function PageListItem({ page, index, isActive, isCompleted, isVie
                 {isCompleted ? '↩' : '✓'}
               </button>
               <button
-                title="Rename"
+                title={t('sidebar.renameTooltip')}
                 onClick={() => {
                   setRenaming(true);
                   setRenameValue(title);
@@ -261,7 +263,7 @@ export default function PageListItem({ page, index, isActive, isCompleted, isVie
                 ✎
               </button>
               <button
-                title="Delete"
+                title={t('sidebar.deleteTooltip')}
                 onClick={() => {
                   removePage(index);
                   setShowMobileActions(false);
@@ -312,7 +314,7 @@ export default function PageListItem({ page, index, isActive, isCompleted, isVie
                 marginLeft: 'auto',
                 flexShrink: 0,
               }}
-              title="Options"
+              title={t('sidebar.optionsTooltip')}
               type="button"
             >
               ⋮

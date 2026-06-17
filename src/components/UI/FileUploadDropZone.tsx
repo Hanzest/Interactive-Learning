@@ -2,9 +2,11 @@ import React, { useState, useRef, useCallback } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import type { LearningPage } from '../../types/schema';
 import { validateLearningPage } from '../../utils/validation';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export default function FileUploadDropZone() {
   const { addPage, addToast } = useAppContext();
+  const { t } = useTranslation();
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const dragCounter = useRef(0);
@@ -19,33 +21,33 @@ export default function FileUploadDropZone() {
 
         const validation = validateLearningPage(data);
         if (!validation.valid) {
-          setError(`"${file.name}" is invalid: ${validation.error}`);
+          setError(t('uploadZone.errorInvalid', { filename: file.name, error: validation.error || '' }));
           return;
         }
 
         const ok = addPage(data, file.name);
         if (ok) {
-          addToast(`Loaded "${data.page?.title || 'Untitled'}"`, 'success', 2000);
+          addToast(t('uploadZone.toastLoaded', { title: data.page?.title || 'Untitled' }), 'success', 2000);
         }
       } catch {
-        setError(`Failed to parse "${file.name}". Ensure it is valid JSON.`);
+        setError(t('uploadZone.errorParse', { filename: file.name }));
       }
     },
-    [addPage, addToast]
+    [addPage, addToast, t]
   );
 
   const processFiles = useCallback(
     async (files: FileList) => {
       const jsonFiles = Array.from(files).filter((f) => f.name.endsWith('.json'));
       if (jsonFiles.length === 0) {
-        setError('Please select a .json file');
+        setError(t('uploadZone.errorSelectJson'));
         return;
       }
       for (const f of jsonFiles) {
         await processFile(f);
       }
     },
-    [processFile]
+    [processFile, t]
   );
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
@@ -81,12 +83,12 @@ export default function FileUploadDropZone() {
         f.name.endsWith('.json')
       );
       if (files.length === 0) {
-        setError('Please drop a .json file');
+        setError(t('uploadZone.errorDropJson'));
         return;
       }
       files.forEach(processFile);
     },
-    [processFile]
+    [processFile, t]
   );
 
   const handleClick = () => {
@@ -112,8 +114,8 @@ export default function FileUploadDropZone() {
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(); }}
-      aria-label="Upload JSON file"
-      title="Click or drag & drop a JSON file"
+      aria-label={t('uploadZone.ariaLabel')}
+      title={t('uploadZone.title')}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -152,7 +154,7 @@ export default function FileUploadDropZone() {
         <line x1="12" y1="3" x2="12" y2="15" />
       </svg>
       <p style={{ margin: 0, fontSize: 14, color: dragging ? 'var(--accent)' : 'var(--text-secondary)', fontWeight: dragging ? 500 : 400 }}>
-        {dragging ? 'Drop files here' : 'Drag & drop JSON file(s) or click'}
+        {dragging ? t('uploadZone.dragDropActive') : t('uploadZone.dragDropPrompt')}
       </p>
       {error && <p style={{ margin: 0, fontSize: 13, color: 'var(--error)' }}>{error}</p>}
     </div>

@@ -1,8 +1,10 @@
 import React from 'react';
 import { useAppContext } from '../../context/AppContext';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export default function SidebarProgress() {
   const { state, completedCount, removeAllPages } = useAppContext();
+  const { t } = useTranslation();
   const total = state.pages.length;
   const viewedCount = state.viewedPages.length;
 
@@ -16,13 +18,13 @@ export default function SidebarProgress() {
           alignItems: 'center',
           justifyContent: 'space-between',
           marginBottom: 8,
-        }}
+         }}
       >
         <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-          {completedCount}/{total} completed
+          {t('sidebar.completedCount', { count: completedCount, total })}
         </span>
         <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-          {viewedCount} viewed
+          {t('sidebar.viewedCount', { count: viewedCount })}
         </span>
       </div>
       <div
@@ -58,7 +60,7 @@ export default function SidebarProgress() {
         }}
         type="button"
       >
-        Clear All
+        {t('sidebar.clearAllLabel')}
       </button>
     </div>
   );

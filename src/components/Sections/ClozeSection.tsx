@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import type { ClozeSection as ClozeSectionType } from '../../types/schema';
 import { renderMarkdown } from '../../utils/renderContent';
 import { useAppContext } from '../../context/AppContext';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface ClozeSectionProps {
   section: ClozeSectionType;
@@ -19,6 +20,7 @@ export default function ClozeSection({
   isConfirmed,
 }: ClozeSectionProps) {
   const { state, saveSectionAnswers, addToast } = useAppContext();
+  const { t } = useTranslation();
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [hints, setHints] = useState<Record<string, boolean>>({});
   const [submitted, setSubmitted] = useState(false);
@@ -85,14 +87,14 @@ export default function ClozeSection({
   const handleSubmit = useCallback(() => {
     const answeredCount = Object.keys(answers).length;
     if (answeredCount < section.blanks.length) {
-      alert("Please fill in all blanks before checking.");
+      alert(t('interactive.pleaseFillBlanks'));
       return;
     }
     if (isExamMode) {
       saveSectionAnswers(state.currentPageIndex, sectionIndex, answers);
       setIsSavedText(true);
       setTimeout(() => setIsSavedText(false), 2000);
-      addToast("Answers saved!", "success", 2000);
+      addToast(t('interactive.answersSaved'), "success", 2000);
       return;
     }
     if (state.learningMode === 'learn') {
@@ -314,7 +316,7 @@ export default function ClozeSection({
           color: 'var(--accent)',
           fontSize: '0.9rem',
         }}>
-          Score: {correctCount} / {section.blanks.length}
+          {t('interactive.score')}: {correctCount} / {section.blanks.length}
         </div>
       )}
 
@@ -350,7 +352,7 @@ export default function ClozeSection({
             transition: 'var(--transition-fast)',
           }}
         >
-          {isExamMode ? (isSavedText ? 'Answers Saved ✓' : 'Save Answers') : (confirming ? 'Confirm Submit?' : 'Submit')}
+          {isExamMode ? (isSavedText ? t('interactive.answersSaved') : t('interactive.saveAnswers')) : (confirming ? t('interactive.confirmSubmit') : t('interactive.submit'))}
         </button>
         {state.learningMode !== 'exam' && (
           <>
@@ -369,7 +371,7 @@ export default function ClozeSection({
                 transition: 'var(--transition-fast)',
               }}
             >
-              Reset
+              {t('interactive.reset')}
             </button>
             <button
               onClick={handleShowAnswer}
@@ -386,7 +388,7 @@ export default function ClozeSection({
                 transition: 'var(--transition-fast)',
               }}
             >
-              {showAnswer ? 'Hide Answer' : 'Show Answer'}
+              {showAnswer ? t('interactive.hideAnswer') : t('interactive.showAnswer')}
             </button>
           </>
         )}

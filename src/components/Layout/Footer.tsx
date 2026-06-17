@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import DonationOverlay from '../Overlays/DonationOverlay';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export default function Footer() {
   const {
@@ -9,6 +10,8 @@ export default function Footer() {
     prevPage,
     completedPercent,
   } = useAppContext();
+
+  const { t } = useTranslation();
 
   const [showDonate, setShowDonate] = useState(false);
 
@@ -67,7 +70,7 @@ export default function Footer() {
               flexShrink: 0,
             }}
             aria-label="Previous page"
-            title="Previous (←)"
+            title={t('footer.prev')}
           >
             ◀
           </button>
@@ -108,7 +111,7 @@ export default function Footer() {
               flexShrink: 0,
             }}
             aria-label="Next page"
-            title="Next (→)"
+            title={t('footer.next')}
           >
             ▶
           </button>
@@ -134,9 +137,9 @@ export default function Footer() {
             flexShrink: 0,
             marginLeft: '0.25rem',
           }}
-          title="Support the creator"
+          title={t('footer.donateTitle')}
         >
-          ❤️ Donate
+          ❤️ {t('footer.donate')}
         </button>
 
         {/* Spacer to push progress bar/creator details to the right */}
@@ -144,7 +147,7 @@ export default function Footer() {
 
         {/* Creator Credit - hides globally on narrow screen via global.css .footer-creator */}
         <span className="footer-creator" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-          Created by{' '}
+          {t('welcomePage.createdBy')}{' '}
           <a
             href="https://github.com/Hanzest"
             target="_blank"
@@ -206,7 +209,7 @@ export default function Footer() {
             }}
             className="footer-viewed-count"
           >
-            {viewedCount} viewed
+            {viewedCount} {t('footer.viewed')}
           </span>
         </div>
       </footer>

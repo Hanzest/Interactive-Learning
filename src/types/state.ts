@@ -41,6 +41,7 @@ export interface AppState {
   examSubmittedPages: Record<string, boolean>;
   examTimeLeft: Record<string, number>;
   examPaused: Record<string, boolean>;
+  language: 'en' | 'vi';
 }
 
 /* ==========================================================================
@@ -91,7 +92,8 @@ export type AppAction =
   | { type: 'RETRY_EXAM'; payload: { pageIndex: number } }
   | { type: 'UPDATE_EXAM_TIME_LEFT'; payload: { pageIndex: number; timeLeft: number } }
   | { type: 'TOGGLE_EXAM_PAUSE'; payload: { pageIndex: number } }
-  | { type: 'SET_EXAM_PAUSE'; payload: { pageIndex: number; paused: boolean } };
+  | { type: 'SET_EXAM_PAUSE'; payload: { pageIndex: number; paused: boolean } }
+  | { type: 'SET_LANGUAGE'; payload: 'en' | 'vi' };
 
 /* ==========================================================================
    Derived / Computed State (not stored, computed from state)

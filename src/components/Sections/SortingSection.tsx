@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import type { SortingSection as SortingSectionType } from '../../types/schema';
 import { useAppContext } from '../../context/AppContext';
 import { renderMarkdown } from '../../utils/renderContent';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface SortingSectionProps {
   section: SortingSectionType;
@@ -19,6 +20,7 @@ export default function SortingSection({
   isConfirmed,
 }: SortingSectionProps) {
   const { state, saveSectionAnswers, addToast } = useAppContext();
+  const { t } = useTranslation();
   const [items, setItems] = useState<typeof section.items>([]);
   const [submitted, setSubmitted] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -136,7 +138,7 @@ export default function SortingSection({
       saveSectionAnswers(state.currentPageIndex, sectionIndex, items);
       setIsSavedText(true);
       setTimeout(() => setIsSavedText(false), 2000);
-      addToast("Order saved!", "success", 2000);
+      addToast(t('sorting.orderSavedToast'), "success", 2000);
       return;
     }
     if (state.learningMode === 'learn') {
@@ -210,7 +212,7 @@ export default function SortingSection({
           color: 'var(--accent)',
           fontSize: '0.9rem',
         }}>
-          {correctCount} / {section.items.length} correctly positioned
+          {t('sorting.correctlyPositioned', { correctCount, total: section.items.length })}
         </div>
       )}
 
@@ -253,7 +255,7 @@ export default function SortingSection({
                 color: 'var(--text-muted)',
                 fontSize: '1.2rem',
                 userSelect: 'none',
-              }} title="Drag to reorder">
+              }} title={t('sorting.dragToReorder')}>
                 ⠿
               </span>
               <span
@@ -269,7 +271,7 @@ export default function SortingSection({
                   color: 'var(--text-muted)',
                   fontStyle: 'italic',
                 }}>
-                  → position {correctPos}
+                  → {t('sorting.correctPosition', { pos: correctPos! })}
                 </span>
               )}
             </div>
@@ -298,7 +300,7 @@ export default function SortingSection({
               transition: 'var(--transition-fast)',
             }}
           >
-            {isExamMode ? (isSavedText ? 'Order Saved ✓' : 'Save Order') : (confirming ? 'Confirm Submit?' : 'Check Order')}
+            {isExamMode ? (isSavedText ? t('sorting.orderSaved') : t('sorting.saveOrder')) : (confirming ? t('sorting.confirmSubmit') : t('sorting.checkOrder'))}
           </button>
         ) : (
           state.learningMode !== 'exam' && (
@@ -317,7 +319,7 @@ export default function SortingSection({
                 transition: 'var(--transition-fast)',
               }}
             >
-              Reset & Reshuffle
+              {t('sorting.resetReshuffle')}
             </button>
           )
         )}

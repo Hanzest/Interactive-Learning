@@ -1,36 +1,10 @@
 import { useAppContext } from '../../context/AppContext';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface ShortcutGroup {
   title: string;
   items: { keys: string; desc: string }[];
 }
-
-const shortcutGroups: ShortcutGroup[] = [
-  {
-    title: 'Navigation',
-    items: [
-      { keys: 'Ctrl+B', desc: 'Toggle sidebar' },
-      { keys: 'a / ←', desc: 'Previous step (flashcard/tab/quiz/slide)' },
-      { keys: 'd / →', desc: 'Next step (flashcard/tab/quiz/slide)' },
-      { keys: 'p', desc: 'Pause / Resume exam (Exam mode)' },
-    ],
-  },
-  {
-    title: 'Actions',
-    items: [
-      { keys: 'r', desc: 'Rename current page' },
-      { keys: 'Delete', desc: 'Remove current page' },
-    ],
-  },
-  {
-    title: 'General',
-    items: [
-      { keys: '?', desc: 'Toggle this shortcuts overlay' },
-      { keys: 'Esc', desc: 'Close overlay / cancel editing' },
-      { keys: '/', desc: 'Focus search bar' },
-    ],
-  },
-];
 
 const s = {
   overlay: {
@@ -161,16 +135,44 @@ const s = {
 
 export default function KeyboardShortcutsOverlay() {
   const { state, toggleShortcuts } = useAppContext();
+  const { t } = useTranslation();
 
   if (!state.showShortcuts) return null;
+
+  const shortcutGroups: ShortcutGroup[] = [
+    {
+      title: t('shortcuts.navigation'),
+      items: [
+        { keys: 'Ctrl+B', desc: t('shortcuts.toggleSidebar') },
+        { keys: 'a / ←', desc: t('shortcuts.prevStep') },
+        { keys: 'd / →', desc: t('shortcuts.nextStep') },
+        { keys: 'p', desc: t('shortcuts.togglePause') },
+      ],
+    },
+    {
+      title: t('shortcuts.actions'),
+      items: [
+        { keys: 'r', desc: t('shortcuts.renamePage') },
+        { keys: 'Delete', desc: t('shortcuts.removePage') },
+      ],
+    },
+    {
+      title: t('shortcuts.general'),
+      items: [
+        { keys: '?', desc: t('shortcuts.toggleOverlay') },
+        { keys: 'Esc', desc: t('shortcuts.escOverlay') },
+        { keys: '/', desc: t('shortcuts.focusSearch') },
+      ],
+    },
+  ];
 
   return (
     <div style={s.overlay} onClick={toggleShortcuts}>
       <div style={s.card} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div style={s.header}>
-          <h2 style={s.title}>⌨️ Keyboard Shortcuts</h2>
-          <button style={s.closeBtn} onClick={toggleShortcuts} aria-label="Close shortcuts">
+          <h2 style={s.title}>⌨️ {t('shortcuts.title')}</h2>
+          <button style={s.closeBtn} onClick={toggleShortcuts} aria-label={t('shortcuts.close')}>
             ✕
           </button>
         </div>
@@ -193,7 +195,9 @@ export default function KeyboardShortcutsOverlay() {
         </div>
 
         <div style={s.footer}>
-          <span style={s.footerText}>Press <kbd style={s.kbdInline}>?</kbd> or <kbd style={s.kbdInline}>Esc</kbd> to close</span>
+          <span style={s.footerText}>
+            {t('shortcuts.press')} <kbd style={s.kbdInline}>?</kbd> {t('shortcuts.or')} <kbd style={s.kbdInline}>Esc</kbd> {t('shortcuts.toClose')}
+          </span>
         </div>
       </div>
     </div>

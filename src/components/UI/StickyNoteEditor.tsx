@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAppContext } from '../../context/AppContext';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface Props {
   pageIndex: number;
@@ -8,6 +9,7 @@ interface Props {
 
 export default function StickyNoteEditor({ pageIndex, sectionIndex }: Props) {
   const { getNote, saveNote } = useAppContext();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
@@ -65,13 +67,13 @@ export default function StickyNoteEditor({ pageIndex, sectionIndex }: Props) {
         }}
         onClick={() => setOpen((o) => !o)}
         type="button"
-        aria-label={open ? 'Close notes' : 'Open notes'}
-        title={open ? 'Close notes' : 'Add notes'}
+        aria-label={open ? t('notes.closeNotesTooltip') : t('notes.openNotesTooltip')}
+        title={open ? t('notes.closeNotesTooltip') : t('notes.addNotesTooltip')}
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width={16} height={16}>
           <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
         </svg>
-        <span style={{ fontSize: 12 }}>Notes</span>
+        <span style={{ fontSize: 12 }}>{t('notes.notesLabel')}</span>
       </button>
       {open && (
         <textarea
@@ -93,7 +95,7 @@ export default function StickyNoteEditor({ pageIndex, sectionIndex }: Props) {
           }}
           value={text}
           onChange={handleChange}
-          placeholder="Write your notes here..."
+          placeholder={t('notes.notesPlaceholder')}
           rows={3}
         />
       )}

@@ -42,6 +42,7 @@ export const initialState: AppState = {
   examSubmittedPages: storage.load<Record<string, boolean>>('examSubmittedPages', {}),
   examTimeLeft: storage.load<Record<string, number>>('examTimeLeft', {}),
   examPaused: {},
+  language: storage.load<'en' | 'vi'>('language', 'en'),
 };
 
 export function appReducer(state: AppState, action: AppAction): AppState {
@@ -590,6 +591,13 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         pomodoroFocusMinutes: action.payload.focusMinutes,
         pomodoroBreakMinutes: action.payload.breakMinutes,
         pomodoroSeconds: action.payload.seconds,
+      };
+
+    case 'SET_LANGUAGE':
+      storage.save('language', action.payload);
+      return {
+        ...state,
+        language: action.payload,
       };
 
     default:
