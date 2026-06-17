@@ -157,7 +157,7 @@
             "Both $\\beta$ and statistical power will contract uniformly."
           ],
           "correctIndex": 0,
-          "explanation": "Because $\\alpha$ and $\\beta$ are inversely related for a fixed sample size, lowering the Type I error threshold ($\\\\alpha$) narrows the critical region for rejection. This increases the probability of a false negative ($\\\\beta$), which directly lowers statistical power ($1 - \\\\beta$).",
+          "Explanation": "Because $\\alpha$ and $\\beta$ are inversely related for a fixed sample size, lowering the Type I error threshold ($\\\\alpha$) narrows the critical region for rejection. This increases the probability of a false negative ($\\\\beta$), which directly lowers statistical power ($1 - \\\\beta$).",
           "optionExplanations": [
             "Correct. Narrowing the rejection region makes it more difficult to reject the null, thereby increasing beta and decreasing power.",
             "Incorrect. This would happen if we increased alpha instead of decreasing it.",
@@ -174,7 +174,7 @@
             "The probability that the observed results are entirely due to systematic sampling bias."
           ],
           "correctIndex": 2,
-          "explanation": "The $p$-value is defined as a conditional probability: $P(T(X) \\ge t(x) \\mid H_0)$. It is a metric evaluating data compatibility with the null model, not a statement regarding the absolute posterior probability of the hypotheses themselves.",
+          "Explanation": "The $p$-value is defined as a conditional probability: $P(T(X) \\ge t(x) \\mid H_0)$. It is a metric evaluating data compatibility with the null model, not a statement regarding the absolute posterior probability of the hypotheses themselves.",
           "optionExplanations": [
             "Incorrect. This defines a Bayesian posterior probability, which frequentist $p$-values cannot provide.",
             "Incorrect. Frequentist methods do not assign probabilities to hypotheses; the null is treated as fixed, not as a random variable.",
@@ -191,7 +191,7 @@
             "Exactly 100%"
           ],
           "correctIndex": 2,
-          "explanation": "The family-wise error rate is calculated using the complement rule: $\\\\alpha_{\\\\text{family}} = 1 - (1 - \\\\alpha)^k$. Inserting values gives $1 - (1 - 0.05)^{20} = 1 - (0.95)^{20} \\\\approx 1 - 0.358 = 0.642$, or roughly 64%.",
+          "Explanation": "The family-wise error rate is calculated using the complement rule: $\\\\alpha_{\\\\text{family}} = 1 - (1 - \\\\alpha)^k$. Inserting values gives $1 - (1 - 0.05)^{20} = 1 - (0.95)^{20} \\\\approx 1 - 0.358 = 0.642$, or roughly 64%.",
           "optionExplanations": [
             "Incorrect. 5% is the per-test alpha rate, not the cumulative family-wise error rate across multiple tests.",
             "Incorrect. 36% is the approximate probability of making zero Type I errors ($0.95^{20}$), not the probability of making at least one.",
@@ -208,7 +208,7 @@
             "Fail to reject $H_0$ because a two-tailed evaluation is mandatory."
           ],
           "correctIndex": 1,
-          "explanation": "Because this is a one-tailed test in the positive direction and the observed statistic ($z = 2.41$) exceeds the critical threshold ($z_c = 2.33$), the value falls within the designated critical region, meaning the null hypothesis is rejected.",
+          "Explanation": "Because this is a one-tailed test in the positive direction and the observed statistic ($z = 2.41$) exceeds the critical threshold ($z_c = 2.33$), the value falls within the designated critical region, meaning the null hypothesis is rejected.",
           "optionExplanations": [
             "Incorrect. Being positive aligns with the direction of the alternative hypothesis; it is not a reason to retain the null.",
             "Correct. The calculated test statistic crosses the threshold into the critical region, justifying the rejection of the null hypothesis.",
@@ -225,7 +225,7 @@
             "Shifting the nominal significance boundary from $\\alpha = 0.01$ to $\\alpha = 0.05$."
           ],
           "correctIndex": 2,
-          "explanation": "Increasing sample size ($n$) narrows the standard error of the estimator. This compresses the distribution profiles under both hypotheses, decreasing the structural overlap of the models and allowing the researcher to lower both error rates simultaneously.",
+          "Explanation": "Increasing sample size ($n$) narrows the standard error of the estimator. This compresses the distribution profiles under both hypotheses, decreasing the structural overlap of the models and allowing the researcher to lower both error rates simultaneously.",
           "optionExplanations": [
             "Incorrect. Changing tail configurations shifts power to one direction while completely eliminating detection power in the opposite direction; it does not universally reduce both errors.",
             "Incorrect. Arbitrary data trimming to decrease variance violates statistical assumptions and introduces severe bias.",

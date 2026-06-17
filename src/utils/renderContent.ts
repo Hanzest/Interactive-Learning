@@ -1,3 +1,5 @@
+import katex from 'katex';
+
 /**
  * Escape HTML to prevent XSS.
  */
@@ -11,11 +13,50 @@ export function escapeHtml(str: unknown): string {
 /**
  * Render simple markdown-like content to safe HTML.
  * Supports: # h1, ## h2, ### h3, #### h4 headings,
- * > blockquotes, **bold**, *italic*, `code`, [link](url), newlines.
+ * > blockquotes, **bold**, *italic*, `code`, [link](url), newlines, LaTeX.
  */
 export function renderMarkdown(text: string): string {
   if (typeof text !== 'string') return '';
-  let html = escapeHtml(text);
+
+  const blocks: string[] = [];
+  const inlines: string[] = [];
+
+  // Helper to normalize double-escaped backslashes in LaTeX
+  const normalizeMath = (math: string) => {
+    return math.replace(/\\{2,}([a-zA-Z]+)/g, '\\$1');
+  };
+
+  // 1. Extract block math $$...$$
+  let tempText = text.replace(/\$\$(.+?)\$\$/gs, (_, math) => {
+    try {
+      const rendered = katex.renderToString(normalizeMath(math), {
+        displayMode: true,
+        throwOnError: false,
+      });
+      blocks.push(rendered);
+      return `__LATEX_BLOCK_${blocks.length - 1}__`;
+    } catch (err) {
+      console.error(err);
+      return _;
+    }
+  });
+
+  // 2. Extract inline math $...$
+  tempText = tempText.replace(/\$([^$\n]+?)\$/g, (_, math) => {
+    try {
+      const rendered = katex.renderToString(normalizeMath(math), {
+        displayMode: false,
+        throwOnError: false,
+      });
+      inlines.push(rendered);
+      return `__LATEX_INLINE_${inlines.length - 1}__`;
+    } catch (err) {
+      console.error(err);
+      return _;
+    }
+  });
+
+  let html = escapeHtml(tempText);
 
   // #### Headings (must be before ### and ## to avoid partial matches)
   html = html.replace(
@@ -94,6 +135,16 @@ export function renderMarkdown(text: string): string {
   html = html.replace(/\r?\n/g, '<br>');
   // Restore table newlines
   html = html.replace(new RegExp(TABLE_NL, 'g'), '\n');
+  // 4. Restore block math placeholders
+  blocks.forEach((rendered, index) => {
+    html = html.replace(`__LATEX_BLOCK_${index}__`, rendered);
+  });
+
+  // 5. Restore inline math placeholders
+  inlines.forEach((rendered, index) => {
+    html = html.replace(`__LATEX_INLINE_${index}__`, rendered);
+  });
+
   return html;
 }
 

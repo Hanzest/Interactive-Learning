@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useAppContext } from '../../context/AppContext';
 import SectionRenderer from '../Sections/SectionRenderer';
 import { gradePageSections } from '../../utils/grading';
+import { renderMarkdown } from '../../utils/renderContent';
 import styles from './PageContent.module.css';
 
 export default function PageContent() {
@@ -385,14 +386,15 @@ export default function PageContent() {
 
         {/* Description */}
         {description && (
-          <p style={{
-            color: 'var(--text-secondary)',
-            marginBottom: 16,
-            fontSize: '0.9375rem',
-            lineHeight: 1.6,
-          }}>
-            {description}
-          </p>
+          <div
+            style={{
+              color: 'var(--text-secondary)',
+              marginBottom: 16,
+              fontSize: '0.9375rem',
+              lineHeight: 1.6,
+            }}
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(description) }}
+          />
         )}
 
         {/* Tags */}

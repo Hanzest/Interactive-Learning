@@ -417,32 +417,32 @@ Available Section Types (you MUST format them exactly like this):
       "question": "Question 1 text?",
       "options": ["Option A", "Option B", "Option C"],
       "correctIndex": 1, // 0-based index of correct option
-      "explanation": "Why Option B is correct",
+      "Explanation": "Why Option B is correct",
       "optionExplanations": ["Incorrect explanation", "Correct explanation", "Incorrect explanation"] // optional, matching options length
     },
     {
       "question": "Question 2 text?",
       "options": ["Option A", "Option B", "Option C"],
       "correctIndex": 0,
-      "explanation": "Why Option A is correct"
+      "Explanation": "Why Option A is correct"
     },
     {
       "question": "Question 3 text?",
       "options": ["Option A", "Option B", "Option C"],
       "correctIndex": 2,
-      "explanation": "Why Option C is correct"
+      "Explanation": "Why Option C is correct"
     },
     {
       "question": "Question 4 text?",
       "options": ["Option A", "Option B", "Option C"],
       "correctIndex": 1,
-      "explanation": "Why Option B is correct"
+      "Explanation": "Why Option B is correct"
     },
     {
       "question": "Question 5 text?",
       "options": ["Option A", "Option B", "Option C"],
       "correctIndex": 0,
-      "explanation": "Why Option A is correct"
+      "Explanation": "Why Option A is correct"
     }
   ]
 }
@@ -676,7 +676,7 @@ Please generate the JSON file for the topic "${topic}" now. Make sure the respon
 
               {/* Dynamic Explanation */}
               <div style={s.explanationCard}>
-                <strong>💡 explanation:</strong>
+                <strong>💡 Explanation:</strong>
                 <p style={{ margin: '4px 0 0 0' }}>{contextExplanations[context]}</p>
               </div>
             </div>
@@ -718,7 +718,7 @@ Please generate the JSON file for the topic "${topic}" now. Make sure the respon
 
               {/* Dynamic Explanation */}
               <div style={s.explanationCard}>
-                <strong>💡 explanation:</strong>
+                <strong>💡 Explanation:</strong>
                 <p style={{ margin: '4px 0 0 0' }}>{depthExplanations[depth]}</p>
               </div>
             </div>

@@ -125,8 +125,8 @@ function validateSection(section: any, path: string): { valid: boolean; error?: 
           return { valid: false, error: `"${path}.questions[${j}].correctIndex" must be a valid integer index within options range` };
         }
       }
-      if (q.explanation !== undefined && typeof q.explanation !== 'string') {
-        return { valid: false, error: `"${path}.questions[${j}].explanation" must be a string` };
+      if (q.Explanation !== undefined && typeof q.Explanation !== 'string') {
+        return { valid: false, error: `"${path}.questions[${j}].Explanation" must be a string` };
       }
       if (q.optionExplanations !== undefined) {
         if (!Array.isArray(q.optionExplanations)) {

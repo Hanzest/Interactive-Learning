@@ -387,7 +387,7 @@ export default function QuizSection({
       </div>
 
       {/* Global Explanation Box */}
-      {activeSubmitted && current.explanation && (
+      {activeSubmitted && current.Explanation && (
         <div style={{
           padding: '1rem',
           backgroundColor: 'var(--success-bg)',
@@ -413,7 +413,7 @@ export default function QuizSection({
           </div>
           <div
             style={{ margin: 0, color: 'var(--text-primary)', lineHeight: 1.5 }}
-            dangerouslySetInnerHTML={{ __html: renderMarkdown(current.explanation) }}
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(current.Explanation) }}
           />
         </div>
       )}

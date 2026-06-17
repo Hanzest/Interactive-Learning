@@ -53,11 +53,11 @@ describe('validateLearningPage', () => {
           type: 'quiz',
           title: 'Mini Quiz',
           questions: [
-            { question: 'Q1?', options: ['A', 'B'], correctIndex: 0, explanation: 'Exp' },
-            { question: 'Q2?', options: ['A', 'B'], correctIndex: 0, explanation: 'Exp' },
-            { question: 'Q3?', options: ['A', 'B'], correctIndex: 0, explanation: 'Exp' },
-            { question: 'Q4?', options: ['A', 'B'], correctIndex: 0, explanation: 'Exp' },
-            { question: 'Q5?', options: ['A', 'B'], correctIndex: 0, explanation: 'Exp' }
+            { question: 'Q1?', options: ['A', 'B'], correctIndex: 0, Explanation: 'Exp' },
+            { question: 'Q2?', options: ['A', 'B'], correctIndex: 0, Explanation: 'Exp' },
+            { question: 'Q3?', options: ['A', 'B'], correctIndex: 0, Explanation: 'Exp' },
+            { question: 'Q4?', options: ['A', 'B'], correctIndex: 0, Explanation: 'Exp' },
+            { question: 'Q5?', options: ['A', 'B'], correctIndex: 0, Explanation: 'Exp' }
           ]
         },
         {

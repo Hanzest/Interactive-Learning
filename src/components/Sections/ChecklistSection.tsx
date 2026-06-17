@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import type { ChecklistSection as ChecklistSectionType } from '../../types/schema';
 import { useAppContext } from '../../context/AppContext';
+import { renderMarkdown } from '../../utils/renderContent';
 
 interface ChecklistSectionProps {
   section: ChecklistSectionType;
@@ -121,7 +122,7 @@ export default function ChecklistSection({ section, sectionIndex }: ChecklistSec
                   cursor: 'pointer',
                 }}
               />
-              <span style={{ flex: 1 }}>{item.text}</span>
+              <span style={{ flex: 1 }} dangerouslySetInnerHTML={{ __html: renderMarkdown(item.text) }} />
               {isOptional && (
                 <span style={{
                   fontSize: '0.75rem',
