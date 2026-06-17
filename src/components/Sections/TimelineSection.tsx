@@ -36,91 +36,40 @@ export default function TimelineSection({ section }: TimelineSectionProps) {
           marginBottom: '0.75rem',
         }}>{section.title}</h2>}
         <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+          gap: '1rem',
+          padding: '0.5rem 0',
         }}>
-          <button
-            onClick={() => scroll('left')}
-            aria-label="Scroll left"
-            className="btn-base"
-            style={{
-              padding: '0.5rem 0.625rem',
-              border: '1px solid var(--border-color)',
-              borderRadius: '50%',
+          {section.items.map((item, i) => (
+            <div key={i} style={{
+              padding: '1rem',
               backgroundColor: 'var(--bg-secondary)',
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-              fontSize: '0.875rem',
-              flexShrink: 0,
-              transition: 'var(--transition-fast)',
-            }}
-          >
-            ◀
-          </button>
-          <div
-            ref={scrollRef}
-            style={{
-              display: 'flex',
-              gap: '1rem',
-              overflowX: 'auto',
-              scrollSnapType: 'x mandatory',
-              padding: '0.5rem 0',
-              scrollbarWidth: 'thin',
-            }}
-          >
-            {section.items.map((item, i) => (
-              <div key={i} style={{
-                minWidth: '280px',
-                maxWidth: '320px',
-                padding: '1rem',
-                backgroundColor: 'var(--bg-secondary)',
-                borderRadius: '8px',
-                border: '1px solid var(--border-color)',
-                scrollSnapAlign: 'start',
-                flexShrink: 0,
-              }}>
-                <div style={{
+              borderRadius: '8px',
+              border: '1px solid var(--border-color)',
+            }}>
+              <div style={{
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                color: 'var(--accent)',
+                marginBottom: '0.375rem',
+              }}>{item.date}</div>
+              <div style={{
+                fontSize: '1rem',
+                fontWeight: 600,
+                color: 'var(--text-primary)',
+                marginBottom: '0.5rem',
+              }}>{item.title}</div>
+              <div
+                style={{
+                  color: 'var(--text-secondary)',
+                  lineHeight: 1.6,
                   fontSize: '0.875rem',
-                  fontWeight: 600,
-                  color: 'var(--accent)',
-                  marginBottom: '0.375rem',
-                }}>{item.date}</div>
-                <div style={{
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  color: 'var(--text-primary)',
-                  marginBottom: '0.5rem',
-                }}>{item.title}</div>
-                <div
-                  style={{
-                    color: 'var(--text-secondary)',
-                    lineHeight: 1.6,
-                    fontSize: '0.875rem',
-                  }}
-                  dangerouslySetInnerHTML={{ __html: renderMarkdown(item.description) }}
-                />
-              </div>
-            ))}
-          </div>
-          <button
-            onClick={() => scroll('right')}
-            aria-label="Scroll right"
-            className="btn-base"
-            style={{
-              padding: '0.5rem 0.625rem',
-              border: '1px solid var(--border-color)',
-              borderRadius: '50%',
-              backgroundColor: 'var(--bg-secondary)',
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-              fontSize: '0.875rem',
-              flexShrink: 0,
-              transition: 'var(--transition-fast)',
-            }}
-          >
-            ▶
-          </button>
+                }}
+                dangerouslySetInnerHTML={{ __html: renderMarkdown(item.description) }}
+              />
+            </div>
+          ))}
         </div>
       </div>
     );

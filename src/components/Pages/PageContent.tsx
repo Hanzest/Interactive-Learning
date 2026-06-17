@@ -31,6 +31,7 @@ export default function PageContent() {
     setSlideScore(null);
     setIsConfirmed(false);
     setForceSubmit(false);
+    setIsPaused(false);
   }, [state.currentPageIndex, state.learningMode]);
 
   const sections = page
@@ -450,6 +451,7 @@ export default function PageContent() {
                       setCustomExamMinutes(mins);
                       setTimeLeft(mins * 60);
                       updateExamTimeLeft(state.currentPageIndex, mins * 60);
+                      setIsPaused(true);
                     }
                     setEditingDuration(false);
                   }}
