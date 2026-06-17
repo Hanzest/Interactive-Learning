@@ -250,7 +250,7 @@ export default function Header() {
             }}
             onClick={toggleDashboard}
             aria-label="Dashboard"
-            title="Dashboard (Ctrl+D)"
+            title="Dashboard"
             type="button"
             className="btn-base header-icon-btn"
           >

@@ -1,0 +1,210 @@
+{
+  "page": {
+    "title": "ESG Fundamentals & History",
+    "description": "Core ESG concepts, historical evolution, and key terminology",
+    "tags": ["ESG", "fundamentals", "history", "sustainability"]
+  },
+  "sections": [
+    {
+      "type": "text",
+      "title": "What is ESG?",
+      "content": "ESG stands for **Environmental**, **Social**, and **Governance** -- a framework for evaluating corporate behavior and performance on sustainability issues. The term originated in the 2005 UN Global Compact report \"Who Cares Wins,\" which argued that integrating ESG factors into capital markets leads to more sustainable investments and better societal outcomes.\n\n- **Environmental (E):** Climate change, natural resource use, pollution, waste, and biodiversity.\n- **Social (S):** Labor practices, human rights, community relations, diversity, and consumer protection.\n- **Governance (G):** Board structure, executive compensation, shareholder rights, ethics, and transparency.\n\nESG is an evolution of earlier concepts like **Corporate Social Responsibility (CSR)** and the **Triple Bottom Line** (People, Planet, Profit), but with a stronger emphasis on **materiality** -- i.e., which ESG factors are financially relevant to a specific industry or company."
+    },
+    {
+      "type": "timeline",
+      "title": "History of ESG",
+      "layout": "vertical",
+      "items": [
+        {
+          "date": "1970s",
+          "title": "Divestment Movements",
+          "description": "Socially responsible investing emerges with divestment from apartheid South Africa and tobacco companies. First ethical funds launched."
+        },
+        {
+          "date": "1997",
+          "title": "GRI Founded",
+          "description": "Global Reporting Initiative (GRI) established to create the first standardized sustainability reporting framework."
+        },
+        {
+          "date": "2005",
+          "title": "\"Who Cares Wins\" Report",
+          "description": "UN Global Compact report coins and formalizes the term **ESG**, arguing for its integration into financial analysis."
+        },
+        {
+          "date": "2006",
+          "title": "UN PRI Launched",
+          "description": "UN Principles for Responsible Investment (PRI) established, with over 3,000 signatories managing $100+ trillion in assets by 2023."
+        },
+        {
+          "date": "2015",
+          "title": "Paris Agreement & SDGs",
+          "description": "195 nations adopt the Paris Agreement on climate change. UN adopts 17 Sustainable Development Goals (SDGs), shaping ESG frameworks."
+        },
+        {
+          "date": "2017",
+          "title": "TCFD Recommendations",
+          "description": "Task Force on Climate-related Financial Disclosures (TCFD) publishes framework for climate risk reporting, now adopted by over 1,000 organizations."
+        },
+        {
+          "date": "2021",
+          "title": "ISSB Announced",
+          "description": "International Sustainability Standards Board (ISSB) founded by IFRS to consolidate frameworks (TCFD, SASB, CDSB, IIRC) into a global baseline."
+        },
+        {
+          "date": "2023+",
+          "title": "Global Baseline Era",
+          "description": "ISSB S1 and S2 published. Mandatory ESG disclosure expands via EU CSRD, SEC climate rule, California bills, and APAC regulations."
+        }
+      ]
+    },
+    {
+      "type": "accordion",
+      "title": "The Three Pillars Explored",
+      "accordionBehavior": "multiple",
+      "items": [
+        {
+          "heading": "Environmental (E) -- Climate & Resources",
+          "content": "The **Environmental** pillar covers a company's impact on natural systems. Key sub-topics include:\n- **Climate Change:** Scope 1 (direct), Scope 2 (energy), and Scope 3 (value chain) greenhouse gas emissions.\n- **Biodiversity:** Land use, deforestation, species protection.\n- **Natural Resources:** Water withdrawal, raw material sourcing, circular economy.\n- **Pollution & Waste:** Emissions to air/water, hazardous waste, packaging.\n- **Advanced:** Science-Based Targets initiative (SBTi), carbon offset quality, net-zero pathways."
+        },
+        {
+          "heading": "Social (S) -- People & Communities",
+          "content": "The **Social** pillar addresses stakeholder relationships. Key sub-topics include:\n- **Labor Practices:** Fair wages, health & safety, collective bargaining.\n- **Human Rights:** Supply chain due diligence, modern slavery, child labor.\n- **Diversity & Inclusion:** Gender pay gap, board diversity, inclusive culture.\n- **Community Relations:** Social license to operate, indigenous rights, local impact.\n- **Advanced:** Living wage vs. minimum wage, HREDD (Human Rights and Environmental Due Diligence)."
+        },
+        {
+          "heading": "Governance (G) -- Leadership & Control",
+          "content": "The **Governance** pillar examines how a company is directed and controlled. Key sub-topics include:\n- **Board Structure:** Independence, separation of CEO/Chair roles, diversity.\n- **Executive Compensation:** Pay-for-performance, clawback provisions, ESG-linked metrics.\n- **Shareholder Rights:** One-share-one-vote, dual-class structures, proxy access.\n- **Ethics & Transparency:** Anti-corruption, whistleblower programs, lobbying disclosures.\n- **Advanced:** Dual-class share structures and their impact on ESG scores, say-on-pay votes."
+        }
+      ]
+    },
+    {
+      "type": "tabs",
+      "title": "ESG vs CSR vs Impact Investing",
+      "tabs": [
+        {
+          "label": "ESG",
+          "content": "**Origin:** Capital markets / investment analysis.\n**Focus:** Material financial risks and opportunities from environmental, social, and governance factors.\n**Metrics:** Standardized ratings (MSCI, Sustainalytics), disclosure frameworks (GRI, SASB, TCFD).\n**Regulation:** Increasingly mandatory (SFDR, CSRD, SEC).\n**Target Audience:** Investors, asset managers, analysts."
+        },
+        {
+          "label": "CSR",
+          "content": "**Origin:** Corporate philanthropy / public relations.\n**Focus:** Voluntary corporate citizenship, community engagement, ethical operations.\n**Metrics:** Qualitative reports, donation amounts, volunteer hours.\n**Regulation:** Largely voluntary; some EU NFRD/CSRD overlap.\n**Target Audience:** Consumers, employees, NGOs, local communities."
+        },
+        {
+          "label": "Impact Investing",
+          "content": "**Origin:** Philanthropy / development finance.\n**Focus:** Measurable positive social or environmental impact *alongside* financial return.\n**Metrics:** IRIS+ metrics, impact multiples, theory of change.\n**Regulation:** Generally voluntary.\n**Target Audience:** Impact funds, development finance institutions, high-net-worth individuals.\n**Key Distinction:** Intentionality -- impact investors explicitly target non-financial outcomes."
+        }
+      ]
+    },
+    {
+      "type": "flashcards",
+      "title": "Key Terminology",
+      "cards": [
+        {
+          "front": "What is Materiality?",
+          "back": "The principle that a company should disclose ESG issues that are **material** to its financial performance or stakeholder decisions. Single materiality = financial impact only. Double materiality = financial impact **and** the company's impact on society/environment."
+        },
+        {
+          "front": "What is Double Materiality?",
+          "back": "A concept under GRI and EU CSRD requiring companies to report both:\n1. How ESG issues affect the company (financial materiality)\n2. How the company affects society and the environment (impact materiality)"
+        },
+        {
+          "front": "What are Scope 1, 2, and 3 Emissions?",
+          "back": "- **Scope 1:** Direct emissions from owned/controlled sources\n- **Scope 2:** Indirect emissions from purchased energy\n- **Scope 3:** All other indirect emissions in the value chain (upstream and downstream)"
+        },
+        {
+          "front": "What is Greenwashing?",
+          "back": "The practice of making misleading or unsubstantiated claims about the environmental benefits of a product, service, or company practice. Key red flags: vagueness, irrelevant claims, hidden trade-offs."
+        },
+        {
+          "front": "What is Stewardship?",
+          "back": "The active engagement by investors with portfolio companies to promote long-term value creation through ESG integration, voting, and dialogue. Central to the **UK Stewardship Code** and **UN PRI**."
+        },
+        {
+          "front": "What is Net Zero?",
+          "back": "A state where greenhouse gas emissions are balanced by removals (carbon sinks). Corporate net-zero targets are validated by the **Science-Based Targets initiative (SBTi)** -- requiring ~90% reduction before offsetting."
+        },
+        {
+          "front": "What is SBTi?",
+          "back": "The Science-Based Targets initiative -- a partnership between CDP, UNGC, WRI, and WWF. Validates corporate emission reduction targets as aligned with **1.5C** or **well-below 2C** pathways from the Paris Agreement."
+        },
+        {
+          "front": "What is EU Taxonomy Alignment?",
+          "back": "A classification system defining which economic activities are **environmentally sustainable**. An activity must:\n1. Contribute substantially to 1+ of 6 environmental objectives\n2. Do No Significant Harm (DNSH) to others\n3. Meet minimum social safeguards"
+        }
+      ]
+    },
+    {
+      "type": "quiz",
+      "title": "Knowledge Check",
+      "questions": [
+        {
+          "question": "Which UN report first formally coined the term 'ESG' in 2005?",
+          "options": [
+            "The Brundtland Report",
+            "Who Cares Wins",
+            "The Stern Review",
+            "Principles for Responsible Investment"
+          ],
+          "correctIndex": 1,
+          "explanation": "The 2005 UN Global Compact report **'Who Cares Wins'** introduced ESG as a framework for integrating environmental, social, and governance factors into capital markets.",
+          "optionExplanations": [
+            "The Brundtland Report (1987) defined sustainable development but predates the term ESG.",
+            "Correct! 'Who Cares Wins' was the landmark UN report that formalized ESG terminology.",
+            "The Stern Review (2006) focused on the economics of climate change, not ESG as a framework.",
+            "The PRI was launched in 2006, a year after the term ESG was coined."
+          ]
+        },
+        {
+          "question": "Double materiality requires companies to report on:",
+          "options": [
+            "Only financial risks from climate change",
+            "Financial impact and impact on society/environment",
+            "Only environmental impacts",
+            "Only governance factors affecting share price"
+          ],
+          "correctIndex": 1,
+          "explanation": "Double materiality covers both **financial materiality** (how ESG affects the company) and **impact materiality** (how the company affects society/environment).",
+          "optionExplanations": [
+            "This describes single materiality, not double.",
+            "Correct! Double materiality is a bidirectional framework.",
+            "Double materiality covers social and governance impacts too, not just environmental.",
+            "It covers far more than just governance factors."
+          ]
+        },
+        {
+          "question": "Which emissions scope includes a company's entire value chain (suppliers, customers, logistics)?",
+          "options": [
+            "Scope 1",
+            "Scope 2",
+            "Scope 3",
+            "All of the above"
+          ],
+          "correctIndex": 2,
+          "explanation": "**Scope 3** covers all indirect emissions not included in Scope 2, spanning upstream (suppliers) and downstream (product use, disposal) activities.",
+          "optionExplanations": [
+            "Scope 1 covers only direct emissions from owned sources.",
+            "Scope 2 covers only purchased energy.",
+            "Correct! Scope 3 is the broadest and often the largest category.",
+            "Only Scope 3 covers the full value chain."
+          ]
+        },
+        {
+          "question": "What distinguishes ESG from traditional CSR?",
+          "options": [
+            "ESG is voluntary; CSR is mandatory",
+            "ESG focuses on material financial risks; CSR focuses on corporate citizenship",
+            "ESG only applies to technology companies",
+            "There is no difference"
+          ],
+          "correctIndex": 1,
+          "explanation": "ESG is an **investment-centric** framework emphasizing material financial risks, while CSR is a broader **corporate citizenship** approach often disconnected from financial materiality.",
+          "optionExplanations": [
+            "CSR is typically voluntary; ESG is increasingly mandatory.",
+            "Correct! This is the core distinction.",
+            "ESG applies across all industries.",
+            "They have different origins, focus, and regulatory trajectories."
+          ]
+        }
+      ]
+    }
+  ]
+}

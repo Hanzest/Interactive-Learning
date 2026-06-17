@@ -6,10 +6,11 @@ This document outlines the pedagogical guidelines, best practices, and schema al
 
 ## 🧠 Pedagogical Foundations
 
-To maximize knowledge retention, structure your pages around three key cognitive science principles:
+To maximize knowledge retention, structure your pages around four key cognitive science principles:
 1. **Active Recall**: Test knowledge before presenting the answer (use *Flashcards*, *Quizzes*, *Matching*).
 2. **Spaced Repetition**: Re-evaluate complex topics periodically to improve long-term retention.
 3. **Scaffolding / Details-on-Demand**: Start with broad concepts and expose complexity progressively (use *Tabs*, *Accordions*).
+4. **Structured Sections**: Knowledge should be presented in a logical order, with clear headings and subheadings. The learning objective should be clear and concise and presented at the beginning of the page.
 
 ---
 
@@ -94,3 +95,9 @@ To maximize knowledge retention, structure your pages around three key cognitive
 - **Validity**: Ensure JSON files conform exactly to the JSON syntax (e.g., escape double quotes `\"` within strings).
 - **Markdown**: Supports standard bold (`**`), italics (`*`), lists (`-`), tables, and code blocks (use three backticks).
 - **Encoding**: Save all JSON files with UTF-8 encoding. Do not use em-dashes (`—`) or decorative unicode symbols where standard text suffices.
+
+## Important Notes
+
+- It is possible to have multiple sections of the same type, as long as they are all relevant to the topic and each has its own purpose.
+- The pages and sections are rendered in the order they appear in the JSON.
+- Lengthy content should be broken down into multiple sections.

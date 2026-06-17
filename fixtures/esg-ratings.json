@@ -1,0 +1,201 @@
+{
+  "page": {
+    "title": "ESG Ratings & Scoring",
+    "description": "How MSCI, Sustainalytics, S&P Global, and Moody's assess corporate ESG performance",
+    "tags": ["ESG ratings", "MSCI", "Sustainalytics", "scoring", "methodology"]
+  },
+  "sections": [
+    {
+      "type": "text",
+      "title": "The ESG Ratings Landscape",
+      "content": "ESG ratings agencies evaluate corporate performance on environmental, social, and governance factors, translating complex data into accessible letter grades or numeric scores for investors. The major agencies are **MSCI**, **Sustainalytics** (now part of Morningstar), **S&P Global** (SAM Corporate Sustainability Assessment), **Moody's** (ESG Scorecard), and **ISS ESG**.\n\nA critical challenge in the industry is **ESG rating divergence** -- different agencies often assign sharply different ratings to the same company. Research shows the average correlation between major ESG ratings is only ~0.54 (vs. ~0.99 for credit ratings). Key drivers of divergence:\n\n- **Methodology:** Different weightings of E, S, and G factors.\n- **Scope:** What is measured vs. what is excluded.\n- **Materiality:** Industry-specific vs. universal weighting.\n- **Data sources:** Self-reported vs. media-screened vs. regulatory data.\n- **Rater effect:** The specific agency's analytical judgment and proprietary models.\n\nThis divergence creates challenges for investors trying to use ESG ratings for portfolio construction, engagement, and risk management."
+    },
+    {
+      "type": "accordion",
+      "title": "Rating Methodologies",
+      "accordionBehavior": "multiple",
+      "items": [
+        {
+          "heading": "MSCI ESG Ratings (AAA to CCC)",
+          "content": "MSCI rates 8,500+ companies on a **AAA to CCC** scale (leaders, average, laggards).\n- **Methodology:** Each industry has 13-35 **Key Issues** weighted by industry-specific impact and time horizon.\n- **Key Issues** are drawn from MSCI's ESG framework: Climate Change, Natural Capital, Human Capital, etc.\n- **Weighting:** Excludes issues deemed immaterial for a given industry (e.g., water stress for a software company).\n- **Controversies:** MSCI applies a **Controversy Score** that can cap the overall rating if severe incidents occur.\n- **Trend:** MSCI combines current exposure with historical management track record."
+        },
+        {
+          "heading": "Sustainalytics (0-100+ Unmanaged Risk)",
+          "content": "Sustainalytics covers 4,500+ companies with a **Unmanaged Risk Score** (0 to 100+).\n- **Lower is better:** Scores represent the amount of unmanaged ESG risk.\n- **Methodology:** Assesses **Material ESG Risk** based on industry exposure and company management.\n- **Exposure:** How exposed is the industry to ESG issues?\n- **Management Gap:** How well does the company manage those risks vs. peers?\n- **Controversies:** Deduct points for controversies that reveal management failures.\n- **Categories:** Negligible (0-10), Low (10-20), Medium (20-30), High (30-40), Severe (40+)."
+        },
+        {
+          "heading": "S&P Global SAM CSA (0-100 Score)",
+          "content": "S&P Global's **Corporate Sustainability Assessment (CSA)** scores companies 0-100.\n- **Methodology:** Annual questionnaire covering 61 industry-specific questions across economic, environmental, and social dimensions.\n- **Weighting:** Industry-specific with up to 23 criteria.\n- **Output:** Used for inclusion in the **Dow Jones Sustainability Indices (DJSI)**. Scores above ~90 typically qualify for DJSI World.\n- **Best-in-class:** Only top-performing companies in each industry are selected for DJSI."
+        },
+        {
+          "heading": "Moody's ESG Scorecard (Credit-Linked)",
+          "content": "Moody's **ESG Scorecard** integrates ESG assessments into credit ratings.\n- **Approach:** Assesses ESG exposure and management across E, S, and G factors.\n- **Output:** A **Credit Impact Score (CIS)** from CIS-1 (positive) to CIS-5 (very negative).\n- **Focus:** How ESG issues affect creditworthiness -- not a general sustainability score.\n- **Distinctive:** Moody's does not produce a standalone ESG rating; ESG is embedded in credit analysis."
+        },
+        {
+          "heading": "ISS ESG QualityScore (1-10)",
+          "content": "ISS ESG's **QualityScore** covers 10,000+ companies with a **Decile Score** (1-10, where 1 = best).\n- **Methodology:** Scores across E, S, G, and overall (weighted average).\n- **Data:** 200+ indicators, structured around governance and sustainability factors.\n- **Focus:** Strong emphasis on **Governance** (board composition, compensation, shareholder rights).\n- **Use case:** Institutional investors use QualityScore for proxy voting and engagement."
+        }
+      ]
+    },
+    {
+      "type": "matching",
+      "title": "Agency to Approach",
+      "pairs": [
+        {
+          "left": "MSCI",
+          "right": "13-35 key issues weighted industry-specific, AAA to CCC scale"
+        },
+        {
+          "left": "Sustainalytics",
+          "right": "Unmanaged Risk Score (0-100+), lower is better, industry + management gap"
+        },
+        {
+          "left": "S&P Global",
+          "right": "CSA questionnaire (0-100), used for DJSI inclusion, best-in-class selection"
+        },
+        {
+          "left": "Moody's",
+          "right": "Credit Impact Score (CIS-1 to CIS-5), ESG integrated into credit analysis"
+        },
+        {
+          "left": "ISS ESG",
+          "right": "QualityScore decile (1-10, 1=best), 200+ indicators, governance-heavy"
+        }
+      ]
+    },
+    {
+      "type": "sorting",
+      "title": "ESG Rating Tiers (MSCI)",
+      "items": [
+        {
+          "text": "Leader (AAA, AA)",
+          "correctOrder": 0
+        },
+        {
+          "text": "Average (A, BBB, BB)",
+          "correctOrder": 1
+        },
+        {
+          "text": "Laggard (B, CCC)",
+          "correctOrder": 2
+        }
+      ]
+    },
+    {
+      "type": "cloze",
+      "title": "Understanding Rating Divergence",
+      "text": "ESG rating divergence occurs when different agencies assign different scores to the same company. The primary drivers include: differences in {{methodology}} (how factors are weighted), differences in {{scope}} (what is included vs. excluded), differences in {{materiality}} definitions (universal vs. industry-specific), and differences in {{data}} sources (self-reported vs. screened). Research by MIT found that the average {{correlation}} between major ESG ratings is only about 0.54, compared to 0.99 for credit ratings.",
+      "blanks": [
+        {
+          "id": "methodology",
+          "options": ["methodology", "budget", "branding", "marketing"],
+          "correctIndex": 0,
+          "correctAnswer": "methodology",
+          "hint": "How each agency constructs and weights its rating model."
+        },
+        {
+          "id": "scope",
+          "options": ["scope", "revenue", "region", "sector"],
+          "correctIndex": 0,
+          "correctAnswer": "scope",
+          "hint": "What topics and issues each agency includes in its assessment."
+        },
+        {
+          "id": "materiality",
+          "options": ["materiality", "liability", "maturity", "mobility"],
+          "correctIndex": 0,
+          "correctAnswer": "materiality",
+          "hint": "Whether the agency uses universal or industry-specific materiality."
+        },
+        {
+          "id": "data",
+          "options": ["data", "debt", "tax", "sales"],
+          "correctIndex": 0,
+          "correctAnswer": "data",
+          "hint": "The sources each agency uses to gather ESG information."
+        },
+        {
+          "id": "correlation",
+          "options": ["correlation", "capitalization", "compliance", "concentration"],
+          "correctIndex": 0,
+          "correctAnswer": "correlation",
+          "hint": "A statistical measure of how similar two rating sets are."
+        }
+      ]
+    },
+    {
+      "type": "quiz",
+      "title": "Ratings Assessment",
+      "questions": [
+        {
+          "question": "Which ESG rating agency uses an 'Unmanaged Risk Score' from 0-100+ where lower scores are better?",
+          "options": [
+            "MSCI",
+            "Sustainalytics",
+            "S&P Global",
+            "Moody's"
+          ],
+          "correctIndex": 1,
+          "explanation": "**Sustainalytics** uses the Unmanaged Risk Score model. A lower score means less unmanaged ESG risk, with categories from Negligible (0-10) to Severe (40+).",
+          "optionExplanations": [
+            "MSCI uses a AAA to CCC letter grade scale, not a numeric risk score.",
+            "Correct! Sustainalytics' methodology assesses unmanaged risk based on industry exposure and management gap.",
+            "S&P Global uses a 0-100 score from its CSA questionnaire, but not labeled as 'Unmanaged Risk'.",
+            "Moody's uses a CIS-1 to CIS-5 Credit Impact Score."
+          ]
+        },
+        {
+          "question": "What is the approximate average correlation between major ESG rating agencies?",
+          "options": [
+            "0.99",
+            "0.85",
+            "0.54",
+            "0.20"
+          ],
+          "correctIndex": 2,
+          "explanation": "Research (e.g., MIT, Christensen et al.) finds that ESG rating correlations average **~0.54**, compared to ~0.99 for credit ratings. This divergence stems from different methodologies, scopes, and data sources.",
+          "optionExplanations": [
+            "0.99 is the correlation for credit ratings, not ESG ratings.",
+            "0.85 is higher than what empirical research finds for ESG ratings.",
+            "Correct! ~0.54 reflects significant divergence across agencies.",
+            "While some pairs diverge more, the average across major agencies is ~0.54."
+          ]
+        },
+        {
+          "question": "How does MSCI determine which Key Issues to include for a given company?",
+          "options": [
+            "All 35 Key Issues apply to every company universally",
+            "Key Issues are selected based on industry-specific materiality and time horizon",
+            "Companies choose which Key Issues to report on",
+            "Only environmental issues are considered"
+          ],
+          "correctIndex": 1,
+          "explanation": "MSCI applies **industry-specific materiality** -- each industry has 13-35 Key Issues weighted by their relevance to that industry. Issues deemed immaterial for a given industry are excluded (e.g., water stress for software companies).",
+          "optionExplanations": [
+            "MSCI does not apply all Key Issues universally; it filters by industry.",
+            "Correct! Industry-specific materiality is central to MSCI's methodology.",
+            "Key Issues are determined by MSCI's research, not company self-selection.",
+            "Key Issues span all three E, S, and G pillars."
+          ]
+        },
+        {
+          "question": "What is MSCI's rating scale from highest to lowest?",
+          "options": [
+            "CCC to AAA (ascending)",
+            "AAA, AA, A, BBB, BB, B, CCC (descending)",
+            "1 to 10 (best to worst)",
+            "A+, A, B, C, D"
+          ],
+          "correctIndex": 1,
+          "explanation": "MSCI's scale runs from **AAA (Leader) → AA → A → BBB → BB → B → CCC (Laggard)**. Leaders (AAA, AA), Average (A, BBB, BB), Laggards (B, CCC).",
+          "optionExplanations": [
+            "The scale is descending from AAA to CCC, not ascending.",
+            "Correct! This is MSCI's complete rating scale in descending order.",
+            "MSCI uses a letter-grade scale, not numeric.",
+            "MSCI does not use plus/minus modifiers besides the letter grades."
+          ]
+        }
+      ]
+    }
+  ]
+}
