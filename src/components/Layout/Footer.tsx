@@ -42,8 +42,6 @@ export default function Footer() {
           borderTop: '1px solid var(--border-color)',
           minHeight: '3.25rem',
           transition: 'background-color var(--transition-normal)',
-          flexWrap: 'nowrap',
-          overflow: 'hidden',
         }}
       >
         {/* Navigation Controls */}
@@ -117,6 +115,37 @@ export default function Footer() {
           </button>
         </div>
 
+        {/* Creator Credit - placed early so it's stable at 400px, never hidden */}
+        <span
+          className="footer-creator"
+          style={{
+            fontSize: '0.75rem',
+            color: 'var(--text-muted)',
+            whiteSpace: 'nowrap',
+            flexShrink: 1,
+            minWidth: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          <a
+            href="https://github.com/Hanzest"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Created by Mingsy Hồ"
+            style={{
+              color: 'var(--accent)',
+              textDecoration: 'none',
+              fontWeight: 600,
+            }}
+          >
+            by Mingsy Hồ
+          </a>
+        </span>
+
+        {/* Spacer to push progress bar to the right */}
+        <div style={{ flex: 1, minWidth: '0.25rem' }} />
+
         {/* Support/Donate button */}
         <button
           onClick={() => setShowDonate(true)}
@@ -135,32 +164,11 @@ export default function Footer() {
             fontSize: '0.75rem',
             transition: 'all 0.15s ease',
             flexShrink: 0,
-            marginLeft: '0.25rem',
           }}
           title={t('footer.donateTitle')}
         >
           ❤️ {t('footer.donate')}
         </button>
-
-        {/* Spacer to push progress bar/creator details to the right */}
-        <div style={{ flex: 1 }} />
-
-        {/* Creator Credit - hides globally on narrow screen via global.css .footer-creator */}
-        <span className="footer-creator" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-          {t('welcomePage.createdBy')}{' '}
-          <a
-            href="https://github.com/Hanzest"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              color: 'var(--accent)',
-              textDecoration: 'none',
-              fontWeight: 600,
-            }}
-          >
-            Mingsy Hồ
-          </a>
-        </span>
 
         {/* Progress bar and Viewed Stats */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>

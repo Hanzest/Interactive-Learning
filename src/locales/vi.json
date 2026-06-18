@@ -38,7 +38,9 @@
     "markCompleteTooltip": "Đánh dấu đã hoàn thành",
     "renameTooltip": "Đổi tên",
     "deleteTooltip": "Xóa",
-    "optionsTooltip": "Tùy chọn"
+    "optionsTooltip": "Tùy chọn",
+    "goHome": "Về trang chủ",
+    "goHomeTitle": "Về trang chủ"
   },
   "uploadZone": {
     "dragDropActive": "Thả tệp vào đây",
@@ -66,33 +68,6 @@
     "tip2": "Dùng phím mũi tên Trái/Phải để chuyển trang.",
     "tip3": "Bật/Tắt chế độ sáng/tối ở góc trên bên phải.",
     "tip4": "Thử chế độ Luyện tập hoặc Kiểm tra để tự đánh giá kiến thức."
-  },
-  "dashboard": {
-    "title": "Tiến độ học tập & Phân tích",
-    "overall": "Tiến độ tổng quan",
-    "completed": "Bài đã hoàn thành",
-    "total": "Tổng số bài",
-    "flashcards": "Flashcard đã thuộc",
-    "quizScore": "Điểm trắc nghiệm trung bình",
-    "duration": "Thời gian học tập",
-    "quizPerformance": "Kết quả trắc nghiệm",
-    "noQuizzes": "Chưa hoàn thành bài trắc nghiệm nào. Hãy chuyển sang chế độ Luyện tập hoặc Kiểm tra để làm bài!",
-    "moduleCompletion": "Trạng thái hoàn thành bài học",
-    "noPages": "Chưa có bài học nào được tải lên. Hãy tải lên tệp JSON để xem phân tích tiến độ.",
-    "sectionsCompleted": "Phần đã hoàn thành"
-  },
-  "shortcuts": {
-    "title": "Phím tắt bàn phím",
-    "subtitle": "Sử dụng các phím tắt này để điều hướng ứng dụng hiệu quả hơn.",
-    "toggleSidebar": "Ẩn/Hiện Menu",
-    "toggleShortcuts": "Ẩn/Hiện hướng dẫn phím tắt",
-    "toggleDashboard": "Ẩn/Hiện Bảng theo dõi",
-    "focusSearch": "Tập trung vào ô tìm kiếm",
-    "nextPage": "Trang tiếp theo",
-    "prevPage": "Trang trước đó",
-    "flipCard": "Lật thẻ Flashcard hiện tại",
-    "toggleDarkMode": "Bật/Tắt chế độ tối",
-    "close": "Đóng"
   },
   "exam": {
     "submit": "Nộp bài kiểm tra",
@@ -360,5 +335,15 @@
     "placeholder": "Viết ghi chú của bạn vào đây...",
     "save": "Lưu",
     "cancel": "Hủy"
+  },
+  "feedback": {
+    "title": "Gửi phản hồi của bạn",
+    "subtitle": "Giúp chúng tôi cải thiện! Phản hồi chỉ mất chưa đến 1 phút.",
+    "cta": "Gửi phản hồi ↗",
+    "responses": "{count} phản hồi",
+    "loading": "Đang tải...",
+    "sidebarTitle": "Phản hồi",
+    "sidebarSubtitle": "Giúp cải thiện ứng dụng!",
+    "sidebarCta": "Gửi phản hồi ↗"
   }
 }

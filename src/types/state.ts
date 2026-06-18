@@ -10,6 +10,7 @@ export interface AppState {
   currentPageIndex: number;
 
   // UI State
+  showWelcomePage: boolean;
   darkMode: boolean;
   isLoading: boolean;
   error: string | null;
@@ -93,7 +94,8 @@ export type AppAction =
   | { type: 'UPDATE_EXAM_TIME_LEFT'; payload: { pageIndex: number; timeLeft: number } }
   | { type: 'TOGGLE_EXAM_PAUSE'; payload: { pageIndex: number } }
   | { type: 'SET_EXAM_PAUSE'; payload: { pageIndex: number; paused: boolean } }
-  | { type: 'SET_LANGUAGE'; payload: 'en' | 'vi' };
+  | { type: 'SET_LANGUAGE'; payload: 'en' | 'vi' }
+  | { type: 'SET_SHOW_WELCOME_PAGE'; payload: boolean };
 
 /* ==========================================================================
    Derived / Computed State (not stored, computed from state)

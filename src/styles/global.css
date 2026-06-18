@@ -456,13 +456,13 @@ a:hover {
   font-size: 0.75rem;
   color: var(--text-muted);
   white-space: nowrap;
-  margin-right: 0.5rem;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @media (max-width: 500px) {
-  .footer-creator {
-    display: none !important;
-  }
   .footer-viewed-count {
     display: none !important;
   }

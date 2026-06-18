@@ -5,9 +5,10 @@ import FileUploadDropZone from '../UI/FileUploadDropZone';
 import SidebarProgress from '../UI/SidebarProgress';
 import PageList from '../UI/PageList';
 import { useTranslation } from '../../hooks/useTranslation';
+import FeedbackWidget from '../UI/FeedbackWidget';
 
 export default function Sidebar() {
-  const { state, toggleSidebar, toggleCreatePrompt } = useAppContext();
+  const { state, toggleSidebar, toggleCreatePrompt, goHome } = useAppContext();
   const { t } = useTranslation();
 
   const isOpen = state.sidebarOpen;
@@ -62,6 +63,28 @@ export default function Sidebar() {
           </div>
           <div style={pageListSectionStyle}>
             <PageList />
+          </div>
+
+          {/* Feedback Widget — sidebar compact variant */}
+          <FeedbackWidget variant="sidebar" />
+
+          {/* Permanent Home / Landing Page button — always pinned at bottom */}
+          <div
+            style={{
+              padding: '0 0.75rem 0.625rem',
+              flexShrink: 0,
+            }}
+          >
+            <button
+              className={styles.homeBtn}
+              onClick={goHome}
+              title={t('sidebar.goHomeTitle')}
+              type="button"
+              aria-label={t('sidebar.goHomeTitle')}
+            >
+              <span aria-hidden="true">🏠</span>
+              <span>{t('sidebar.goHome')}</span>
+            </button>
           </div>
         </div>
       </aside>

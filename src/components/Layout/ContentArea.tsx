@@ -6,7 +6,7 @@ import WelcomePage from '../Pages/WelcomePage';
 export default function ContentArea() {
   const { state } = useAppContext();
 
-  if (state.pages.length === 0) {
+  if (state.pages.length === 0 || state.showWelcomePage) {
     return <WelcomePage />;
   }
 

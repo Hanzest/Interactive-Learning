@@ -24,6 +24,7 @@ export const initialState: AppState = {
   showDashboard: false,
   showCreatePrompt: false,
   sidebarOpen: false,
+  showWelcomePage: false,
   searchQuery: '',
   renamingIndex: null,
   contextMenu: null,
@@ -63,6 +64,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         pages: newPages,
         pageHashes: newHashes,
         currentPageIndex: state.currentPageIndex === -1 ? 0 : state.currentPageIndex,
+        showWelcomePage: false,
         error: null,
       };
     }
@@ -153,10 +155,11 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       const newViewed = state.viewedPages.includes(index)
         ? state.viewedPages
         : [...state.viewedPages, index];
-      return {
+    return {
         ...state,
         currentPageIndex: index,
         viewedPages: newViewed,
+        showWelcomePage: false,
         sidebarOpen: closeSidebar ? false : state.sidebarOpen,
       };
     }
@@ -599,6 +602,9 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         language: action.payload,
       };
+
+    case 'SET_SHOW_WELCOME_PAGE':
+      return { ...state, showWelcomePage: action.payload };
 
     default:
       return state;

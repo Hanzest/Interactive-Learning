@@ -77,6 +77,7 @@ interface AppContextValue {
   setExamPause: (pageIndex: number, paused: boolean) => void;
   getQuizAttemptHistory: (pageIndex: number, sectionIndex: number) => { attempts: number; bestCorrect: number; bestTotal: number };
   setLanguage: (lang: 'en' | 'vi') => void;
+  goHome: () => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -208,8 +209,11 @@ export function AppProvider({ children }: AppProviderProps) {
   const removeAllPages = useCallback(() => {
     if (state.pages.length === 0) return;
     dispatch({ type: 'REMOVE_ALL_PAGES' });
-    addToastFn('All pages deleted', 'warning', 2000, null);
-  }, [state.pages.length]);
+    // Use locale-aware toast message
+    const lang = state.language || 'en';
+    const msg = lang === 'vi' ? 'Đã xóa tất cả các bài học' : 'All pages deleted';
+    addToastFn(msg, 'warning', 2000, null);
+  }, [state.pages.length, state.language]);
 
   const renamePage = useCallback((index: number, title: string) => {
     if (!title.trim()) return;
@@ -304,6 +308,14 @@ export function AppProvider({ children }: AppProviderProps) {
 
   const setLanguage = useCallback((lang: 'en' | 'vi') => {
     dispatch({ type: 'SET_LANGUAGE', payload: lang });
+  }, []);
+
+  const goHome = useCallback(() => {
+    dispatch({ type: 'SET_SHOW_WELCOME_PAGE', payload: true });
+    // Close sidebar on mobile when going home
+    if (window.innerWidth < 768) {
+      dispatch({ type: 'SET_SIDEBAR', payload: false });
+    }
   }, []);
 
   // setPageConfidence removed
@@ -403,6 +415,7 @@ export function AppProvider({ children }: AppProviderProps) {
     isQuizCompleted,
     saveSession,
     getQuizAttemptHistory,
+    goHome,
   }), [
     state, visibleIndices, visibleCount, currentPage, completedCount, completedPercent,
     isCurrentPageVisible, addPage, removePage, removeAllPages, renamePage,
@@ -412,7 +425,7 @@ export function AppProvider({ children }: AppProviderProps) {
     toggleExamPause, setExamPause, setLanguage,
     setError, setRenamingIndex, setContextMenu, saveNote, getNote, recordQuizScore,
     saveChecklist, saveFlashcardProgress, addToastFn, dismissToast, isPageViewed, isPageCompleted,
-    isQuizCompleted, saveSession, getQuizAttemptHistory,
+    isQuizCompleted, saveSession, getQuizAttemptHistory, goHome,
   ]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -38,7 +38,9 @@
     "markCompleteTooltip": "Mark complete",
     "renameTooltip": "Rename",
     "deleteTooltip": "Delete",
-    "optionsTooltip": "Options"
+    "optionsTooltip": "Options",
+    "goHome": "Back to Home",
+    "goHomeTitle": "Back to landing page"
   },
   "uploadZone": {
     "dragDropActive": "Drop files here",
@@ -66,33 +68,6 @@
     "tip2": "Use 'Left'/'Right' arrow keys to turn pages.",
     "tip3": "Toggle between Dark and Light mode in the top right.",
     "tip4": "Try Practice Mode or Exam Mode for interactive assessments."
-  },
-  "dashboard": {
-    "title": "Learning Progress & Analytics",
-    "overall": "Overall Progress",
-    "completed": "Pages Completed",
-    "total": "Total Pages",
-    "flashcards": "Flashcards Mastered",
-    "quizScore": "Average Quiz Score",
-    "duration": "Study Session Duration",
-    "quizPerformance": "Quiz Performance",
-    "noQuizzes": "No quizzes completed yet. Switch to Practice or Exam mode to take a quiz!",
-    "moduleCompletion": "Module Completion Status",
-    "noPages": "No pages uploaded yet. Upload a JSON file to see progress analytics.",
-    "sectionsCompleted": "Sections Completed"
-  },
-  "shortcuts": {
-    "title": "Keyboard Shortcuts",
-    "subtitle": "Use these global shortcuts to navigate the application efficiently.",
-    "toggleSidebar": "Toggle Sidebar",
-    "toggleShortcuts": "Toggle Shortcuts Guide",
-    "toggleDashboard": "Toggle Dashboard",
-    "focusSearch": "Focus Search Bar",
-    "nextPage": "Next Page",
-    "prevPage": "Previous Page",
-    "flipCard": "Flip Active Flashcard",
-    "toggleDarkMode": "Toggle Dark Mode",
-    "close": "Close"
   },
   "exam": {
     "submit": "Submit Exam",
@@ -360,5 +335,15 @@
     "placeholder": "Write your note here...",
     "save": "Save",
     "cancel": "Cancel"
+  },
+  "feedback": {
+    "title": "Share Your Feedback",
+    "subtitle": "Help us improve! Your feedback takes less than 1 minute.",
+    "cta": "Give Feedback ↗",
+    "responses": "{count} responses so far",
+    "loading": "Loading...",
+    "sidebarTitle": "Feedback",
+    "sidebarSubtitle": "Help improve the app!",
+    "sidebarCta": "Send Feedback ↗"
   }
 }
