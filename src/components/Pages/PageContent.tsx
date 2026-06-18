@@ -10,6 +10,8 @@ export default function PageContent() {
   const { state, submitExam, retryExam, updateExamTimeLeft, toggleExamPause, setExamPause, setLearningMode, addToast } = useAppContext();
   const { t } = useTranslation();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const prevModeRef = useRef(state.learningMode);
+  const prevPageRef = useRef(state.currentPageIndex);
   const slideDirection = useRef(1);
   const [animClass, setAnimClass] = useState('');
   const [showConfirmOverlay, setShowConfirmOverlay] = useState(false);
@@ -37,16 +39,6 @@ export default function PageContent() {
     }
   }, [state.currentPageIndex, isPaused, setExamPause]);
 
-  // Reset slide position when navigating between pages or switching modes
-  useEffect(() => {
-    setCurrentSlide(0);
-    setShowConfirmOverlay(false);
-    setSlideScore(null);
-    setIsConfirmed(false);
-    setForceSubmit(false);
-    setIsPaused(false);
-  }, [state.currentPageIndex, state.learningMode]);
-
   const sections = page
     ? (state.learningMode === 'learn'
         ? (page.learn || [])
@@ -56,18 +48,38 @@ export default function PageContent() {
     : [];
 
   const totalSlides = sections.length;
+
+  // Reset slide to 0 ONLY when page or mode actually changes (tracked via refs).
+  // This avoids a race condition with the clamp effect below.
+  useEffect(() => {
+    const modeChanged = prevModeRef.current !== state.learningMode;
+    const pageChanged = prevPageRef.current !== state.currentPageIndex;
+    prevModeRef.current = state.learningMode;
+    prevPageRef.current = state.currentPageIndex;
+
+    if (modeChanged || pageChanged) {
+      setCurrentSlide(0);
+      setShowConfirmOverlay(false);
+      setSlideScore(null);
+      setIsConfirmed(false);
+      setForceSubmit(false);
+      setIsPaused(false);
+    }
+  }, [state.currentPageIndex, state.learningMode]);
+
+  // Clamp currentSlide when it falls out of bounds (e.g., after a slide was removed).
+  // Uses functional update to avoid stale closure race with the reset effect above.
+  useEffect(() => {
+    if (totalSlides > 0) {
+      setCurrentSlide(prev => prev >= totalSlides ? totalSlides - 1 : prev);
+    }
+  }, [totalSlides]);
+
   // Derive a safe slide index via useMemo to avoid render-phase setState anti-pattern
   const safeSlideIndex = useMemo(() => {
     if (totalSlides === 0) return 0;
     return Math.max(0, Math.min(currentSlide, totalSlides - 1));
   }, [currentSlide, totalSlides]);
-
-  // Sync currentSlide when it falls out of bounds (e.g., mode switch changes totalSlides)
-  useEffect(() => {
-    if (totalSlides > 0 && currentSlide >= totalSlides) {
-      setCurrentSlide(totalSlides - 1);
-    }
-  }, [totalSlides, currentSlide]);
 
   const section = sections[safeSlideIndex];
   const isGraded = section && ['quiz', 'fill-blank', 'matching', 'sorting', 'cloze'].includes(section.type);

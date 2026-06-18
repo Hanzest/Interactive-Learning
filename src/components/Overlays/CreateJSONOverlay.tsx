@@ -319,7 +319,7 @@ export default function CreateJSONOverlay() {
   // Generate prompt text
   const generatePrompt = (): string => {
     let prompt = `You are a professional educational content creator and expert JSON formatter.
-Please create a comprehensive, highly interactive learning page about the topic: "${topic}".
+Create educational content in json format for this topic: "${topic}".
 `;
 
     if (mode === 'tailored') {
@@ -335,8 +335,23 @@ Keep the content concise, engaging, and suitable for a general audience.
     }
 
     prompt += `
-The response must be ONLY a valid JSON object matching the schema below. Do not add any conversational text before or after the JSON.
+**Core Educational Design Principles:**
+- Cognitive Load Theory: Ensure that the 'learn' section sequences information logically from simple to complex. Break down complex concepts into digestible micro-learning chunks (using text, tabs, or accordions).
+- Pedagogical Intent for UI Elements:
+  Flashcards: Use ONLY for factual reinforcement, active recall of definitions, or formula memorization. Do NOT use them to explain complex concepts.
+  Quiz/Fill-blank/Cloze: Use for conceptual checking, misconception refutation, and application of knowledge. Ensure distractors (wrong options) in quizzes represent common learner misconceptions.
+  Sorting/Timeline: Use strictly for procedural knowledge, chronological events, or step-by-step algorithms.
+  Matching: Use for linking terms with definitions, causes with effects, or problems with specific tools.
+- Scaffolding & Differentiation: The difficulty must increment progressively from 'learn' (conceptualization) to 'practice' (guided application) and 'exam' (independent evaluation under constraints).
+- Elaborative Feedback: In all 'quiz' sections, the 'Explanation' and 'optionExplanations' must not just state what is right, but briefly explain *why* the wrong options are incorrect based on common mistakes.
+- You must present the scope and deliverables of the json at the second section in "learn" array.
+- All content in "practice" and "exam" must be covered in "learn" array. But the "practice" and "exam" sections should not duplicate the content of the
+"learn" section.
+
+**Format constraints**
+- Only a valid JSON object matching the schema below. Do not add any conversational text before or after the JSON.
 Ensure the JSON is fully compliant, with no syntax errors, no trailing commas, and valid Markdown in string fields.
+- Not starting content with '>' or '*' as bullet point, use '-'.
 
 JSON Schema structure:
 {
@@ -360,13 +375,11 @@ JSON Schema structure:
   ]
 }
 
-Note: The "page", "learn", "practice", and "exam" fields are strictly REQUIRED.
-Also, the number of items/questions in specific interactive sections MUST satisfy the following minimum limits:
-- quiz: must contain at least 5 questions
-- fill-blank: must contain at least 4 sentences
-- matching: must contain at least 3 matching pairs
-- sorting: must contain at least 4 items to sort
-- cloze: must contain at least 4 blanks
+**Required fields**
+- page: required
+- learn: required
+- practice: required
+- exam: required
 
 Available Section Types (you MUST format them exactly like this):
 
@@ -517,7 +530,17 @@ Available Section Types (you MUST format them exactly like this):
   ]
 }
 
-Please generate the JSON file for the topic "${topic}" now. The json value of every string key must be in ${outputLang || 'English'}. Make sure the response is wrapped only in a \`\`\`json ... \`\`\` block.`;
+**Minimum limit constraints**
+- quiz: >= 3 questions
+- fill-blank: >= 5 sentences
+- matching: >= 5 matching pairs
+- sorting: >= 5 items to sort
+- cloze: >= 5 blanks
+- learn array: >= 8 sections
+- practice array: >= 3 sections
+- exam array: >= 5 sections
+
+Generate the JSON file for the topic "${topic}". The json value of every string key must be in ${outputLang || 'English'}. Make sure the response is wrapped only in a \`\`\`json ... \`\`\` block.`;
 
     return prompt;
   };

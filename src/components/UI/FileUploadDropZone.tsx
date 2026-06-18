@@ -25,7 +25,11 @@ export default function FileUploadDropZone({ variant = 'full' }: Props) {
 
         const validation = validateLearningPage(data);
         if (!validation.valid) {
-          setError(t('uploadZone.errorInvalid', { filename: file.name, error: validation.error || '' }));
+          const errMsg = t('uploadZone.errorInvalid', { filename: file.name, error: validation.error || '' });
+          console.error('[FileUpload] Validation failed:', errMsg);
+          setError(errMsg);
+          // Also show a toast for visibility outside the drop zone
+          addToast(errMsg, 'error', 6000);
           return;
         }
 
@@ -33,8 +37,10 @@ export default function FileUploadDropZone({ variant = 'full' }: Props) {
         if (ok) {
           addToast(t('uploadZone.toastLoaded', { title: data.page?.title || 'Untitled' }), 'success', 2000);
         }
-      } catch {
-        setError(t('uploadZone.errorParse', { filename: file.name }));
+      } catch (e) {
+        const errMsg = t('uploadZone.errorParse', { filename: file.name });
+        console.error('[FileUpload] Parse error:', e);
+        setError(errMsg);
       }
     },
     [addPage, addToast, t]
@@ -167,17 +173,22 @@ export default function FileUploadDropZone({ variant = 'full' }: Props) {
         </p>
       )}
       {error && (
-        <span style={{
-          fontSize: 11,
-          color: 'var(--error)',
+        <div style={{
+          fontSize: isCompact ? 11 : 13,
+          color: '#fff',
           textAlign: 'center',
-          whiteSpace: isCompact ? 'nowrap' : undefined,
+          backgroundColor: 'rgba(220, 38, 38, 0.85)',
+          padding: isCompact ? '3px 8px' : '8px 12px',
+          borderRadius: 8,
+          whiteSpace: isCompact ? 'nowrap' : 'normal',
           overflow: isCompact ? 'hidden' : undefined,
           textOverflow: isCompact ? 'ellipsis' : undefined,
-          ...(isCompact ? { position: 'absolute', bottom: -18, left: 0, right: 0 } : { marginTop: 4 }),
+          maxWidth: isCompact ? 200 : '100%',
+          boxShadow: '0 2px 8px rgba(220, 38, 38, 0.3)',
+          ...(isCompact ? { position: 'absolute', bottom: -28, left: '50%', transform: 'translateX(-50%)', zIndex: 10 } : { marginTop: 8, width: '100%' }),
         }}>
-          {error}
-        </span>
+          ⚠️ {error}
+        </div>
       )}
     </div>
   );

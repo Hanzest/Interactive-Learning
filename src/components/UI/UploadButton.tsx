@@ -14,7 +14,9 @@ export default function UploadButton() {
 
       const validation = validateLearningPage(data);
       if (!validation.valid) {
-        addToast(`Invalid JSON in ${file.name}: ${validation.error}`, 'error', 5000);
+        const errMsg = `Invalid JSON in ${file.name}: ${validation.error}`;
+        console.error('[UploadButton] Validation failed:', errMsg);
+        addToast(errMsg, 'error', 6000);
         return;
       }
 
@@ -22,8 +24,10 @@ export default function UploadButton() {
       if (ok) {
         addToast(`Loaded "${data.page?.title || 'Untitled'}"`, 'success', 2000);
       }
-    } catch {
-      addToast(`Failed to parse ${file.name}`, 'error', 4000);
+    } catch (e) {
+      const errMsg = `Failed to parse ${file.name}`;
+      console.error('[UploadButton] Parse error:', e);
+      addToast(errMsg, 'error', 6000);
     }
   };
 
