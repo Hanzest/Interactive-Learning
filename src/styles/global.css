@@ -464,3 +464,10 @@ a:hover {
     overflow-x: hidden;
   }
 }
+
+/* WelcomePage action buttons: full-width on mobile when wrapped */
+@media (max-width: 500px) {
+  .welcome-action-btn {
+    width: 100%;
+  }
+}

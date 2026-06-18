@@ -135,9 +135,10 @@ export default function WelcomePage() {
         {t('welcomePage.subtitle')}
       </p>
 
-      {/* Action Buttons Row */}
+      {/* Action Buttons Row — wrap to 2 lines on narrow screens */}
       <div style={{
         display: 'flex',
+        flexWrap: 'wrap',
         alignItems: 'center',
         justifyContent: 'center',
         gap: '0.75rem',
@@ -149,10 +150,10 @@ export default function WelcomePage() {
         <button
           type="button"
           onClick={toggleHelpGuide}
-          className="btn-base"
+          className="btn-base welcome-action-btn"
           title={t('welcomePage.helpBtn')}
           style={{
-            display: 'inline-flex',
+            display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '0.5rem',
@@ -165,8 +166,8 @@ export default function WelcomePage() {
             fontWeight: 700,
             fontSize: '0.875rem',
             transition: 'background 0.15s, color 0.15s, transform 0.1s',
-            flexShrink: 0,
             minHeight: 44,
+            whiteSpace: 'nowrap',
           }}
         >
           <svg viewBox="0 0 24 24" width={20} height={20} style={{ flexShrink: 0 }} aria-hidden="true">
@@ -198,11 +199,11 @@ export default function WelcomePage() {
             alignItems: 'center',
             gap: '0.5rem',
             transition: 'background 0.15s, transform 0.1s',
-            flex: 1,
             justifyContent: 'center',
+            whiteSpace: 'nowrap',
           }}
           onClick={toggleCreatePrompt}
-          className="btn-base"
+          className="btn-base welcome-action-btn"
         >
           {t('welcomePage.wizardBtn2')}
         </button>
