@@ -147,7 +147,10 @@
     "getStarted": "Bắt đầu ngay",
     "uploadPrompt": "Kéo thả tệp JSON bài học vào đây, hoặc click để tải lên từ máy tính của bạn.",
     "aiPrompt": "Bạn chưa có tệp JSON? Tạo nhanh bằng Trí tuệ Nhân tạo:",
-    "wizardBtn": "Tạo JSON bằng Trình tạo AI",
+    "wizardBtn": "Tạo JSON bằng Trình tạo Prompt",
+    "helpBtn": "Hướng dẫn sử dụng",
+    "helpBtnLabel": "Hướng dẫn",
+    "wizardBtn2": "✨ Tạo JSON bằng Trình tạo Prompt",
     "createdBy": "Phát triển bởi",
     "press": "Nhấn",
     "shortcutHint1End": "để xem bảng hướng dẫn phím tắt",
@@ -335,6 +338,20 @@
     "placeholder": "Viết ghi chú của bạn vào đây...",
     "save": "Lưu",
     "cancel": "Hủy"
+  },
+  "helpGuide": {
+    "title": "Hướng dẫn sử dụng",
+    "close": "Đóng hướng dẫn",
+    "step1Title": "Học tập tương tác",
+    "step1Desc": "Ứng dụng giúp bạn học tương tác với thẻ Flashcard 3D, trò chơi Ghép cặp, bài điền từ Cloze, kéo thả Sắp xếp, Điền vào chỗ trống, và nhiều hơn nữa. Mỗi phần tự động hiển thị từ tệp JSON bài học của bạn.",
+    "step2Title": "Tạo nội dung học tập",
+    "step2Desc": "Nhấn \"Tạo JSON bằng Trình tạo Prompt\" và làm theo các bước để mô tả chủ đề của bạn. Trình tạo sẽ tạo tệp JSON sẵn sàng để bạn tải về.",
+    "step3Title": "Tải lên & Học tập",
+    "step3Desc": "Tải tệp JSON đã tạo lên. Sau đó chuyển đổi giữa 3 chế độ học: Học (xem), Luyện tập (tương tác có phản hồi), và Kiểm tra (thi tính giờ, chấm điểm).",
+    "step4Title": "Quản lý thanh bên",
+    "step4Desc": "Mở thanh bên (biểu tượng ☰ trên thanh trên cùng) để xem, sắp xếp lại (kéo thả), đánh dấu bài đã hoàn thành hoặc xóa bài. Theo dõi tiến độ tổng thể của bạn ở đó.",
+    "step5Title": "Điều khiển thanh trên cùng",
+    "step5Desc": "Dùng thanh trên cùng để chuyển chủ đề Sáng/Tối, chuyển đổi ngôn ngữ, tải lên tệp JSON, hoặc mở Bảng điều khiển để xem thống kê."
   },
   "feedback": {
     "title": "Gửi phản hồi của bạn",

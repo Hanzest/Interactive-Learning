@@ -53,6 +53,7 @@ interface AppContextValue {
   toggleShortcuts: () => void;
   toggleDashboard: () => void;
   toggleCreatePrompt: () => void;
+  toggleHelpGuide: () => void;
   toggleSidebar: () => void;
   setLearningMode: (mode: LearningMode) => void;
   setError: (err: string | null) => void;
@@ -251,6 +252,7 @@ export function AppProvider({ children }: AppProviderProps) {
   const toggleShortcuts = useCallback(() => dispatch({ type: 'TOGGLE_SHORTCUTS' }), []);
   const toggleDashboard = useCallback(() => dispatch({ type: 'TOGGLE_DASHBOARD' }), []);
   const toggleCreatePrompt = useCallback(() => dispatch({ type: 'TOGGLE_CREATE_PROMPT' }), []);
+  const toggleHelpGuide = useCallback(() => dispatch({ type: 'TOGGLE_HELP_GUIDE' }), []);
   const toggleSidebar = useCallback(() => dispatch({ type: 'TOGGLE_SIDEBAR' }), []);
   const setError = useCallback((err: string | null) => dispatch({ type: 'SET_ERROR', payload: err }), []);
   const setRenamingIndex = useCallback((idx: number | null) => dispatch({ type: 'SET_RENAMING_INDEX', payload: idx }), []);
@@ -391,6 +393,7 @@ export function AppProvider({ children }: AppProviderProps) {
     toggleShortcuts,
     toggleDashboard,
     toggleCreatePrompt,
+    toggleHelpGuide,
     toggleSidebar,
     setLearningMode,
     saveSectionAnswers,
@@ -420,7 +423,7 @@ export function AppProvider({ children }: AppProviderProps) {
     state, visibleIndices, visibleCount, currentPage, completedCount, completedPercent,
     isCurrentPageVisible, addPage, removePage, removeAllPages, renamePage,
     togglePageComplete, movePage, goToPage, nextPage, prevPage, goToRandomPage,
-    setSearchQuery, toggleDarkMode, toggleShortcuts, toggleDashboard, toggleCreatePrompt, toggleSidebar,
+    setSearchQuery, toggleDarkMode, toggleShortcuts, toggleDashboard, toggleCreatePrompt, toggleHelpGuide, toggleSidebar,
     setLearningMode, saveSectionAnswers, submitExam, retryExam, updateExamTimeLeft,
     toggleExamPause, setExamPause, setLanguage,
     setError, setRenamingIndex, setContextMenu, saveNote, getNote, recordQuizScore,

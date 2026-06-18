@@ -148,6 +148,9 @@
     "uploadPrompt": "Drag & drop a learning page JSON file here, or click to upload one from your computer.",
     "aiPrompt": "Don't have a JSON file? Generate one using AI:",
     "wizardBtn": "Create JSON with Prompt Wizard",
+    "helpBtn": "Help Guide",
+    "helpBtnLabel": "Help Guide",
+    "wizardBtn2": "✨ Create JSON with Prompt Wizard",
     "createdBy": "Created by",
     "press": "Press",
     "shortcutHint1End": "for keyboard shortcuts overlay",
@@ -335,6 +338,20 @@
     "placeholder": "Write your note here...",
     "save": "Save",
     "cancel": "Cancel"
+  },
+  "helpGuide": {
+    "title": "How to Use This App",
+    "close": "Close guide",
+    "step1Title": "Interactive Learning",
+    "step1Desc": "This app makes learning interactive with 3D Flashcards, Matching Games, Cloze tests, drag-and-drop Sorting, Fill-in-the-blank sentences, and more. Every section auto-renders from your study JSON.",
+    "step2Title": "Create Your Study Content",
+    "step2Desc": "Click \"Create JSON with Prompt Wizard\" and follow the steps to describe your topic. The wizard generates a ready-to-use JSON file for you to download.",
+    "step3Title": "Upload & Learn",
+    "step3Desc": "Upload the downloaded JSON file. Then switch between 3 learning modes: Learn (browse), Practice (interactive with feedback), and Exam (timed, graded assessment).",
+    "step4Title": "Sidebar Management",
+    "step4Desc": "Open the sidebar (☰ icon in the top bar) to view, reorder (drag & drop), mark pages as complete, or delete pages. Track your overall progress there.",
+    "step5Title": "Top Bar Controls",
+    "step5Desc": "Use the top bar to toggle Dark/Light theme, switch between English and Vietnamese, upload JSON files, or access the Dashboard for analytics."
   },
   "feedback": {
     "title": "Share Your Feedback",

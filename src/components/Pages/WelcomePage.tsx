@@ -1,10 +1,10 @@
 import React from 'react';
 import { useAppContext } from '../../context/AppContext';
-import FileUploadDropZone from '../UI/FileUploadDropZone';
+
 import { useTranslation } from '../../hooks/useTranslation';
 
 export default function WelcomePage() {
-  const { toggleCreatePrompt } = useAppContext();
+  const { toggleCreatePrompt, toggleHelpGuide } = useAppContext();
   const { t } = useTranslation();
 
   // Premium, responsive styles
@@ -91,45 +91,6 @@ export default function WelcomePage() {
     margin: 0,
   };
 
-  const actionBoxStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '1.5rem',
-    width: '100%',
-    maxWidth: '480px',
-    background: 'var(--bg-secondary)',
-    border: '1px solid var(--border-color)',
-    borderRadius: '1.25rem',
-    padding: '2rem',
-    boxShadow: 'var(--shadow-sm)',
-    marginBottom: '3rem',
-  };
-
-  const flexBtnContainer: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    width: '100%',
-    gap: '0.75rem',
-  };
-
-  const wizardBtnStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '0.75rem',
-    border: 'none',
-    borderRadius: '0.5rem',
-    background: 'var(--accent)',
-    color: '#fff',
-    fontWeight: 700,
-    fontSize: '0.9375rem',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '0.5rem',
-    transition: 'background 0.15s, transform 0.1s',
-  };
-
   const creatorCreditStyle: React.CSSProperties = {
     fontSize: '0.875rem',
     color: 'var(--text-secondary)',
@@ -174,6 +135,79 @@ export default function WelcomePage() {
         {t('welcomePage.subtitle')}
       </p>
 
+      {/* Action Buttons Row */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '0.75rem',
+        marginBottom: '2.5rem',
+        width: '100%',
+        maxWidth: 480,
+      }}>
+        {/* Help Guide button — consistent with Header's borderedIconBtn style */}
+        <button
+          type="button"
+          onClick={toggleHelpGuide}
+          className="btn-base"
+          title={t('welcomePage.helpBtn')}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            padding: '0.5rem 1.25rem',
+            border: '2px solid var(--accent)',
+            borderRadius: 10,
+            background: 'var(--bg-primary)',
+            color: 'var(--accent)',
+            cursor: 'pointer',
+            fontWeight: 700,
+            fontSize: '0.875rem',
+            transition: 'background 0.15s, color 0.15s, transform 0.1s',
+            flexShrink: 0,
+            minHeight: 44,
+          }}
+        >
+          <svg viewBox="0 0 24 24" width={20} height={20} style={{ flexShrink: 0 }} aria-hidden="true">
+            <circle cx="12" cy="12" r="11" fill="currentColor" opacity={0.01} />
+            <circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" strokeWidth={1.5} />
+            <text
+              x="12" y="17"
+              textAnchor="middle"
+              fontSize="13"
+              fontWeight="bold"
+              fontFamily="system-ui, sans-serif"
+              fill="currentColor"
+            >?</text>
+          </svg>
+          <span>{t('welcomePage.helpBtnLabel')}</span>
+        </button>
+        <button
+          type="button"
+          style={{
+            padding: '0.7rem 1.5rem',
+            border: 'none',
+            borderRadius: '0.5rem',
+            background: 'var(--accent)',
+            color: '#fff',
+            fontWeight: 700,
+            fontSize: '0.9375rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            transition: 'background 0.15s, transform 0.1s',
+            flex: 1,
+            justifyContent: 'center',
+          }}
+          onClick={toggleCreatePrompt}
+          className="btn-base"
+        >
+          {t('welcomePage.wizardBtn2')}
+        </button>
+      </div>
+
       {/* Features Grid */}
       <div style={gridStyle}>
         <div style={cardStyle} className="card-base">
@@ -198,32 +232,6 @@ export default function WelcomePage() {
           <p style={cardTextStyle}>
             {t('welcomePage.feat3Desc')}
           </p>
-        </div>
-      </div>
-
-      {/* Upload & Prompt Area */}
-      <div style={actionBoxStyle}>
-        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem', fontWeight: 700 }}>{t('welcomePage.getStarted')}</h3>
-        <p style={{ margin: '0 0 1rem 0', fontSize: '0.875rem', color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.5 }}>
-          {t('welcomePage.uploadPrompt')}
-        </p>
-
-        <div style={{ width: '100%' }}>
-          <FileUploadDropZone />
-        </div>
-
-        <div style={flexBtnContainer}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', margin: '4px 0' }}>
-            {t('welcomePage.aiPrompt')}
-          </div>
-          <button
-            type="button"
-            style={wizardBtnStyle}
-            onClick={toggleCreatePrompt}
-            className="btn-base"
-          >
-            ✨ {t('welcomePage.wizardBtn')}
-          </button>
         </div>
       </div>
 

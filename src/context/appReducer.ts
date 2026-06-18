@@ -23,6 +23,7 @@ export const initialState: AppState = {
   showShortcuts: false,
   showDashboard: false,
   showCreatePrompt: false,
+  showHelpGuide: false,
   sidebarOpen: false,
   showWelcomePage: false,
   searchQuery: '',
@@ -321,6 +322,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 
     case 'TOGGLE_CREATE_PROMPT':
       return { ...state, showCreatePrompt: !state.showCreatePrompt };
+    case 'TOGGLE_HELP_GUIDE':
+      return { ...state, showHelpGuide: !state.showHelpGuide };
 
     case 'TOGGLE_SIDEBAR':
       return { ...state, sidebarOpen: !state.sidebarOpen };

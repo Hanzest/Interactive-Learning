@@ -54,6 +54,7 @@ export function useKeyboardShortcuts(): void {
       if (e.key === 'Escape') {
         if (c.state.showShortcuts) c.toggleShortcuts();
         if (c.state.showDashboard) c.toggleDashboard();
+        if (c.state.showHelpGuide) c.toggleHelpGuide();
         c.setContextMenu(null);
         c.setRenamingIndex(null);
         return;

@@ -17,6 +17,7 @@ export interface AppState {
   showShortcuts: boolean;
   showDashboard: boolean;
   showCreatePrompt: boolean;
+  showHelpGuide: boolean;
   sidebarOpen: boolean;
   searchQuery: string;
   renamingIndex: number | null;
@@ -66,6 +67,7 @@ export type AppAction =
   | { type: 'TOGGLE_SHORTCUTS' }
   | { type: 'TOGGLE_DASHBOARD' }
   | { type: 'TOGGLE_CREATE_PROMPT' }
+  | { type: 'TOGGLE_HELP_GUIDE' }
   | { type: 'TOGGLE_SIDEBAR' }
   | { type: 'SET_SIDEBAR'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
