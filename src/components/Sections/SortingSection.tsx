@@ -30,6 +30,8 @@ export default function SortingSection({
   const dragItemRef = useRef<number | null>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const animFrameRef = useRef<number>(0);
+  const [isTouchDevice] = useState(() => 'ontouchstart' in window || navigator.maxTouchPoints > 0);
+  const touchDragIndexRef = useRef<number | null>(null);
 
   const isExamMode = state.learningMode === 'exam';
   const currentPageId = state.pages[state.currentPageIndex]?._meta?.id || String(state.currentPageIndex);
@@ -113,6 +115,52 @@ export default function SortingSection({
   };
 
   const handleDragEnd = () => {
+    setDragIndex(null);
+    setDragOverIndex(null);
+    dragItemRef.current = null;
+  };
+
+  // Touch event handlers for mobile DnD
+  const handleTouchStart = (index: number) => (e: React.TouchEvent) => {
+    if (activeSubmitted) return;
+    touchDragIndexRef.current = index;
+    dragItemRef.current = index;
+    setDragIndex(index);
+  };
+
+  const handleTouchMove = (index: number) => (e: React.TouchEvent) => {
+    if (activeSubmitted) return;
+    if (touchDragIndexRef.current === null) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (!elemBelow) return;
+    const dropItem = elemBelow.closest('[data-sort-index]');
+    if (dropItem) {
+      const dropIndex = parseInt(dropItem.getAttribute('data-sort-index')!, 10);
+      if (!isNaN(dropIndex) && dropIndex !== dragOverIndex) {
+        setDragOverIndex(dropIndex);
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (activeSubmitted) return;
+    const from = touchDragIndexRef.current;
+    const to = dragOverIndex;
+    touchDragIndexRef.current = null;
+    if (from === null || to === null || from === to) {
+      setDragIndex(null);
+      setDragOverIndex(null);
+      dragItemRef.current = null;
+      return;
+    }
+    const cleanup = flipAnimate();
+    const next = [...items];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    saveAndSetItems(next);
+    requestAnimationFrame(() => requestAnimationFrame(cleanup));
     setDragIndex(null);
     setDragOverIndex(null);
     dragItemRef.current = null;
@@ -231,11 +279,15 @@ export default function SortingSection({
             <div
               key={`${item.text}-${i}`}
               ref={(el) => { itemRefs.current[i] = el; }}
-              draggable={!activeSubmitted}
+              data-sort-index={i}
+              draggable={!activeSubmitted && !isTouchDevice}
               onDragStart={() => handleDragStart(i)}
               onDragOver={(e) => handleDragOver(e, i)}
               onDrop={() => handleDrop(i)}
               onDragEnd={handleDragEnd}
+              onTouchStart={isTouchDevice && !activeSubmitted ? handleTouchStart(i) : undefined}
+              onTouchMove={isTouchDevice && !activeSubmitted ? handleTouchMove(i) : undefined}
+              onTouchEnd={isTouchDevice && !activeSubmitted ? handleTouchEnd : undefined}
               className={`sorting-item ${activeSubmitted ? 'submitted' : ''}`}
               style={{
                 display: 'flex',
@@ -245,7 +297,8 @@ export default function SortingSection({
                 backgroundColor: itemBg(status, isDragging, isDragOver),
                 border: itemBorder(status, isDragging, isDragOver),
                 borderRadius: '6px',
-                cursor: activeSubmitted ? 'default' : 'grab',
+                cursor: activeSubmitted ? 'default' : (isTouchDevice ? 'grab' : 'grab'),
+                touchAction: isTouchDevice ? 'none' : undefined,
                 transition: 'background-color 150ms ease, border-color 150ms ease, opacity 150ms ease',
                 opacity: isDragging ? 0.6 : 1,
               }}

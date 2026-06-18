@@ -56,15 +56,20 @@ export default function PageContent() {
     : [];
 
   const totalSlides = sections.length;
-  // Clamping to prevent out-of-bounds rendering crashes
-  const activeSlideIndex = totalSlides > 0 ? Math.max(0, Math.min(currentSlide, totalSlides - 1)) : 0;
+  // Derive a safe slide index via useMemo to avoid render-phase setState anti-pattern
+  const safeSlideIndex = useMemo(() => {
+    if (totalSlides === 0) return 0;
+    return Math.max(0, Math.min(currentSlide, totalSlides - 1));
+  }, [currentSlide, totalSlides]);
 
-  // Synchronously adjust currentSlide state during render if it exceeds totalSlides
-  if (totalSlides > 0 && currentSlide >= totalSlides) {
-    setCurrentSlide(totalSlides - 1);
-  }
+  // Sync currentSlide when it falls out of bounds (e.g., mode switch changes totalSlides)
+  useEffect(() => {
+    if (totalSlides > 0 && currentSlide >= totalSlides) {
+      setCurrentSlide(totalSlides - 1);
+    }
+  }, [totalSlides, currentSlide]);
 
-  const section = sections[activeSlideIndex];
+  const section = sections[safeSlideIndex];
   const isGraded = section && ['quiz', 'fill-blank', 'matching', 'sorting', 'cloze'].includes(section.type);
 
   // ── Exam mode: page-wide timer ─────────────────────────────────────────────
@@ -161,7 +166,7 @@ export default function PageContent() {
       setForceSubmit(false);
       setSlideScore(null);
     }
-  }, [activeSlideIndex, isExamMode]);
+  }, [safeSlideIndex, isExamMode]);
 
   const handleGraded = useCallback((score: number, total: number) => {
     setSlideScore({ score, total });
@@ -213,7 +218,7 @@ export default function PageContent() {
   const tags = (meta as any).tags || [];
 
   const hasMultipleSlides = totalSlides > 1;
-  const isLastSlide = activeSlideIndex === totalSlides - 1;
+  const isLastSlide = safeSlideIndex === totalSlides - 1;
 
   const goPrev = useCallback(() => {
     slideDirection.current = -1;
@@ -710,17 +715,17 @@ export default function PageContent() {
               <button
                 key={i}
                 onClick={() => {
-                  slideDirection.current = i > activeSlideIndex ? 1 : -1;
-                  setAnimClass(i > activeSlideIndex ? styles.slideEnterRight : styles.slideEnterLeft);
+                  slideDirection.current = i > safeSlideIndex ? 1 : -1;
+                  setAnimClass(i > safeSlideIndex ? styles.slideEnterRight : styles.slideEnterLeft);
                   setCurrentSlide(i);
                 }}
                 aria-label={`Go to section ${i + 1}`}
                 style={{
-                  width: i === activeSlideIndex ? 24 : 8,
+                  width: i === safeSlideIndex ? 24 : 8,
                   height: 8,
                   borderRadius: 4,
                   border: 'none',
-                  backgroundColor: i === activeSlideIndex ? 'var(--accent)' : 'var(--bg-tertiary)',
+                  backgroundColor: i === safeSlideIndex ? 'var(--accent)' : 'var(--bg-tertiary)',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
                 }}
@@ -732,7 +737,7 @@ export default function PageContent() {
               marginLeft: 8,
               whiteSpace: 'nowrap',
             }}>
-              {activeSlideIndex + 1} / {totalSlides}
+              {safeSlideIndex + 1} / {totalSlides}
             </span>
           </div>
         )}
@@ -795,14 +800,14 @@ export default function PageContent() {
           {hasMultipleSlides && (
             <button
               onClick={goPrev}
-              disabled={activeSlideIndex === 0}
+              disabled={safeSlideIndex === 0}
               data-nav-prev="slide"
               aria-label="Previous section"
               className={styles.slideArrow}
               style={{
-                color: activeSlideIndex === 0 ? 'var(--text-muted)' : 'var(--text-secondary)',
-                cursor: activeSlideIndex === 0 ? 'not-allowed' : 'pointer',
-                opacity: activeSlideIndex === 0 ? 0.3 : 1,
+                color: safeSlideIndex === 0 ? 'var(--text-muted)' : 'var(--text-secondary)',
+                cursor: safeSlideIndex === 0 ? 'not-allowed' : 'pointer',
+                opacity: safeSlideIndex === 0 ? 0.3 : 1,
               }}
             >
               ◀
@@ -865,20 +870,33 @@ export default function PageContent() {
               </div>
             )}
 
+            {!section ? (
+              <div style={{
+                padding: '1.5rem',
+                backgroundColor: 'var(--bg-primary)',
+                borderRadius: '8px',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-muted)',
+                textAlign: 'center',
+              }}>
+                {t('pageContent.noSections')}
+              </div>
+            ) : (
             <SectionRenderer
-              key={`${state.currentPageIndex}-${activeSlideIndex}`}
+              key={`${state.currentPageIndex}-${safeSlideIndex}`}
               section={section}
               sectionIndex={
                 state.learningMode === 'learn'
-                  ? (page.learn ? page.learn.indexOf(section) : activeSlideIndex)
+                  ? (page.learn ? Math.max(0, page.learn.indexOf(section)) : safeSlideIndex)
                   : state.learningMode === 'practice'
-                  ? (page.practice ? page.practice.indexOf(section) : activeSlideIndex)
-                  : (page.exam ? page.exam.indexOf(section) : activeSlideIndex)
+                  ? (page.practice ? Math.max(0, page.practice.indexOf(section)) : safeSlideIndex)
+                  : (page.exam ? Math.max(0, page.exam.indexOf(section)) : safeSlideIndex)
               }
               forceSubmit={forceSubmit}
               isConfirmed={isConfirmed}
               onGraded={isExamMode ? undefined : handleGraded}
             />
+            )}
 
             {/* Navigation options to other modes on the last slide */}
             {isLastSlide && (
@@ -1000,38 +1018,45 @@ export default function PageContent() {
                 borderRadius: 12,
                 background: 'linear-gradient(135deg, var(--accent-light) 0%, var(--bg-secondary) 100%)',
                 border: '1px solid var(--accent-mid)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 16,
               }}>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)', marginBottom: 4 }}>
-                    {t('pageContent.readyToSubmit')}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 16,
+                }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)', marginBottom: 4 }}>
+                      {t('pageContent.readyToSubmit')}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                      {t('pageContent.submitDetails')}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                    {t('pageContent.submitDetails')}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                  }}>
+                    <button
+                      onClick={() => setShowConfirmOverlay(true)}
+                      className="btn-base"
+                      style={{
+                        padding: '0.6rem 1.5rem',
+                        border: 'none',
+                        borderRadius: 8,
+                        background: 'var(--accent)',
+                        color: '#fff',
+                        cursor: 'pointer',
+                        fontWeight: 700,
+                        fontSize: '0.9rem',
+                        boxShadow: '0 2px 8px var(--accent-shadow)',
+                        whiteSpace: 'nowrap',
+                        minHeight: 44,
+                      }}
+                    >
+                      {t('pageContent.confirmSubmitBtn')}
+                    </button>
                   </div>
                 </div>
-                <button
-                  onClick={() => setShowConfirmOverlay(true)}
-                  className="btn-base"
-                  style={{
-                    flexShrink: 0,
-                    padding: '0.6rem 1.5rem',
-                    border: 'none',
-                    borderRadius: 8,
-                    background: 'var(--accent)',
-                    color: '#fff',
-                    cursor: 'pointer',
-                    fontWeight: 700,
-                    fontSize: '0.9rem',
-                    boxShadow: '0 2px 8px var(--accent-shadow)',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {t('pageContent.confirmSubmitBtn')}
-                </button>
               </div>
             )}
 
@@ -1040,7 +1065,7 @@ export default function PageContent() {
               <div className={styles.mobileNav}>
                 <button
                   onClick={goPrev}
-                  disabled={activeSlideIndex === 0}
+                  disabled={safeSlideIndex === 0}
                   className="btn-base"
                   style={{
                     padding: '8px 16px',
@@ -1050,15 +1075,15 @@ export default function PageContent() {
                     color: 'var(--text-primary)',
                     fontWeight: 600,
                     fontSize: '0.85rem',
-                    cursor: activeSlideIndex === 0 ? 'not-allowed' : 'pointer',
-                    opacity: activeSlideIndex === 0 ? 0.5 : 1,
+                    cursor: safeSlideIndex === 0 ? 'not-allowed' : 'pointer',
+                    opacity: safeSlideIndex === 0 ? 0.5 : 1,
                   }}
                 >
                   {t('pageContent.prevSlide')}
                 </button>
                 <button
                   onClick={goNext}
-                  disabled={activeSlideIndex === totalSlides - 1}
+                  disabled={safeSlideIndex === totalSlides - 1}
                   className="btn-base"
                   style={{
                     padding: '8px 16px',
@@ -1068,8 +1093,8 @@ export default function PageContent() {
                     color: '#fff',
                     fontWeight: 600,
                     fontSize: '0.85rem',
-                    cursor: activeSlideIndex === totalSlides - 1 ? 'not-allowed' : 'pointer',
-                    opacity: activeSlideIndex === totalSlides - 1 ? 0.5 : 1,
+                    cursor: safeSlideIndex === totalSlides - 1 ? 'not-allowed' : 'pointer',
+                    opacity: safeSlideIndex === totalSlides - 1 ? 0.5 : 1,
                   }}
                 >
                   {t('pageContent.nextSlide')}
@@ -1082,14 +1107,14 @@ export default function PageContent() {
           {hasMultipleSlides && (
             <button
               onClick={goNext}
-              disabled={activeSlideIndex === totalSlides - 1}
+              disabled={safeSlideIndex === totalSlides - 1}
               data-nav-next="slide"
               aria-label="Next section"
               className={styles.slideArrow}
               style={{
-                color: activeSlideIndex === totalSlides - 1 ? 'var(--text-muted)' : 'var(--text-secondary)',
-                cursor: activeSlideIndex === totalSlides - 1 ? 'not-allowed' : 'pointer',
-                opacity: activeSlideIndex === totalSlides - 1 ? 0.3 : 1,
+                color: safeSlideIndex === totalSlides - 1 ? 'var(--text-muted)' : 'var(--text-secondary)',
+                cursor: safeSlideIndex === totalSlides - 1 ? 'not-allowed' : 'pointer',
+                opacity: safeSlideIndex === totalSlides - 1 ? 0.3 : 1,
               }}
             >
               ▶

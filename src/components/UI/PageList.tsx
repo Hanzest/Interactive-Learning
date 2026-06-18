@@ -1,13 +1,39 @@
-import React from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import PageListItem from './PageListItem';
 import { useTranslation } from '../../hooks/useTranslation';
 
 export default function PageList() {
-  const { state, visibleIndices, currentPage, setSearchQuery } = useAppContext();
+  const { state, visibleIndices, currentPage, setSearchQuery, movePage } = useAppContext();
   const { t } = useTranslation();
 
+  const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
+  const draggedRef = useRef<number | null>(null);
+
   const totalPages = state.pages.length;
+
+  const handleDragStart = useCallback((index: number) => {
+    draggedRef.current = index;
+    setDraggedItemIndex(index);
+  }, []);
+
+  const handleDragOver = useCallback((index: number) => {
+    // Visual feedback only - actual reorder happens on drop
+  }, []);
+
+  const handleDrop = useCallback((targetIndex: number) => {
+    const from = draggedRef.current;
+    if (from !== null && from !== targetIndex) {
+      movePage(from, targetIndex);
+    }
+    draggedRef.current = null;
+    setDraggedItemIndex(null);
+  }, [movePage]);
+
+  const handleDragEnd = useCallback(() => {
+    draggedRef.current = null;
+    setDraggedItemIndex(null);
+  }, []);
 
   // Empty state when search yields no results
   if (totalPages > 0 && visibleIndices.length === 0) {
@@ -72,6 +98,11 @@ export default function PageList() {
           isCompleted={!!state.pages[pageIndex]?._meta?.completed}
           isViewed={state.viewedPages.includes(pageIndex)}
           isQuizDone={false} /* Could compute from quizScores if needed */
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          onDragEnd={handleDragEnd}
+          draggedIndex={draggedItemIndex}
         />
       ))}
     </div>
