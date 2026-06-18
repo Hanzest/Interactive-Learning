@@ -49,24 +49,8 @@ a:hover {
 }
 
 /* --------------------------------------------------------------------------
-   Scrollbar styling
+   Scrollbar styling (sidebar moved to Sidebar.module.css)
    -------------------------------------------------------------------------- */
-.sidebar-scroll::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sidebar-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar-scroll::-webkit-scrollbar-thumb {
-  background: var(--text-muted);
-  border-radius: 3px;
-}
-
-.sidebar-scroll {
-  scrollbar-width: thin;
-}
 
 /* --------------------------------------------------------------------------
    Shared section styles (used in rendered markdown)
@@ -471,5 +455,12 @@ a:hover {
 @media (max-width: 420px) {
   .footer-progress-bar-track {
     display: none !important;
+  }
+}
+
+/* Sidebar 400px safety: ensure no horizontal overflow */
+@media (max-width: 400px) {
+  body {
+    overflow-x: hidden;
   }
 }

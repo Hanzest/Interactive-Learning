@@ -27,7 +27,10 @@ export default function PageListItem({ page, index, isActive, isCompleted, isVie
   const [renaming, setRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState('');
   const [hovered, setHovered] = useState(false);
+  const [showActions, setShowActions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const actionsRef = useRef<HTMLDivElement>(null);
+  const [isTouch] = useState(() => 'ontouchstart' in window || navigator.maxTouchPoints > 0);
 
   const title = page.page?.title || `Page ${index + 1}`;
 
@@ -48,6 +51,22 @@ export default function PageListItem({ page, index, isActive, isCompleted, isVie
       inputRef.current.select();
     }
   }, [renaming]);
+
+  // Close actions when clicking/touching outside
+  useEffect(() => {
+    if (!showActions) return;
+    const handleOutside = (e: MouseEvent | TouchEvent) => {
+      if (actionsRef.current && !actionsRef.current.contains(e.target as Node)) {
+        setShowActions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('touchstart', handleOutside, { passive: true });
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('touchstart', handleOutside);
+    };
+  }, [showActions]);
 
   const handleRenameSubmit = () => {
     if (renameValue.trim()) {
@@ -72,46 +91,50 @@ export default function PageListItem({ page, index, isActive, isCompleted, isVie
     const examSubmitted = isExamMode && !!state.examSubmittedPages[pageId];
     if (isExamMode && examSubmitted) {
       return (
-        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: '50%', background: 'var(--success)', color: '#fff', fontSize: 10, fontWeight: 700, flexShrink: 0 }} title={t('sidebar.examCompletedTooltip')}>
+        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18, borderRadius: '50%', background: 'var(--success)', color: '#fff', fontSize: 9, fontWeight: 700, flexShrink: 0 }} title={t('sidebar.examCompletedTooltip')}>
           E
         </span>
       );
     }
     if (isCompleted) {
       return (
-        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: '50%', background: 'var(--success)', color: '#fff', fontSize: 10, fontWeight: 700, flexShrink: 0 }} title={t('sidebar.completedTooltip')}>
+        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18, borderRadius: '50%', background: 'var(--success)', color: '#fff', fontSize: 9, fontWeight: 700, flexShrink: 0 }} title={t('sidebar.completedTooltip')}>
           ✓
         </span>
       );
     }
     if (isQuizDone) {
       return (
-        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: '50%', background: 'var(--accent)', color: '#fff', fontSize: 9, fontWeight: 700, flexShrink: 0 }} title={t('sidebar.quizCompletedTooltip')}>
+        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18, borderRadius: '50%', background: 'var(--accent)', color: '#fff', fontSize: 8, fontWeight: 700, flexShrink: 0 }} title={t('sidebar.quizCompletedTooltip')}>
           Q
         </span>
       );
     }
     return (
       <span style={{
-        width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+        width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
         background: isViewed ? 'var(--accent)' : 'var(--text-muted)',
       }} />
     );
   };
+
+  const shouldShowActions = hovered || showActions || isTouch;
 
   return (
     <div
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: 8,
-        padding: '8px 12px',
+        gap: 6,
+        padding: '6px 10px',
         cursor: 'pointer',
         background: isActive ? 'var(--accent-light)' : 'transparent',
         borderLeft: isActive ? '3px solid var(--accent)' : '3px solid transparent',
-        transition: 'background 0.15s',
+        borderRadius: '0 6px 6px 0',
+        transition: 'background 0.15s, border-color 0.15s',
         userSelect: 'none',
         position: 'relative',
+        margin: '1px 4px',
       }}
       onClick={() => goToPage(index)}
       onContextMenu={handleContextMenu}
@@ -120,7 +143,7 @@ export default function PageListItem({ page, index, isActive, isCompleted, isVie
       title={title}
     >
       {/* Drag handle */}
-      <span style={{ color: 'var(--text-muted)', fontSize: 16, cursor: 'grab', flexShrink: 0 }}>
+      <span style={{ color: 'var(--text-muted)', fontSize: 14, cursor: 'grab', flexShrink: 0, opacity: hovered ? 0.6 : 0.3 }}>
         ⠿
       </span>
 
@@ -144,21 +167,23 @@ export default function PageListItem({ page, index, isActive, isCompleted, isVie
           onClick={(e) => e.stopPropagation()}
           style={{
             flex: 1,
+            minWidth: 0,
             padding: '2px 4px',
             border: '1px solid var(--accent)',
             borderRadius: 4,
-            fontSize: 13,
+            fontSize: 12,
             outline: 'none',
             background: 'var(--bg-primary)',
             color: 'var(--text-primary)',
           }}
         />
       ) : (
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
           <span
             style={{
-              fontSize: 13,
-              color: 'var(--text-primary)',
+              fontSize: 12.5,
+              color: isActive ? 'var(--accent)' : 'var(--text-primary)',
+              fontWeight: isActive ? 600 : 400,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
@@ -169,161 +194,97 @@ export default function PageListItem({ page, index, isActive, isCompleted, isVie
         </div>
       )}
 
-      {/* Touch device detection */}
-      {(() => {
-        const [isTouch, setIsTouch] = useState(false);
-        const [showMobileActions, setShowMobileActions] = useState(false);
-        const menuRef = useRef<HTMLDivElement>(null);
-
-        useEffect(() => {
-          setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0);
-        }, []);
-
-        useEffect(() => {
-          if (!showMobileActions) return;
-          const handleOutsideClick = (e: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-              setShowMobileActions(false);
-            }
-          };
-          document.addEventListener('mousedown', handleOutsideClick);
-          return () => document.removeEventListener('mousedown', handleOutsideClick);
-        }, [showMobileActions]);
-
-        if (renaming) return null;
-
-        if (hovered || showMobileActions) {
-          return (
-            <div
-              ref={menuRef}
-              style={{
-                display: 'flex',
-                gap: 4,
-                position: 'absolute',
-                right: 8,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                background: 'var(--bg-primary)',
-                padding: '4px 6px',
-                borderRadius: 8,
-                border: '1px solid var(--border-color)',
-                boxShadow: 'var(--shadow-md)',
-                zIndex: 10,
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                title={isCompleted ? t('sidebar.markIncompleteTooltip') : t('sidebar.markCompleteTooltip')}
-                onClick={() => {
-                  togglePageComplete(index);
-                  setShowMobileActions(false);
-                }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '4px 6px',
-                  fontSize: 13,
-                  color: isCompleted ? 'var(--success)' : 'var(--text-secondary)',
-                  borderRadius: 4,
-                  lineHeight: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: 'var(--bg-secondary)',
-                }}
-                type="button"
-              >
-                {isCompleted ? '↩' : '✓'}
-              </button>
-              <button
-                title={t('sidebar.renameTooltip')}
-                onClick={() => {
-                  setRenaming(true);
-                  setRenameValue(title);
-                  setRenamingIndex(index);
-                  setShowMobileActions(false);
-                }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '4px 6px',
-                  fontSize: 13,
-                  color: 'var(--text-secondary)',
-                  borderRadius: 4,
-                  lineHeight: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: 'var(--bg-secondary)',
-                }}
-                type="button"
-              >
-                ✎
-              </button>
-              <button
-                title={t('sidebar.deleteTooltip')}
-                onClick={() => {
-                  removePage(index);
-                  setShowMobileActions(false);
-                }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '4px 6px',
-                  fontSize: 13,
-                  color: 'var(--error-text, #ef4444)',
-                  borderRadius: 4,
-                  lineHeight: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: 'var(--bg-secondary)',
-                }}
-                type="button"
-              >
-                ✕
-              </button>
-            </div>
-          );
-        }
-
-        if (isTouch) {
-          return (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowMobileActions(true);
-              }}
-              style={{
-                background: 'none',
-                border: '1px solid var(--border-color)',
-                backgroundColor: 'var(--bg-secondary)',
-                cursor: 'pointer',
-                padding: '2px 6px',
-                fontSize: 14,
-                fontWeight: 'bold',
-                color: 'var(--text-secondary)',
-                borderRadius: 6,
-                lineHeight: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginLeft: 'auto',
-                flexShrink: 0,
-              }}
-              title={t('sidebar.optionsTooltip')}
-              type="button"
-            >
-              ⋮
-            </button>
-          );
-        }
-
-        return null;
-      })()}
+      {/* Action buttons: shown on hover, or always on touch devices */}
+      {!renaming && shouldShowActions && (
+        <div
+          ref={actionsRef}
+          style={{
+            display: 'flex',
+            gap: isTouch ? 2 : 3,
+            marginLeft: 'auto',
+            flexShrink: 0,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            title={isCompleted ? t('sidebar.markIncompleteTooltip') : t('sidebar.markCompleteTooltip')}
+            onClick={() => {
+              togglePageComplete(index);
+              setShowActions(false);
+            }}
+            style={{
+              background: 'none',
+              border: '1px solid var(--border-color)',
+              cursor: 'pointer',
+              padding: isTouch ? '2px 5px' : '3px 5px',
+              fontSize: isTouch ? 11 : 12,
+              color: isCompleted ? 'var(--success)' : 'var(--text-secondary)',
+              borderRadius: 4,
+              lineHeight: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'var(--bg-secondary)',
+              transition: 'all 0.1s',
+            }}
+            type="button"
+          >
+            {isCompleted ? '↩' : '✓'}
+          </button>
+          <button
+            title={t('sidebar.renameTooltip')}
+            onClick={() => {
+              setRenaming(true);
+              setRenameValue(title);
+              setRenamingIndex(index);
+              setShowActions(false);
+            }}
+            style={{
+              background: 'none',
+              border: '1px solid var(--border-color)',
+              cursor: 'pointer',
+              padding: isTouch ? '2px 5px' : '3px 5px',
+              fontSize: isTouch ? 11 : 12,
+              color: 'var(--text-secondary)',
+              borderRadius: 4,
+              lineHeight: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'var(--bg-secondary)',
+              transition: 'all 0.1s',
+            }}
+            type="button"
+          >
+            ✎
+          </button>
+          <button
+            title={t('sidebar.deleteTooltip')}
+            onClick={() => {
+              removePage(index);
+              setShowActions(false);
+            }}
+            style={{
+              background: 'none',
+              border: '1px solid var(--border-color)',
+              cursor: 'pointer',
+              padding: isTouch ? '2px 5px' : '3px 5px',
+              fontSize: isTouch ? 11 : 12,
+              color: 'var(--error-text, #ef4444)',
+              borderRadius: 4,
+              lineHeight: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'var(--bg-secondary)',
+              transition: 'all 0.1s',
+            }}
+            type="button"
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 }

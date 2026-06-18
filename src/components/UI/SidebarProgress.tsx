@@ -3,7 +3,7 @@ import { useAppContext } from '../../context/AppContext';
 import { useTranslation } from '../../hooks/useTranslation';
 
 export default function SidebarProgress() {
-  const { state, completedCount, removeAllPages } = useAppContext();
+  const { state, completedCount } = useAppContext();
   const { t } = useTranslation();
   const total = state.pages.length;
   const viewedCount = state.viewedPages.length;
@@ -11,7 +11,7 @@ export default function SidebarProgress() {
   if (total === 0) return null;
 
   return (
-    <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)' }}>
+    <div>
       <div
         style={{
           display: 'flex',
@@ -46,22 +46,6 @@ export default function SidebarProgress() {
           }}
         />
       </div>
-      <button
-        onClick={removeAllPages}
-        style={{
-          marginTop: 8,
-          padding: '4px 0',
-          border: 'none',
-          background: 'none',
-          color: 'var(--text-muted)',
-          fontSize: 12,
-          cursor: 'pointer',
-          textDecoration: 'underline',
-        }}
-        type="button"
-      >
-        {t('sidebar.clearAllLabel')}
-      </button>
     </div>
   );
 }

@@ -4,7 +4,11 @@ import type { LearningPage } from '../../types/schema';
 import { validateLearningPage } from '../../utils/validation';
 import { useTranslation } from '../../hooks/useTranslation';
 
-export default function FileUploadDropZone() {
+interface Props {
+  variant?: 'full' | 'compact';
+}
+
+export default function FileUploadDropZone({ variant = 'full' }: Props) {
   const { addPage, addToast } = useAppContext();
   const { t } = useTranslation();
   const [dragging, setDragging] = useState(false);
@@ -100,9 +104,10 @@ export default function FileUploadDropZone() {
     if (files && files.length > 0) {
       processFiles(files);
     }
-    // Reset so the same files can be re-selected
     e.target.value = '';
   };
+
+  const isCompact = variant === 'compact';
 
   return (
     <div
@@ -118,17 +123,20 @@ export default function FileUploadDropZone() {
       title={t('uploadZone.title')}
       style={{
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: isCompact ? undefined : 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 12,
-        padding: '32px 24px',
-        border: `2px dashed ${dragging ? 'var(--accent)' : 'var(--border-color)'}`,
-        borderRadius: 12,
-        background: dragging ? 'var(--accent-light)' : 'var(--bg-secondary)',
+        gap: isCompact ? 0 : 12,
+        width: isCompact ? 40 : undefined,
+        height: isCompact ? 40 : undefined,
+        padding: isCompact ? 0 : '32px 24px',
+        border: `2px dashed ${dragging ? 'var(--accent)' : isCompact ? 'var(--text-muted)' : 'var(--border-color)'}`,
+        borderRadius: isCompact ? 10 : 12,
+        background: dragging ? 'var(--accent-light)' : isCompact ? 'var(--bg-secondary)' : 'var(--bg-secondary)',
         cursor: 'pointer',
         transition: 'border-color 0.15s, background 0.15s',
-        textAlign: 'center',
+        textAlign: isCompact ? undefined : 'center',
+        flexShrink: isCompact ? 0 : undefined,
       }}
     >
       <input
@@ -145,18 +153,32 @@ export default function FileUploadDropZone() {
         fill="none"
         stroke="currentColor"
         strokeWidth={2}
-        width={32}
-        height={32}
+        width={isCompact ? 22 : 32}
+        height={isCompact ? 22 : 32}
         style={{ color: dragging ? 'var(--accent)' : 'var(--text-muted)' }}
       >
         <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
         <polyline points="17 8 12 3 7 8" />
         <line x1="12" y1="3" x2="12" y2="15" />
       </svg>
-      <p style={{ margin: 0, fontSize: 14, color: dragging ? 'var(--accent)' : 'var(--text-secondary)', fontWeight: dragging ? 500 : 400 }}>
-        {dragging ? t('uploadZone.dragDropActive') : t('uploadZone.dragDropPrompt')}
-      </p>
-      {error && <p style={{ margin: 0, fontSize: 13, color: 'var(--error)' }}>{error}</p>}
+      {!isCompact && (
+        <p style={{ margin: 0, fontSize: 14, color: dragging ? 'var(--accent)' : 'var(--text-secondary)', fontWeight: dragging ? 500 : 400 }}>
+          {dragging ? t('uploadZone.dragDropActive') : t('uploadZone.dragDropPrompt')}
+        </p>
+      )}
+      {error && (
+        <span style={{
+          fontSize: 11,
+          color: 'var(--error)',
+          textAlign: 'center',
+          whiteSpace: isCompact ? 'nowrap' : undefined,
+          overflow: isCompact ? 'hidden' : undefined,
+          textOverflow: isCompact ? 'ellipsis' : undefined,
+          ...(isCompact ? { position: 'absolute', bottom: -18, left: 0, right: 0 } : { marginTop: 4 }),
+        }}>
+          {error}
+        </span>
+      )}
     </div>
   );
 }
