@@ -101,7 +101,7 @@ function validateSection(section: any, path: string): { valid: boolean; error?: 
     if (!Array.isArray(section.questions)) {
       return { valid: false, error: `"${path}.questions" must be an array` };
     }
-    if (section.questions.length < 5) {
+    if (section.questions.length < 3) {
       return { valid: false, error: `"${path}.questions" must contain at least 5 questions (found ${section.questions.length})` };
     }
     for (let j = 0; j < section.questions.length; j++) {
@@ -146,8 +146,8 @@ function validateSection(section: any, path: string): { valid: boolean; error?: 
     if (!Array.isArray(section.sentences)) {
       return { valid: false, error: `"${path}.sentences" must be an array` };
     }
-    if (section.sentences.length < 4) {
-      return { valid: false, error: `"${path}.sentences" must contain at least 4 sentences (found ${section.sentences.length})` };
+    if (section.sentences.length < 5) {
+      return { valid: false, error: `"${path}.sentences" must contain at least 5 sentences (found ${section.sentences.length})` };
     }
     if (section.instantFeedback !== undefined && typeof section.instantFeedback !== 'boolean') {
       return { valid: false, error: `"${path}.instantFeedback" must be a boolean` };
@@ -168,8 +168,8 @@ function validateSection(section: any, path: string): { valid: boolean; error?: 
     if (!Array.isArray(section.pairs)) {
       return { valid: false, error: `"${path}.pairs" must be an array` };
     }
-    if (section.pairs.length < 3) {
-      return { valid: false, error: `"${path}.pairs" must contain at least 3 matching pairs (found ${section.pairs.length})` };
+    if (section.pairs.length < 5) {
+      return { valid: false, error: `"${path}.pairs" must contain at least 5 matching pairs (found ${section.pairs.length})` };
     }
     for (let j = 0; j < section.pairs.length; j++) {
       const pair = section.pairs[j];
@@ -187,8 +187,8 @@ function validateSection(section: any, path: string): { valid: boolean; error?: 
     if (!Array.isArray(section.items)) {
       return { valid: false, error: `"${path}.items" must be an array` };
     }
-    if (section.items.length < 4) {
-      return { valid: false, error: `"${path}.items" must contain at least 4 items to sort (found ${section.items.length})` };
+    if (section.items.length < 5) {
+      return { valid: false, error: `"${path}.items" must contain at least 5 items to sort (found ${section.items.length})` };
     }
     for (let j = 0; j < section.items.length; j++) {
       const item = section.items[j];
@@ -225,8 +225,8 @@ function validateSection(section: any, path: string): { valid: boolean; error?: 
     if (!Array.isArray(section.blanks)) {
       return { valid: false, error: `"${path}.blanks" must be an array` };
     }
-    if (section.blanks.length < 4) {
-      return { valid: false, error: `"${path}.blanks" must contain at least 4 cloze blanks (found ${section.blanks.length})` };
+    if (section.blanks.length < 5) {
+      return { valid: false, error: `"${path}.blanks" must contain at least 5 cloze blanks (found ${section.blanks.length})` };
     }
     for (let j = 0; j < section.blanks.length; j++) {
       const blank = section.blanks[j];

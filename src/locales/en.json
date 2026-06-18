@@ -199,7 +199,7 @@
     "contextExplanations": {
       "Exam": "Optimized for exam prep: focuses on core testing points, definitions, active recall flashcards, and multiple-choice questions.",
       "Academic": "Focused on academic rigor: includes in-depth concepts, theoretical explanations, historical timeline context, and structured tabs.",
-      "Professional/Working": "Practical and application-oriented: uses real-world scenarios, professional checklists, sorting steps, and hands-on coding/process guides.",
+      "Professional/Working": "Practical and application-oriented: uses real-world scenarios, professional checklists, sorting steps, and anti-patterns.",
       "Daily Life": "Casual and general understanding: uses simplified language, everyday examples, basic flashcards, and interactive checklists.",
       "Strategic": "High-level overview and systems thinking: outlines strategic steps, timeline milestones, comparative tables, and Cloze tests for concepts."
     },

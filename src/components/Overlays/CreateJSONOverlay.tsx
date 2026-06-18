@@ -10,7 +10,7 @@ type DepthType = 'Low' | 'Medium' | 'High';
 const contextExplanations: Record<ContextType, string> = {
   Exam: 'Optimized for exam prep: focuses on core testing points, definitions, active recall flashcards, and multiple-choice questions.',
   Academic: 'Focused on academic rigor: includes in-depth concepts, theoretical explanations, historical timeline context, and structured tabs.',
-  'Professional/Working': 'Practical and application-oriented: uses real-world scenarios, professional checklists, sorting steps, and hands-on coding/process guides.',
+  'Professional/Working': 'Practical and application-oriented: uses real-world scenarios, professional checklists, sorting steps, and anti-patterns.',
   'Daily Life': 'Casual and general understanding: uses simplified language, everyday examples, basic flashcards, and interactive checklists.',
   Strategic: 'High-level overview and systems thinking: outlines strategic steps, timeline milestones, comparative tables, and Cloze tests for concepts.',
 };
@@ -344,7 +344,7 @@ Keep the content concise, engaging, and suitable for a general audience.
   Matching: Use for linking terms with definitions, causes with effects, or problems with specific tools.
 - Scaffolding & Differentiation: The difficulty must increment progressively from 'learn' (conceptualization) to 'practice' (guided application) and 'exam' (independent evaluation under constraints).
 - Elaborative Feedback: In all 'quiz' sections, the 'Explanation' and 'optionExplanations' must not just state what is right, but briefly explain *why* the wrong options are incorrect based on common mistakes.
-- You must present the scope and deliverables of the json at the second section in "learn" array.
+- Present the scope (what content will be covered) and deliverables (what the learner can do after the lesson) at the second section in "learn" array.
 - All content in "practice" and "exam" must be covered in "learn" array. But the "practice" and "exam" sections should not duplicate the content of the
 "learn" section.
 
