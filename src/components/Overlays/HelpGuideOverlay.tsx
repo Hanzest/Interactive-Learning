@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { useTranslation } from '../../hooks/useTranslation';
 import styles from './HelpGuideOverlay.module.css';
@@ -301,6 +301,19 @@ export default function HelpGuideOverlay() {
   const goToSlide = useCallback((index: number) => {
     setCurrentSlide(index);
   }, []);
+
+  // Keyboard navigation: ←/a = prev, →/d = next
+  useEffect(() => {
+    function handleKeydown(e: KeyboardEvent) {
+      if (e.key === 'ArrowLeft' || e.key === 'a') {
+        goPrev();
+      } else if (e.key === 'ArrowRight' || e.key === 'd') {
+        goNext();
+      }
+    }
+    document.addEventListener('keydown', handleKeydown);
+    return () => document.removeEventListener('keydown', handleKeydown);
+  }, [goPrev, goNext]);
 
   if (!state.showHelpGuide) return null;
 
