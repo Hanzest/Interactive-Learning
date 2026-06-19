@@ -68,7 +68,8 @@ describe('validateLearningPage', () => {
             { text: 'Vite is a ___ build tool.', answer: 'frontend' },
             { text: 'React is a ___ library.', answer: 'ui' },
             { text: 'TypeScript is a ___ typed language.', answer: 'strongly' },
-            { text: 'HTML is a ___ language.', answer: 'markup' }
+            { text: 'HTML is a ___ language.', answer: 'markup' },
+            { text: 'JS is a ___ language.', answer: 'scripting' }
           ]
         }
       ],
@@ -79,7 +80,9 @@ describe('validateLearningPage', () => {
           pairs: [
             { left: 'A', right: 'Apple' },
             { left: 'B', right: 'Banana' },
-            { left: 'C', right: 'Cherry' }
+            { left: 'C', right: 'Cherry' },
+            { left: 'D', right: 'Date' },
+            { left: 'E', right: 'Elderberry' }
           ]
         },
         {
@@ -89,7 +92,8 @@ describe('validateLearningPage', () => {
             { text: 'Step 1', correctOrder: 0 },
             { text: 'Step 2', correctOrder: 1 },
             { text: 'Step 3', correctOrder: 2 },
-            { text: 'Step 4', correctOrder: 3 }
+            { text: 'Step 4', correctOrder: 3 },
+            { text: 'Step 5', correctOrder: 4 }
           ]
         },
         {
@@ -103,12 +107,13 @@ describe('validateLearningPage', () => {
         {
           type: 'cloze',
           title: 'Cloze Deletion',
-          text: 'Vite is a {{tool1}}, React is a {{tool2}}, TypeScript has {{tool3}}, HTML has {{tool4}}.',
+          text: 'Vite is a {{tool1}}, React is a {{tool2}}, TypeScript has {{tool3}}, HTML has {{tool4}}, CSS has {{tool5}}.',
           blanks: [
             { id: 'tool1', options: ['tool', 'library'], correctIndex: 0, correctAnswer: 'tool', hint: 'build tool' },
             { id: 'tool2', options: ['tool', 'library'], correctIndex: 1, correctAnswer: 'library', hint: 'ui library' },
             { id: 'tool3', options: ['types', 'none'], correctIndex: 0, correctAnswer: 'types', hint: 'strongly typed' },
-            { id: 'tool4', options: ['tags', 'none'], correctIndex: 0, correctAnswer: 'tags', hint: 'markup language' }
+            { id: 'tool4', options: ['tags', 'none'], correctIndex: 0, correctAnswer: 'tags', hint: 'markup language' },
+            { id: 'tool5', options: ['styles', 'none'], correctIndex: 0, correctAnswer: 'styles', hint: 'cascading style sheets' }
           ]
         }
       ]
@@ -302,13 +307,13 @@ describe('validateLearningPage', () => {
       expect(result.error).toContain('correctIndex" must be a valid integer index');
     });
 
-    it('should validate fill-blank section properties and reject less than 4 sentences', () => {
+    it('should validate fill-blank section properties and reject less than 5 sentences', () => {
       let result = validateLearningPage({
         ...baseValid,
         learn: [{ type: 'fill-blank', title: 'T', sentences: [{ text: '' }] }]
       });
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('sentences" must contain at least 4 sentences');
+      expect(result.error).toContain('sentences" must contain at least 5 sentences');
 
       result = validateLearningPage({
         ...baseValid,
@@ -319,7 +324,8 @@ describe('validateLearningPage', () => {
             { text: 'A ___', answer: 'a' },
             { text: 'B ___', answer: 'b' },
             { text: 'C ___', answer: 'c' },
-            { text: 'D ___', answer: 123 }
+            { text: 'D ___', answer: 123 },
+            { text: 'E ___', answer: 'e' }
           ]
         }]
       });
@@ -327,31 +333,31 @@ describe('validateLearningPage', () => {
       expect(result.error).toContain('answer');
     });
 
-    it('should validate matching section properties and reject less than 3 pairs', () => {
+    it('should validate matching section properties and reject less than 5 pairs', () => {
       let result = validateLearningPage({
         ...baseValid,
         learn: [{ type: 'matching', title: 'T', pairs: [{ left: 'L', right: '' }] }]
       });
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('pairs" must contain at least 3 matching pairs');
+      expect(result.error).toContain('pairs" must contain at least 5 matching pairs');
     });
 
-    it('should validate sorting section properties and reject less than 4 items', () => {
+    it('should validate sorting section properties and reject less than 5 items', () => {
       let result = validateLearningPage({
         ...baseValid,
         learn: [{ type: 'sorting', title: 'T', items: [{ text: 'Step', correctOrder: 'first' }] }]
       });
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('items" must contain at least 4 items');
+      expect(result.error).toContain('items" must contain at least 5 items to sort');
     });
 
-    it('should validate cloze section properties and reject less than 4 blanks', () => {
+    it('should validate cloze section properties and reject less than 5 blanks', () => {
       let result = validateLearningPage({
         ...baseValid,
         learn: [{ type: 'cloze', title: 'T', text: 'This is {{blank1}}.', blanks: [] }]
       });
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('blanks" must contain at least 4 cloze blanks');
+      expect(result.error).toContain('blanks" must contain at least 5 cloze blanks');
     });
   });
 });

@@ -5,9 +5,12 @@ import katex from 'katex';
  */
 export function escapeHtml(str: unknown): string {
   if (typeof str !== 'string') return String(str == null ? '' : str);
-  const div = document.createElement('div');
-  div.appendChild(document.createTextNode(str));
-  return div.innerHTML;
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 /**
@@ -60,28 +63,28 @@ export function renderMarkdown(text: string): string {
 
   // #### Headings (must be before ### and ## to avoid partial matches)
   html = html.replace(
-    /(?:^|\r?\n)####\s+(.+?)(?=\r?\n|$)/g,
-    '<h4 class="section-heading section-heading-h4">$1</h4>'
+    /(^|\r?\n)####\s+(.+?)(?=\r?\n|$)/g,
+    '$1<h4 class="section-heading section-heading-h4">$2</h4>'
   );
   // ### Headings
   html = html.replace(
-    /(?:^|\r?\n)###\s+(.+?)(?=\r?\n|$)/g,
-    '<h3 class="section-heading section-heading-h3">$1</h3>'
+    /(^|\r?\n)###\s+(.+?)(?=\r?\n|$)/g,
+    '$1<h3 class="section-heading section-heading-h3">$2</h3>'
   );
   // ## Headings (must be after ### to avoid triple-hash partial matches)
   html = html.replace(
-    /(?:^|\r?\n)##\s+(.+?)(?=\r?\n|$)/g,
-    '<h2 class="section-heading section-heading-h2">$1</h2>'
+    /(^|\r?\n)##\s+(.+?)(?=\r?\n|$)/g,
+    '$1<h2 class="section-heading section-heading-h2">$2</h2>'
   );
   // # Headings (must be last since it's the most general)
   html = html.replace(
-    /(?:^|\r?\n)#\s+(.+?)(?=\r?\n|$)/g,
-    '<h1 class="section-heading section-heading-h1">$1</h1>'
+    /(^|\r?\n)#\s+(.+?)(?=\r?\n|$)/g,
+    '$1<h1 class="section-heading section-heading-h1">$2</h1>'
   );
   // > Blockquotes
   html = html.replace(
-    /(?:^|\r?\n)>\s*(.+?)(?=\r?\n|$)/g,
-    '<blockquote class="section-blockquote">$1</blockquote>'
+    /(^|\r?\n)(?:&amp;gt;|&gt;|>)\s*(.+?)(?=\r?\n|$)/g,
+    '$1<blockquote class="section-blockquote">$2</blockquote>'
   );
   // **Bold**
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
@@ -131,6 +134,8 @@ export function renderMarkdown(text: string): string {
   html = html.replace(/(<table[^>]*>[\s\S]*?<\/table>)/g, (m) =>
     m.replace(/\n/g, TABLE_NL)
   );
+  // Remove newline immediately following block elements to prevent double-breaks
+  html = html.replace(/(<\/h[1-6]>|<\/blockquote>|<\/table>)\r?\n/gi, '$1');
   // Newlines → <br>
   html = html.replace(/\r?\n/g, '<br>');
   // Restore table newlines
