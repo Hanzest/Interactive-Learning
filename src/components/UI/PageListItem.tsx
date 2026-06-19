@@ -280,6 +280,9 @@ export default function PageListItem({
             }
           }}
           onClick={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
           style={{
             flex: 1,
             minWidth: 0,
@@ -315,11 +318,14 @@ export default function PageListItem({
           ref={actionsRef}
           style={{
             display: 'flex',
-            gap: isTouch ? 2 : 3,
+            gap: isTouch ? 5 : 3,
             marginLeft: 'auto',
             flexShrink: 0,
           }}
           onClick={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
         >
           <button
             title={isCompleted ? t('sidebar.markIncompleteTooltip') : t('sidebar.markCompleteTooltip')}
@@ -331,8 +337,10 @@ export default function PageListItem({
               background: 'none',
               border: '1px solid var(--border-color)',
               cursor: 'pointer',
-              padding: isTouch ? '2px 5px' : '3px 5px',
-              fontSize: isTouch ? 11 : 12,
+              padding: isTouch ? '5px 8px' : '3px 5px',
+              fontSize: isTouch ? 13 : 12,
+              minWidth: isTouch ? '28px' : '20px',
+              height: isTouch ? '28px' : 'auto',
               color: isCompleted ? 'var(--success)' : 'var(--text-secondary)',
               borderRadius: 4,
               lineHeight: 1,
@@ -358,8 +366,10 @@ export default function PageListItem({
               background: 'none',
               border: '1px solid var(--border-color)',
               cursor: 'pointer',
-              padding: isTouch ? '2px 5px' : '3px 5px',
-              fontSize: isTouch ? 11 : 12,
+              padding: isTouch ? '5px 8px' : '3px 5px',
+              fontSize: isTouch ? 13 : 12,
+              minWidth: isTouch ? '28px' : '20px',
+              height: isTouch ? '28px' : 'auto',
               color: 'var(--text-secondary)',
               borderRadius: 4,
               lineHeight: 1,
@@ -383,8 +393,10 @@ export default function PageListItem({
               background: 'none',
               border: '1px solid var(--border-color)',
               cursor: 'pointer',
-              padding: isTouch ? '2px 5px' : '3px 5px',
-              fontSize: isTouch ? 11 : 12,
+              padding: isTouch ? '5px 8px' : '3px 5px',
+              fontSize: isTouch ? 13 : 12,
+              minWidth: isTouch ? '28px' : '20px',
+              height: isTouch ? '28px' : 'auto',
               color: 'var(--error-text, #ef4444)',
               borderRadius: 4,
               lineHeight: 1,
