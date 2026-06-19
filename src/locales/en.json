@@ -345,7 +345,7 @@
     "step1Title": "Interactive Learning",
     "step1Desc": "This app makes learning interactive with 3D Flashcards, Matching Games, Cloze tests, drag-and-drop Sorting, Fill-in-the-blank sentences, and more. Every section auto-renders from your study JSON.",
     "step2Title": "Create Your Study Content",
-    "step2Desc": "Click \"Create JSON with Prompt Wizard\" and follow the steps to describe your topic. The wizard generates a ready-to-use JSON file for you to download.",
+    "step2Desc": "Click \"Create JSON with Prompt Wizard\" and follow the steps to describe your topic. Copy the prompt from the wizard and paste to a chatbot and get a ready-to-use JSON file for you to download.",
     "step3Title": "Upload & Learn",
     "step3Desc": "Upload the downloaded JSON file. Then switch between 3 learning modes: Learn (browse), Practice (interactive with feedback), and Exam (timed, graded assessment).",
     "step4Title": "Sidebar Management",
