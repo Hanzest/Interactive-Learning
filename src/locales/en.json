@@ -197,16 +197,16 @@
       "High": "High Depth"
     },
     "contextExplanations": {
-      "Exam": "Optimized for exam prep: focuses on core testing points, definitions, active recall flashcards, and multiple-choice questions.",
-      "Academic": "Focused on academic rigor: includes in-depth concepts, theoretical explanations, historical timeline context, and structured tabs.",
-      "Professional/Working": "Practical and application-oriented: uses real-world scenarios, professional checklists, sorting steps, and anti-patterns.",
-      "Daily Life": "Casual and general understanding: uses simplified language, everyday examples, basic flashcards, and interactive checklists.",
-      "Strategic": "High-level overview and systems thinking: outlines strategic steps, timeline milestones, comparative tables, and Cloze tests for concepts."
+      "Exam": "Optimized for exam prep: focuses on core testing points, high-frequency definitions, common exam traps, and knowledge gaps that frequently appear in assessments.",
+      "Academic": "Focused on academic rigor: covers theoretical foundations, conceptual frameworks, research paradigms, historical evolution, and scholarly debates.",
+      "Professional/Working": "Practical and application-oriented: covers real-world scenarios, industry-standard workflows, professional decision-making, troubleshooting methods, and common anti-patterns.",
+      "Daily Life": "Casual and general understanding: covers everyday applications, practical know-how, common terminology, relatable analogies, and real-life problem-solving situations.",
+      "Strategic": "High-level overview and systems thinking: covers strategic frameworks, system interdependencies, long-term roadmaps, competitive landscapes, and high-level decision models."
     },
     "depthExplanations": {
       "Low": "A brief, high-level overview of the main topics. Best for a quick read, basic introduction, or a fast refresher.",
       "Medium": "A balanced approach with core concepts, simple illustrations, and moderate detail. Suitable for most learners.",
-      "High": "An exhaustive resource covering advanced mechanics, edge cases, extensive flashcard sets, in-depth quizzes, and matching terms. Best for mastery."
+      "High": "An exhaustive deep-dive covering advanced mechanics, edge cases, underlying principles, nuanced exceptions, and comprehensive mastery-level knowledge. Best for full competency."
     }
   },
   "dashboard": {
