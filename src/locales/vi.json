@@ -207,7 +207,8 @@
       "Low": "Tổng quan ngắn gọn, ở mức vĩ mô. Phù hợp để đọc nhanh, giới thiệu sơ bộ hoặc ôn tập ngắn.",
       "Medium": "Cân bằng giữa lý thuyết và ví dụ minh họa cơ bản. Phù hợp với hầu hết nhu cầu học tập thông thường.",
       "High": "Đi sâu toàn diện bao quát cơ chế nâng cao, trường hợp ngoại lệ, nguyên lý nền tảng, sắc thái khác biệt và kiến thức làm chủ chuyên sâu. Phù hợp để đạt năng lực toàn diện."
-    }
+    },
+    "disclaimer": "<strong>Tuyên bố miễn trừ trách nhiệm:</strong> Nội dung do AI tạo có thể không chính xác."
   },
   "dashboard": {
     "title": "Bảng tiến độ học tập",

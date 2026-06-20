@@ -866,6 +866,18 @@ Generate the JSON file for the topic "${topic}". The json value of every string 
               </div>
             </div>
           )}
+
+          {/* Disclaimer — persistent across all steps */}
+          <div
+            style={{
+              marginTop: 'auto',
+              fontSize: '0.75rem',
+              color: 'var(--text-muted)',
+              lineHeight: 1.5,
+            }}
+          >
+            <span dangerouslySetInnerHTML={{ __html: t('promptWizard.disclaimer') }} />
+          </div>
         </div>
 
         {/* Footer */}

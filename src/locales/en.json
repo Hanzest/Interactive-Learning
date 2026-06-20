@@ -207,7 +207,8 @@
       "Low": "A brief, high-level overview of the main topics. Best for a quick read, basic introduction, or a fast refresher.",
       "Medium": "A balanced approach with core concepts, simple illustrations, and moderate detail. Suitable for most learners.",
       "High": "An exhaustive deep-dive covering advanced mechanics, edge cases, underlying principles, nuanced exceptions, and comprehensive mastery-level knowledge. Best for full competency."
-    }
+    },
+    "disclaimer": "<strong>Disclaimer:</strong> AI-generated content may have inaccuracies."
   },
   "dashboard": {
     "title": "Progress Dashboard",
