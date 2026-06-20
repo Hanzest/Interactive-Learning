@@ -165,7 +165,22 @@
     "stepTopic": "Topic",
     "stepContext": "Context",
     "stepDepth": "Depth",
+    "stepAvoid": "Avoid",
     "stepReady": "Ready",
+    "avoidStep": {
+      "question": "Which graded components do you want to avoid?",
+      "description": "Select at most 4 components you do NOT want to appear in the practice and exam modes.",
+      "limitWarning": "You must leave at least one graded component type allowed.",
+      "avoidLabel": "Avoid ✕",
+      "allowLabel": "Allow ✓",
+      "components": {
+        "quiz": "Quiz / Multiple Choice",
+        "fill-blank": "Fill-in-the-Blank Sentences",
+        "matching": "Matching Pairs",
+        "sorting": "Sorting Items",
+        "cloze": "Cloze Deletion"
+      }
+    },
     "questionTopic": "What topic do you want to learn?",
     "placeholderTopic": "e.g., React Hooks, Photosynthesis, WW2 History",
     "questionLanguage": "Output Language",

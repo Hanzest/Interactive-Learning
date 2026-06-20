@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateLearningPage } from '../validation';
+import { validateLearningPage, MIN_CONSTRAINTS } from '../validation';
 
 describe('validateLearningPage', () => {
   it('should validate a correct full learning page object', () => {
@@ -287,7 +287,7 @@ describe('validateLearningPage', () => {
         learn: [{ type: 'quiz', title: 'T', questions: [{ question: 'Q', options: [] }] }]
       });
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('questions" must contain at least 5 questions');
+      expect(result.error).toContain(`questions" must contain at least ${MIN_CONSTRAINTS.quiz} questions`);
 
       result = validateLearningPage({
         ...baseValid,
@@ -313,7 +313,7 @@ describe('validateLearningPage', () => {
         learn: [{ type: 'fill-blank', title: 'T', sentences: [{ text: '' }] }]
       });
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('sentences" must contain at least 5 sentences');
+      expect(result.error).toContain(`sentences" must contain at least ${MIN_CONSTRAINTS.fillBlank} sentences`);
 
       result = validateLearningPage({
         ...baseValid,
@@ -339,7 +339,7 @@ describe('validateLearningPage', () => {
         learn: [{ type: 'matching', title: 'T', pairs: [{ left: 'L', right: '' }] }]
       });
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('pairs" must contain at least 5 matching pairs');
+      expect(result.error).toContain(`pairs" must contain at least ${MIN_CONSTRAINTS.matching} matching pairs`);
     });
 
     it('should validate sorting section properties and reject less than 5 items', () => {
@@ -348,7 +348,7 @@ describe('validateLearningPage', () => {
         learn: [{ type: 'sorting', title: 'T', items: [{ text: 'Step', correctOrder: 'first' }] }]
       });
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('items" must contain at least 5 items to sort');
+      expect(result.error).toContain(`items" must contain at least ${MIN_CONSTRAINTS.sorting} items to sort`);
     });
 
     it('should validate cloze section properties and reject less than 5 blanks', () => {
@@ -357,7 +357,7 @@ describe('validateLearningPage', () => {
         learn: [{ type: 'cloze', title: 'T', text: 'This is {{blank1}}.', blanks: [] }]
       });
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('blanks" must contain at least 5 cloze blanks');
+      expect(result.error).toContain(`blanks" must contain at least ${MIN_CONSTRAINTS.cloze} cloze blanks`);
     });
   });
 });

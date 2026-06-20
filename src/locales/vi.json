@@ -165,7 +165,22 @@
     "stepTopic": "Chủ đề",
     "stepContext": "Ngữ cảnh",
     "stepDepth": "Độ sâu",
+    "stepAvoid": "Tránh",
     "stepReady": "Hoàn tất",
+    "avoidStep": {
+      "question": "Bạn muốn tránh những thành phần tính điểm nào?",
+      "description": "Chọn tối đa 4 thành phần bạn KHÔNG muốn xuất hiện trong chế độ luyện tập và kiểm tra.",
+      "limitWarning": "Bạn phải giữ lại ít nhất một loại thành phần tính điểm.",
+      "avoidLabel": "Tránh ✕",
+      "allowLabel": "Cho phép ✓",
+      "components": {
+        "quiz": "Trắc nghiệm / Quiz",
+        "fill-blank": "Điền vào chỗ trống (câu)",
+        "matching": "Ghép cặp",
+        "sorting": "Sắp xếp thứ tự",
+        "cloze": "Điền vào chỗ trống (đoạn văn - Cloze)"
+      }
+    },
     "questionTopic": "Bạn muốn học về chủ đề gì?",
     "placeholderTopic": "Ví dụ: React Hooks, Quang hợp, Lịch sử Thế chiến 2",
     "questionLanguage": "Ngôn ngữ đầu ra",

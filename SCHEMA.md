@@ -295,8 +295,8 @@ All uploaded JSON files are validated against this schema before rendering. Erro
 The validator enforces:
 1. **Required Fields**: Every uploaded JSON file must contain a `page` object, and `learn`, `practice`, and `exam` arrays.
 2. **Item Count Constraints**:
-   - `quiz` sections: Must contain at least **5 questions**
-   - `fill-blank` sections: Must contain at least **4 sentences**
-   - `matching` sections: Must contain at least **3 pairs**
-   - `sorting` sections: Must contain at least **4 items**
-   - `cloze` sections: Must contain at least **4 blanks**
+    - `quiz` sections: Must contain at least **5 questions**
+    - `fill-blank` sections: Must contain at least **5 sentences**
+    - `matching` sections: Must contain at least **5 pairs**
+    - `sorting` sections: Must contain at least **5 items**
+    - `cloze` sections: Must contain at least **5 blanks**

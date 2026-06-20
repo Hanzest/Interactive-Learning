@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { useTranslation } from '../../hooks/useTranslation';
+import { MIN_CONSTRAINTS } from '../../utils/validation';
 
 type PromptMode = 'fast' | 'tailored';
 
@@ -285,15 +286,35 @@ export default function CreateJSONOverlay() {
   const [outputLang, setOutputLang] = useState<string>('English');
   const [context, setContext] = useState<ContextType>('Academic');
   const [depth, setDepth] = useState<DepthType>('Medium');
+  const [avoidComponents, setAvoidComponents] = useState<string[]>([]);
 
   const [dropdownContextOpen, setDropdownContextOpen] = useState(false);
   const [dropdownDepthOpen, setDropdownDepthOpen] = useState(false);
+
+  const backdropRef = useRef<HTMLDivElement>(null);
+  const isMouseDownOnBackdrop = useRef(false);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.target === backdropRef.current) {
+      isMouseDownOnBackdrop.current = true;
+    } else {
+      isMouseDownOnBackdrop.current = false;
+    }
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (isMouseDownOnBackdrop.current && e.target === backdropRef.current) {
+      toggleCreatePrompt();
+    }
+    isMouseDownOnBackdrop.current = false;
+  };
 
   useEffect(() => {
     if (state.showCreatePrompt) {
       setStep(1);
       setTopic('');
       setOutputLang(language === 'vi' ? 'Tiếng Việt' : 'English');
+      setAvoidComponents([]);
     }
   }, [state.showCreatePrompt, language]);
 
@@ -302,15 +323,15 @@ export default function CreateJSONOverlay() {
   // Handle step flow
   const handleNext = () => {
     if (mode === 'fast') {
-      if (step === 1) setStep(4);
+      if (step === 1) setStep(5);
     } else {
-      if (step < 4) setStep(step + 1);
+      if (step < 5) setStep(step + 1);
     }
   };
 
   const handleBack = () => {
     if (mode === 'fast') {
-      if (step === 4) setStep(1);
+      if (step === 5) setStep(1);
     } else {
       if (step > 1) setStep(step - 1);
     }
@@ -328,6 +349,10 @@ Tailor the content to the following specifications:
 - Target Context: ${context} (${contextExplanations[context]})
 - Content Depth: ${depth} (${depthExplanations[depth]})
 `;
+      if (avoidComponents.length > 0) {
+        prompt += `- Avoided graded components: DO NOT generate any sections of type: ${avoidComponents.join(', ')}. These components must not exist in practice and exam arrays.
+`;
+      }
     } else {
       prompt += `
 Keep the content concise, engaging, and suitable for a general audience.
@@ -347,8 +372,17 @@ Keep the content concise, engaging, and suitable for a general audience.
 - Present the scope (what content will be covered) and deliverables (what the learner can do after the lesson) at the second section in "learn" array.
 - All content in "practice" and "exam" must be covered in "learn" array. But the "practice" and "exam" sections should not duplicate the content of the
 "learn" section.
+`;
 
-**Format constraints**
+    if (mode === 'tailored' && avoidComponents.length > 0) {
+      prompt += `
+**Avoided Components Constraint:**
+- Do NOT generate or include any of these section types: ${avoidComponents.join(', ')}.
+- These types are strictly forbidden in this request.
+`;
+    }
+
+    prompt += `**Format constraints**
 - Only a valid JSON object matching the schema below. Do not add any conversational text before or after the JSON.
 Ensure the JSON is fully compliant, with no syntax errors, no trailing commas, and valid Markdown in string fields.
 - Not starting content with '>' or '*' as bullet point, use '-'.
@@ -367,11 +401,11 @@ JSON Schema structure:
   ],
   "practice": [
     // Array of interactive practice sections containing a separate set of practice questions.
-    // Allowed interactive question types: quiz, fill-blank, matching, sorting, cloze.
+    // Allowed interactive question types: ${['quiz', 'fill-blank', 'matching', 'sorting', 'cloze'].filter(c => !avoidComponents.includes(c)).join(', ')}.
   ],
   "exam": [
     // Array of interactive exam sections containing a separate set of exam questions.
-    // Allowed interactive question types: quiz, fill-blank, matching, sorting, cloze.
+    // Allowed interactive question types: ${['quiz', 'fill-blank', 'matching', 'sorting', 'cloze'].filter(c => !avoidComponents.includes(c)).join(', ')}.
   ]
 }
 
@@ -480,7 +514,8 @@ Available Section Types (you MUST format them exactly like this):
     { "text": "The sun ___ in the east.", "answer": "rises" },
     { "text": "Water boils at ___ degrees Celsius.", "answer": "100" },
     { "text": "Earth has ___ natural satellite.", "answer": "one" },
-    { "text": "Light travels in a ___ line.", "answer": "straight" }
+    { "text": "Light travels in a ___ line.", "answer": "straight" },
+    { "text": "The moon orbits the ___.", "answer": "earth" }
   ]
 }
 
@@ -491,7 +526,9 @@ Available Section Types (you MUST format them exactly like this):
   "pairs": [
     { "left": "Item Left 1", "right": "Matching Item Right 1" },
     { "left": "Item Left 2", "right": "Matching Item Right 2" },
-    { "left": "Item Left 3", "right": "Matching Item Right 3" }
+    { "left": "Item Left 3", "right": "Matching Item Right 3" },
+    { "left": "Item Left 4", "right": "Matching Item Right 4" },
+    { "left": "Item Left 5", "right": "Matching Item Right 5" }
   ]
 }
 
@@ -503,7 +540,8 @@ Available Section Types (you MUST format them exactly like this):
     { "text": "Step 1", "correctOrder": 0 },
     { "text": "Step 2", "correctOrder": 1 },
     { "text": "Step 3", "correctOrder": 2 },
-    { "text": "Step 4", "correctOrder": 3 }
+    { "text": "Step 4", "correctOrder": 3 },
+    { "text": "Step 5", "correctOrder": 4 }
   ]
 }
 
@@ -521,24 +559,25 @@ Available Section Types (you MUST format them exactly like this):
 {
   "type": "cloze",
   "title": "Fill the Paragraph",
-  "text": "The quick brown {{animal1}} jumps over the lazy {{animal2}}. The sky is {{color}} and the grass is {{green}}.",
+  "text": "The quick brown {{animal1}} jumps over the lazy {{animal2}}. The sky is {{color}}, the grass is {{green}}, and fire is {{red}}.",
   "blanks": [
     { "id": "animal1", "options": ["fox", "bear"], "correctIndex": 0, "correctAnswer": "fox", "hint": "Orange-furred wild canine" },
     { "id": "animal2", "options": ["cat", "dog"], "correctIndex": 1, "correctAnswer": "dog", "hint": "Man's best friend" },
     { "id": "color", "options": ["blue", "red"], "correctIndex": 0, "correctAnswer": "blue", "hint": "Color of a clear daytime sky" },
-    { "id": "green", "options": ["green", "yellow"], "correctIndex": 0, "correctAnswer": "green", "hint": "Standard color of healthy grass" }
+    { "id": "green", "options": ["green", "yellow"], "correctIndex": 0, "correctAnswer": "green", "hint": "Standard color of healthy grass" },
+    { "id": "red", "options": ["red", "purple"], "correctIndex": 0, "correctAnswer": "red", "hint": "Color of fire" }
   ]
 }
 
 **Minimum limit constraints**
-- quiz: >= 3 questions
-- fill-blank: >= 5 sentences
-- matching: >= 5 matching pairs
-- sorting: >= 5 items to sort
-- cloze: >= 5 blanks
-- learn array: >= 8 sections
-- practice array: >= 3 sections
-- exam array: >= 5 sections
+- quiz: >= ${MIN_CONSTRAINTS.quiz} questions
+- fill-blank: >= ${MIN_CONSTRAINTS.fillBlank} sentences
+- matching: >= ${MIN_CONSTRAINTS.matching} matching pairs
+- sorting: >= ${MIN_CONSTRAINTS.sorting} items to sort
+- cloze: >= ${MIN_CONSTRAINTS.cloze} blanks
+- learn array: >= ${MIN_CONSTRAINTS.learnSections} sections
+- practice array: >= ${MIN_CONSTRAINTS.practiceSections} sections
+- exam array: >= ${MIN_CONSTRAINTS.examSections} sections
 
 Generate the JSON file for the topic "${topic}". The json value of every string key must be in ${outputLang || 'English'}. Make sure the response is wrapped only in a \`\`\`json ... \`\`\` block.`;
 
@@ -575,7 +614,7 @@ Generate the JSON file for the topic "${topic}". The json value of every string 
           </div>
           <div style={s.stepConnector} />
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={s.stepDot(step === 4, false)}>2</div>
+            <div style={s.stepDot(step === 5, false)}>2</div>
             <span style={s.stepLabel}>{t('promptWizard.stepReady')}</span>
           </div>
         </div>
@@ -600,7 +639,12 @@ Generate the JSON file for the topic "${topic}". The json value of every string 
         </div>
         <div style={s.stepConnector} />
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div style={s.stepDot(step === 4, false)}>4</div>
+          <div style={s.stepDot(step === 4, step > 4)}>4</div>
+          <span style={s.stepLabel}>{t('promptWizard.stepAvoid')}</span>
+        </div>
+        <div style={s.stepConnector} />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={s.stepDot(step === 5, false)}>5</div>
           <span style={s.stepLabel}>{t('promptWizard.stepReady')}</span>
         </div>
       </div>
@@ -613,8 +657,13 @@ Generate the JSON file for the topic "${topic}". The json value of every string 
   };
 
   return (
-    <div style={s.overlay} onClick={toggleCreatePrompt}>
-      <div style={s.card} onClick={(e) => e.stopPropagation()}>
+    <div
+      ref={backdropRef}
+      style={s.overlay}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+    >
+      <div style={s.card} onMouseDown={(e) => e.stopPropagation()} onMouseUp={(e) => e.stopPropagation()}>
         {/* Header */}
         <div style={s.header}>
           <h2 style={s.title}>✨ {t('promptWizard.title')}</h2>
@@ -780,8 +829,81 @@ Generate the JSON file for the topic "${topic}". The json value of every string 
             </div>
           )}
 
-          {/* Step 4: Ready & AI Model Redirection */}
+          {/* Step 4: Avoid Graded Components */}
           {step === 4 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={s.label}>{t('promptWizard.avoidStep.question')}</label>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.75rem', lineHeight: 1.4 }}>
+                  {t('promptWizard.avoidStep.description')}
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                  {(['quiz', 'fill-blank', 'matching', 'sorting', 'cloze'] as const).map((comp) => {
+                    const isAvoided = avoidComponents.includes(comp);
+                    return (
+                      <button
+                        key={comp}
+                        type="button"
+                        onClick={() => {
+                          if (isAvoided) {
+                            setAvoidComponents(avoidComponents.filter((c) => c !== comp));
+                          } else {
+                            if (avoidComponents.length < 4) {
+                              setAvoidComponents([...avoidComponents, comp]);
+                            } else {
+                              addToast(t('promptWizard.avoidStep.limitWarning'), 'warning', 3000);
+                            }
+                          }
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '0.75rem 1rem',
+                          borderRadius: 8,
+                          border: isAvoided ? '1px solid var(--error, #ef4444)' : '1px solid var(--border-color)',
+                          background: isAvoided ? 'var(--bg-tertiary)' : 'var(--bg-secondary)',
+                          color: isAvoided ? 'var(--text-muted)' : 'var(--text-primary)',
+                          cursor: 'pointer',
+                          textAlign: 'left' as const,
+                          transition: 'all 0.15s ease',
+                          outline: 'none',
+                        }}
+                      >
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span
+                            style={{
+                              textDecoration: isAvoided ? 'line-through' : 'none',
+                              fontWeight: isAvoided ? 500 : 600,
+                              opacity: isAvoided ? 0.6 : 1,
+                            }}
+                          >
+                            {t(`promptWizard.avoidStep.components.${comp}`)}
+                          </span>
+                        </span>
+                        <span
+                          style={{
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            padding: '2px 8px',
+                            borderRadius: 4,
+                            background: isAvoided ? 'rgba(239, 68, 68, 0.1)' : 'var(--accent-light)',
+                            color: isAvoided ? 'var(--error, #ef4444)' : 'var(--accent)',
+                            border: isAvoided ? '1px solid var(--error, #ef4444)' : 'none',
+                          }}
+                        >
+                          {isAvoided ? t('promptWizard.avoidStep.avoidLabel') : t('promptWizard.avoidStep.allowLabel')}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 5: Ready & AI Model Redirection */}
+          {step === 5 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
                 <label style={s.label}>{t('promptWizard.labelPrompt')}</label>
@@ -890,7 +1012,7 @@ Generate the JSON file for the topic "${topic}". The json value of every string 
             <div />
           )}
 
-          {step < 4 ? (
+          {step < 5 ? (
             <button
               type="button"
               style={s.btnNext(isNextDisabled())}
