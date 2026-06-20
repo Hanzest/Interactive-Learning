@@ -21,13 +21,17 @@ describe('renderMarkdown', () => {
   });
 
   it('should remove the newline immediately following closing block tags', () => {
-    const markdown = '### What We Will Cover\n- The foundations...\n\n### Deliverables\nBy the end...';
+    const markdown = '### What We Will Cover\n- The foundations...\n### Deliverables\nBy the end...';
     const result = renderMarkdown(markdown);
     // Since the newline immediately after h3 is removed, there is no <br> immediately following it.
     expect(result).toContain('</h3>- The foundations...');
     expect(result).toContain('</h3>By the end...');
-    // Double newlines should still be preserved
-    expect(result).toContain('- The foundations...<br><br>');
+  });
+
+  it('should collapse double/multiple newlines to a single newline', () => {
+    const markdown = 'Paragraph 1\n\nParagraph 2\n\n\nParagraph 3';
+    const result = renderMarkdown(markdown);
+    expect(result).toBe('Paragraph 1<br>Paragraph 2<br>Paragraph 3');
   });
 
   it('should parse tables correctly without sucking in sibling headings', () => {

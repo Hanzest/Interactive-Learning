@@ -21,6 +21,9 @@ export function escapeHtml(str: unknown): string {
 export function renderMarkdown(text: string): string {
   if (typeof text !== 'string') return '';
 
+  // Normalize newlines and replace double newlines with single newlines
+  const normalizedText = text.replace(/\r\n/g, '\n').replace(/\n\n+/g, '\n');
+
   const blocks: string[] = [];
   const inlines: string[] = [];
 
@@ -30,7 +33,7 @@ export function renderMarkdown(text: string): string {
   };
 
   // 1. Extract block math $$...$$
-  let tempText = text.replace(/\$\$(.+?)\$\$/gs, (_, math) => {
+  let tempText = normalizedText.replace(/\$\$(.+?)\$\$/gs, (_, math) => {
     try {
       const rendered = katex.renderToString(normalizeMath(math), {
         displayMode: true,
