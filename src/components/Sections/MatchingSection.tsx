@@ -42,7 +42,8 @@ export default function MatchingSection({
 
   // Load saved answers and layout
   useEffect(() => {
-    const saved = state.sectionAnswers[currentPageId]?.[sectionIndex];
+    const savedKey = `${state.learningMode}_${sectionIndex}`;
+    const saved = state.sectionAnswers[currentPageId]?.[savedKey] ?? state.sectionAnswers[currentPageId]?.[sectionIndex];
     if (saved) {
       setMatches(saved.matches || {});
       setShuffledRight(saved.shuffledRight || shuffle(section.pairs.map(p => p.right)));
@@ -341,25 +342,28 @@ stroke={activeSubmitted ? (line.correct ? 'var(--success)' : 'var(--error)') : '
         display: 'flex',
         gap: '0.5rem',
         marginTop: '1rem',
+        justifyContent: 'flex-end',
       }}>
-        <button
-          onClick={handleSubmit}
-          disabled={!allMatched || activeSubmitted}
-          className="btn-base"
-          style={{
-            padding: '0.5rem 1.25rem',
-            border: 'none',
-            borderRadius: '6px',
-            backgroundColor: (!allMatched || activeSubmitted) ? 'var(--bg-tertiary)' : (confirming ? 'var(--warning)' : 'var(--accent)'),
-            color: (!allMatched || activeSubmitted) ? 'var(--text-muted)' : '#fff',
-            cursor: (!allMatched || activeSubmitted) ? 'not-allowed' : 'pointer',
-            fontWeight: 600,
-            fontSize: '0.875rem',
-            transition: 'var(--transition-fast)',
-          }}
-        >
-          {isExamMode ? (isSavedText ? t('interactive.answersSaved') : t('interactive.saveAnswers')) : (confirming ? t('interactive.confirmSubmit') : t('interactive.submit'))}
-        </button>
+        {!isExamMode && (
+          <button
+            onClick={handleSubmit}
+            disabled={!allMatched || activeSubmitted}
+            className="btn-base"
+            style={{
+              padding: '0.5rem 1.25rem',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: (!allMatched || activeSubmitted) ? 'var(--bg-tertiary)' : (confirming ? 'var(--warning)' : 'var(--accent)'),
+              color: (!allMatched || activeSubmitted) ? 'var(--text-muted)' : '#fff',
+              cursor: (!allMatched || activeSubmitted) ? 'not-allowed' : 'pointer',
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              transition: 'var(--transition-fast)',
+            }}
+          >
+            {confirming ? t('interactive.confirmSubmit') : t('interactive.submit')}
+          </button>
+        )}
         {state.learningMode !== 'exam' && (
           <>
             <button

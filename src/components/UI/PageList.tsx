@@ -91,7 +91,7 @@ export default function PageList() {
     <div>
       {visibleIndices.map((pageIndex) => (
         <PageListItem
-          key={pageIndex}
+          key={state.pages[pageIndex]?._meta?.id || pageIndex}
           page={state.pages[pageIndex]}
           index={pageIndex}
           isActive={state.currentPageIndex === pageIndex}

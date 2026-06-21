@@ -13,6 +13,9 @@ import MatchingSection from './MatchingSection';
 import SortingSection from './SortingSection';
 import ChecklistSection from './ChecklistSection';
 import ClozeSection from './ClozeSection';
+import TrueFalseSection from './TrueFalseSection';
+import ShortAnswerSection from './ShortAnswerSection';
+import CategorizeSection from './CategorizeSection';
 
 interface SectionRendererProps {
   section: Section;
@@ -47,6 +50,7 @@ export default function SectionRenderer({
   };
 
   const renderSection = () => {
+    const sectionKey = `${currentPageIndex}_${sectionIndex}_${state.learningMode}`;
     switch (section.type) {
       case 'text':
         return <TextSection section={section} />;
@@ -57,10 +61,11 @@ export default function SectionRenderer({
       case 'timeline':
         return <TimelineSection section={section} />;
       case 'flashcards':
-        return <FlashcardsSection section={section} sectionIndex={sectionIndex} />;
+        return <FlashcardsSection key={sectionKey} section={section} sectionIndex={sectionIndex} />;
       case 'quiz':
         return (
           <QuizSection
+            key={sectionKey}
             section={section}
             sectionIndex={sectionIndex}
             forceSubmit={forceSubmit}
@@ -71,6 +76,7 @@ export default function SectionRenderer({
       case 'fill-blank':
         return (
           <FillBlankSection
+            key={sectionKey}
             section={section}
             sectionIndex={sectionIndex}
             forceSubmit={forceSubmit}
@@ -81,6 +87,7 @@ export default function SectionRenderer({
       case 'matching':
         return (
           <MatchingSection
+            key={sectionKey}
             section={section}
             sectionIndex={sectionIndex}
             forceSubmit={forceSubmit}
@@ -91,6 +98,7 @@ export default function SectionRenderer({
       case 'sorting':
         return (
           <SortingSection
+            key={sectionKey}
             section={section}
             sectionIndex={sectionIndex}
             forceSubmit={forceSubmit}
@@ -99,10 +107,44 @@ export default function SectionRenderer({
           />
         );
       case 'checklist':
-        return <ChecklistSection section={section} sectionIndex={sectionIndex} />;
+        return <ChecklistSection key={sectionKey} section={section} sectionIndex={sectionIndex} />;
       case 'cloze':
         return (
           <ClozeSection
+            key={sectionKey}
+            section={section}
+            sectionIndex={sectionIndex}
+            forceSubmit={forceSubmit}
+            onGraded={onGraded}
+            isConfirmed={isConfirmed}
+          />
+        );
+      case 'true-false':
+        return (
+          <TrueFalseSection
+            key={sectionKey}
+            section={section}
+            sectionIndex={sectionIndex}
+            forceSubmit={forceSubmit}
+            onGraded={onGraded}
+            isConfirmed={isConfirmed}
+          />
+        );
+      case 'short-answer':
+        return (
+          <ShortAnswerSection
+            key={sectionKey}
+            section={section}
+            sectionIndex={sectionIndex}
+            forceSubmit={forceSubmit}
+            onGraded={onGraded}
+            isConfirmed={isConfirmed}
+          />
+        );
+      case 'categorize':
+        return (
+          <CategorizeSection
+            key={sectionKey}
             section={section}
             sectionIndex={sectionIndex}
             forceSubmit={forceSubmit}

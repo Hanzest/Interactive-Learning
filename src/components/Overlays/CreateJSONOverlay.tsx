@@ -401,11 +401,11 @@ JSON Schema structure:
   ],
   "practice": [
     // Array of interactive practice sections containing a separate set of practice questions.
-    // Allowed interactive question types: ${['quiz', 'fill-blank', 'matching', 'sorting', 'cloze'].filter(c => !avoidComponents.includes(c)).join(', ')}.
+    // Allowed interactive question types: ${['quiz', 'fill-blank', 'matching', 'sorting', 'cloze', 'true-false', 'short-answer', 'categorize'].filter(c => !avoidComponents.includes(c)).join(', ')}.
   ],
   "exam": [
     // Array of interactive exam sections containing a separate set of exam questions.
-    // Allowed interactive question types: ${['quiz', 'fill-blank', 'matching', 'sorting', 'cloze'].filter(c => !avoidComponents.includes(c)).join(', ')}.
+    // Allowed interactive question types: ${['quiz', 'fill-blank', 'matching', 'sorting', 'cloze', 'true-false', 'short-answer', 'categorize'].filter(c => !avoidComponents.includes(c)).join(', ')}.
   ]
 }
 
@@ -569,12 +569,58 @@ Available Section Types (you MUST format them exactly like this):
   ]
 }
 
+12. True/False Section:
+{
+  "type": "true-false",
+  "title": "Fact or Fiction?",
+  "statements": [
+    { "statement": "JavaScript is a statically typed language.", "isTrue": false, "explanation": "JavaScript is dynamically typed. TypeScript adds optional static typing on top of it." },
+    { "statement": "The HTTP protocol is stateless.", "isTrue": true, "explanation": "Each HTTP request is independent; the server retains no session state between requests by default." },
+    { "statement": "Arrays in Python are zero-indexed.", "isTrue": true, "explanation": "Like most languages, Python arrays and lists start at index 0." }
+  ]
+}
+
+13. Short Answer Section:
+{
+  "type": "short-answer",
+  "title": "In Your Own Words",
+  "questions": [
+    {
+      "prompt": "In 2-3 sentences, explain what a closure is in JavaScript and why it is useful.",
+      "sampleAnswer": "A closure is a function that retains access to variables from its outer (enclosing) scope even after that outer function has returned. This allows the inner function to remember its environment. Closures are commonly used for data encapsulation, factory functions, and event handlers.",
+      "keyPoints": ["retains access to outer scope variables", "persists after outer function returns", "used for encapsulation or factory patterns"],
+      "hint": "Think about what happens to a function's variables after it finishes executing."
+    }
+  ]
+}
+
+14. Categorize Section:
+{
+  "type": "categorize",
+  "title": "Classify the Concepts",
+  "categories": [
+    { "id": "compiled", "label": "Compiled Languages" },
+    { "id": "interpreted", "label": "Interpreted Languages" },
+    { "id": "hybrid", "label": "Hybrid (JIT)" }
+  ],
+  "items": [
+    { "id": "c", "text": "C", "categoryId": "compiled", "explanation": "C is compiled directly to machine code." },
+    { "id": "python", "text": "Python", "categoryId": "interpreted", "explanation": "Python is interpreted line by line at runtime." },
+    { "id": "java", "text": "Java", "categoryId": "hybrid", "explanation": "Java compiles to bytecode then JIT-compiles at runtime." },
+    { "id": "js", "text": "JavaScript", "categoryId": "hybrid", "explanation": "Modern JS engines like V8 use JIT compilation." },
+    { "id": "rust", "text": "Rust", "categoryId": "compiled", "explanation": "Rust compiles directly to native machine code with no runtime." }
+  ]
+}
+
 **Minimum limit constraints**
 - quiz: >= ${MIN_CONSTRAINTS.quiz} questions
 - fill-blank: >= ${MIN_CONSTRAINTS.fillBlank} sentences
 - matching: >= ${MIN_CONSTRAINTS.matching} matching pairs
 - sorting: >= ${MIN_CONSTRAINTS.sorting} items to sort
 - cloze: >= ${MIN_CONSTRAINTS.cloze} blanks
+- true-false: >= ${MIN_CONSTRAINTS.trueFalse} statements
+- short-answer: >= ${MIN_CONSTRAINTS.shortAnswer} question
+- categorize: >= ${MIN_CONSTRAINTS.categorizeItems} items and >= ${MIN_CONSTRAINTS.categorizeCategories} categories
 - learn array: >= ${MIN_CONSTRAINTS.learnSections} sections
 - practice array: >= ${MIN_CONSTRAINTS.practiceSections} sections
 - exam array: >= ${MIN_CONSTRAINTS.examSections} sections
@@ -838,7 +884,7 @@ Generate the JSON file for the topic "${topic}". The json value of every string 
                   {t('promptWizard.avoidStep.description')}
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
-                  {(['quiz', 'fill-blank', 'matching', 'sorting', 'cloze'] as const).map((comp) => {
+                  {(['quiz', 'fill-blank', 'matching', 'sorting', 'cloze', 'true-false', 'short-answer', 'categorize'] as const).map((comp) => {
                     const isAvoided = avoidComponents.includes(comp);
                     return (
                       <button
@@ -848,7 +894,7 @@ Generate the JSON file for the topic "${topic}". The json value of every string 
                           if (isAvoided) {
                             setAvoidComponents(avoidComponents.filter((c) => c !== comp));
                           } else {
-                            if (avoidComponents.length < 4) {
+                            if (avoidComponents.length < 7) {
                               setAvoidComponents([...avoidComponents, comp]);
                             } else {
                               addToast(t('promptWizard.avoidStep.limitWarning'), 'warning', 3000);

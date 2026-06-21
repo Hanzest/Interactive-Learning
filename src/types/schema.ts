@@ -59,7 +59,10 @@ export type Section =
   | MatchingSection
   | SortingSection
   | ChecklistSection
-  | ClozeSection;
+  | ClozeSection
+  | TrueFalseSection
+  | ShortAnswerSection
+  | CategorizeSection;
 
 export type SectionType =
   | 'text'
@@ -72,7 +75,10 @@ export type SectionType =
   | 'matching'
   | 'sorting'
   | 'checklist'
-  | 'cloze';
+  | 'cloze'
+  | 'true-false'
+  | 'short-answer'
+  | 'categorize';
 
 export interface SectionBase {
   type: SectionType;
@@ -205,6 +211,50 @@ export interface ClozeBlank {
   correctIndex?: number;
   correctAnswer?: string;
   hint?: string;
+}
+
+/* 12. True / False */
+export interface TrueFalseSection extends SectionBase {
+  type: 'true-false';
+  statements: TrueFalseStatement[];
+}
+
+export interface TrueFalseStatement {
+  statement: string;
+  isTrue: boolean;
+  explanation: string;
+}
+
+/* 13. Short Answer */
+export interface ShortAnswerSection extends SectionBase {
+  type: 'short-answer';
+  questions: ShortAnswerQuestion[];
+}
+
+export interface ShortAnswerQuestion {
+  prompt: string;
+  sampleAnswer: string;
+  keyPoints?: string[];
+  hint?: string;
+}
+
+/* 14. Categorize */
+export interface CategorizeSection extends SectionBase {
+  type: 'categorize';
+  categories: CategorizeCategory[];
+  items: CategorizeItem[];
+}
+
+export interface CategorizeCategory {
+  id: string;
+  label: string;
+}
+
+export interface CategorizeItem {
+  id: string;
+  text: string;
+  categoryId: string;
+  explanation?: string;
 }
 
 /* --------------------------------------------------------------------------

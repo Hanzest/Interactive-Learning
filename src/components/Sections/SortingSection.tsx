@@ -40,7 +40,8 @@ export default function SortingSection({
 
   // Load saved answers
   useEffect(() => {
-    const saved = state.sectionAnswers[currentPageId]?.[sectionIndex];
+    const savedKey = `${state.learningMode}_${sectionIndex}`;
+    const saved = state.sectionAnswers[currentPageId]?.[savedKey] ?? state.sectionAnswers[currentPageId]?.[sectionIndex];
     if (saved) {
       setItems(saved);
     } else {
@@ -219,15 +220,15 @@ export default function SortingSection({
     : 0;
 
   const itemBg = (status: string, isDragging: boolean, isDragOver: boolean): string => {
-    if (isDragging) return 'var(--accent-light)';
-    if (isDragOver) return 'var(--bg-tertiary)';
+    if (isDragging) return 'var(--accent)';
+    if (isDragOver) return 'var(--accent-light)';
     if (status === 'correct') return 'rgba(16, 185, 129, 0.1)';
     if (status === 'wrong') return 'rgba(239, 68, 68, 0.1)';
     return 'var(--bg-secondary)';
   };
 
   const itemBorder = (status: string, isDragging: boolean, isDragOver: boolean): string => {
-    if (isDragging) return '2px solid var(--accent)';
+    if (isDragging) return '1px solid var(--accent)';
     if (isDragOver) return '2px dashed var(--accent)';
     if (status === 'correct') return '2px solid var(--success)';
     if (status === 'wrong') return '2px solid var(--error)';
@@ -300,12 +301,12 @@ export default function SortingSection({
                 cursor: activeSubmitted ? 'default' : (isTouchDevice ? 'grab' : 'grab'),
                 touchAction: isTouchDevice ? 'none' : undefined,
                 transition: 'background-color 150ms ease, border-color 150ms ease, opacity 150ms ease',
-                opacity: isDragging ? 0.6 : 1,
+                boxShadow: isDragging ? 'var(--shadow-md)' : 'none',
               }}
             >
               <span style={{
                 cursor: activeSubmitted ? 'default' : 'grab',
-                color: 'var(--text-muted)',
+                color: isDragging ? 'rgba(255, 255, 255, 0.8)' : 'var(--text-muted)',
                 fontSize: '1.2rem',
                 userSelect: 'none',
               }} title={t('sorting.dragToReorder')}>
@@ -314,7 +315,7 @@ export default function SortingSection({
               <span
                 style={{
                   flex: 1,
-                  color: 'var(--text-primary)',
+                  color: isDragging ? '#fff' : 'var(--text-primary)',
                 }}
                 dangerouslySetInnerHTML={{ __html: renderMarkdown(item.text) }}
               />
@@ -336,8 +337,9 @@ export default function SortingSection({
         display: 'flex',
         gap: '0.5rem',
         marginTop: '1rem',
+        justifyContent: 'flex-end',
       }}>
-        {!activeSubmitted ? (
+        {!isExamMode && !activeSubmitted ? (
           <button
             onClick={handleSubmit}
             className="btn-base"
@@ -353,10 +355,10 @@ export default function SortingSection({
               transition: 'var(--transition-fast)',
             }}
           >
-            {isExamMode ? (isSavedText ? t('sorting.orderSaved') : t('sorting.saveOrder')) : (confirming ? t('sorting.confirmSubmit') : t('sorting.checkOrder'))}
+            {confirming ? t('sorting.confirmSubmit') : t('sorting.checkOrder')}
           </button>
         ) : (
-          state.learningMode !== 'exam' && (
+          !isExamMode && activeSubmitted && (
             <button
               onClick={handleReset}
               className="btn-base"

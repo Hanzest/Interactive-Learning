@@ -39,7 +39,7 @@ export interface AppState {
   pomodoroSeconds: number;
   pomodoroIsRunning: boolean;
   learningMode: LearningMode;
-  sectionAnswers: Record<string, Record<number, any>>;
+  sectionAnswers: Record<string, Record<string, any>>;
   examSubmittedPages: Record<string, boolean>;
   examTimeLeft: Record<string, number>;
   examPaused: Record<string, boolean>;

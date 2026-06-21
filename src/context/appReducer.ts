@@ -205,32 +205,29 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 
     case 'TOGGLE_DARK_MODE': {
       const newMode = !state.darkMode;
-      storage.save('theme', newMode ? 'dark' : 'light');
       return { ...state, darkMode: newMode };
     }
 
     case 'SET_DARK_MODE': {
-      storage.save('theme', action.payload ? 'dark' : 'light');
       return { ...state, darkMode: action.payload };
     }
 
     case 'SET_LEARNING_MODE': {
-      storage.save('learningMode', action.payload);
       return { ...state, learningMode: action.payload };
     }
 
     case 'SAVE_SECTION_ANSWERS': {
       const { pageIndex, sectionIndex, answers } = action.payload;
       const pageId = state.pages[pageIndex]?._meta?.id || String(pageIndex);
+      const modeKey = `${state.learningMode}_${sectionIndex}`;
       const pageAnswers = state.sectionAnswers[pageId] || {};
       const newAnswers = {
         ...state.sectionAnswers,
         [pageId]: {
           ...pageAnswers,
-          [sectionIndex]: answers
+          [modeKey]: answers
         }
       };
-      storage.save('sectionAnswers', newAnswers);
       return {
         ...state,
         sectionAnswers: newAnswers
@@ -244,7 +241,6 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         ...state.examSubmittedPages,
         [pageId]: true
       };
-      storage.save('examSubmittedPages', newSubmitted);
       return {
         ...state,
         examSubmittedPages: newSubmitted
@@ -264,9 +260,6 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       const newTimeLeft = { ...state.examTimeLeft };
       delete newTimeLeft[pageId];
       const newPaused = { ...state.examPaused, [pageId]: true };
-      storage.save('examSubmittedPages', newSubmitted);
-      storage.save('sectionAnswers', newAnswers);
-      storage.save('examTimeLeft', newTimeLeft);
       return {
         ...state,
         examSubmittedPages: newSubmitted,
@@ -283,7 +276,6 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         ...state.examTimeLeft,
         [pageId]: timeLeft
       };
-      storage.save('examTimeLeft', newTimeLeft);
       return {
         ...state,
         examTimeLeft: newTimeLeft
@@ -367,7 +359,6 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       const pageId = state.pages[pageIndex]?._meta?.id || String(pageIndex);
       const key = `${pageId}-${sectionIndex}`;
       const newScores = { ...state.quizScores, [key]: { correct, total } };
-      storage.save('quizScores', newScores);
       return { ...state, quizScores: newScores };
     }
 
@@ -442,7 +433,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       });
 
       // Migrate legacy numerical keys in sectionAnswers, examSubmittedPages, examTimeLeft
-      const migratedAnswers: Record<string, Record<number, any>> = {};
+      const migratedAnswers: Record<string, Record<string, any>> = {};
       const migratedSubmitted: Record<string, boolean> = {};
       const migratedTimeLeft: Record<string, number> = {};
       const migratedScores: Record<string, { correct: number; total: number }> = {};
@@ -600,7 +591,6 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
 
     case 'SET_LANGUAGE':
-      storage.save('language', action.payload);
       return {
         ...state,
         language: action.payload,

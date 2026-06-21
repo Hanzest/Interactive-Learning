@@ -35,7 +35,8 @@ export default function QuizSection({
 
   // Load saved answers
   useEffect(() => {
-    const saved = state.sectionAnswers[currentPageId]?.[sectionIndex];
+    const savedKey = `${state.learningMode}_${sectionIndex}`;
+    const saved = state.sectionAnswers[currentPageId]?.[savedKey] ?? state.sectionAnswers[currentPageId]?.[sectionIndex];
     if (saved) {
       setAnswers(saved);
     } else {
@@ -423,7 +424,7 @@ export default function QuizSection({
       {/* Navigation + Submit/Reset on the same line */}
       <div style={{
         display: 'flex',
-        justifyContent: 'center',
+        justifyContent: 'flex-end',
         gap: '0.75rem',
         alignItems: 'center',
       }}>
@@ -447,7 +448,7 @@ export default function QuizSection({
           ◀ {t('interactive.prev')}
         </button>
 
-        {!activeSubmitted ? (
+        {!isExamMode && !activeSubmitted ? (
           <button
             onClick={handleSubmit}
             disabled={Object.keys(answers).length < section.questions.length}
@@ -464,10 +465,10 @@ export default function QuizSection({
               transition: 'var(--transition-fast)',
             }}
           >
-            {isExamMode ? (isSavedText ? t('interactive.answersSaved') : t('interactive.saveAnswers')) : (confirming ? t('interactive.confirmSubmit') : t('interactive.submit'))}
+            {confirming ? t('interactive.confirmSubmit') : t('interactive.submit')}
           </button>
         ) : (
-          state.learningMode !== 'exam' && (
+          !isExamMode && activeSubmitted && (
             <button
               onClick={handleReset}
               className="btn-base"

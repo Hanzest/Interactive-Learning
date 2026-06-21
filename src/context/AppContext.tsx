@@ -162,11 +162,57 @@ export function AppProvider({ children }: AppProviderProps) {
     }
   }, []);
 
-  // Save session on relevant state changes
+  // Save session on relevant state changes (debounced by 1s)
   useEffect(() => {
     if (!isSessionLoaded) return;
-    saveSessionToStorage(state);
+    const handler = setTimeout(() => {
+      saveSessionToStorage(state);
+    }, 1000);
+    return () => clearTimeout(handler);
   }, [state.pages, state.pageHashes, state.currentPageIndex, state.viewedPages, state.quizScores, isSessionLoaded]);
+
+  // Persist learningMode
+  useEffect(() => {
+    storage.save('learningMode', state.learningMode);
+  }, [state.learningMode]);
+
+  // Persist language
+  useEffect(() => {
+    storage.save('language', state.language);
+  }, [state.language]);
+
+  // Persist theme
+  useEffect(() => {
+    storage.save('theme', state.darkMode ? 'dark' : 'light');
+  }, [state.darkMode]);
+
+  // Persist sectionAnswers with debounce
+  useEffect(() => {
+    if (!isSessionLoaded) return;
+    const handler = setTimeout(() => {
+      storage.save('sectionAnswers', state.sectionAnswers);
+    }, 800);
+    return () => clearTimeout(handler);
+  }, [state.sectionAnswers, isSessionLoaded]);
+
+  // Persist examSubmittedPages and examTimeLeft with debounce
+  useEffect(() => {
+    if (!isSessionLoaded) return;
+    const handler = setTimeout(() => {
+      storage.save('examSubmittedPages', state.examSubmittedPages);
+      storage.save('examTimeLeft', state.examTimeLeft);
+    }, 800);
+    return () => clearTimeout(handler);
+  }, [state.examSubmittedPages, state.examTimeLeft, isSessionLoaded]);
+
+  // Persist quizScores with debounce
+  useEffect(() => {
+    if (!isSessionLoaded) return;
+    const handler = setTimeout(() => {
+      storage.save('quizScores', state.quizScores);
+    }, 800);
+    return () => clearTimeout(handler);
+  }, [state.quizScores, isSessionLoaded]);
 
   // Derived values
   const visibleIndices = useMemo(() => getVisibleIndices(state), [state.pages, state.searchQuery]);

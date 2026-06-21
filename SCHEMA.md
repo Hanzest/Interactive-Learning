@@ -33,7 +33,7 @@ Each section object inside the `learn`, `practice`, or `exam` arrays requires at
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `type` | string | ✅ | One of: `text`, `tabs`, `accordion`, `timeline`, `flashcards`, `quiz`, `fill-blank`, `matching`, `sorting`, `checklist`, `cloze` |
+| `type` | string | ✅ | One of: `text`, `tabs`, `accordion`, `timeline`, `flashcards`, `quiz`, `fill-blank`, `matching`, `sorting`, `checklist`, `cloze`, `true-false`, `short-answer`, `categorize` |
 | `title` | string | ✅ | Section heading displayed above the content |
 
 Plus **type-specific fields** as described below.
@@ -288,6 +288,89 @@ Plus **type-specific fields** as described below.
 
 See [`test/fixtures/valid-full.json`](./test/fixtures/valid-full.json) for a complete example covering all 11 section types.
 
+---
+
+### 12. `true-false` - True or False with explanation
+
+```json
+{
+  "type": "true-false",
+  "title": "Fact Check",
+  "statements": [
+    {
+      "statement": "JavaScript is a statically typed language.",
+      "isTrue": false,
+      "explanation": "JavaScript is dynamically typed. TypeScript adds optional static typing."
+    }
+  ]
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `statements` | array | ✅ | Array of statement objects (minimum 3) |
+| `statements[].statement` | string | ✅ | The claim to evaluate |
+| `statements[].isTrue` | boolean | ✅ | Whether the statement is correct |
+| `statements[].explanation` | string | ✅ | Shown after answer - explains why it is true or false |
+
+---
+
+### 13. `short-answer` - Open-Ended Response with Self-Assessment
+
+```json
+{
+  "type": "short-answer",
+  "title": "In Your Own Words",
+  "questions": [
+    {
+      "prompt": "In 2-3 sentences, explain what a closure is in JavaScript.",
+      "sampleAnswer": "A closure is a function that retains access to variables from its outer scope...",
+      "keyPoints": ["retains outer scope access", "outer function has returned"],
+      "hint": "Think about what happens to variables after a function finishes."
+    }
+  ]
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `questions` | array | ✅ | Array of question objects (minimum 1) |
+| `questions[].prompt` | string | ✅ | The open-ended question |
+| `questions[].sampleAnswer` | string | ✅ | Model answer revealed after the learner submits |
+| `questions[].keyPoints` | string[] | ❌ | Bullet checklist of key ideas for self-grading |
+| `questions[].hint` | string | ❌ | Optional hint shown to the user |
+
+---
+
+### 14. `categorize` - Drag-to-Category Classification
+
+```json
+{
+  "type": "categorize",
+  "title": "Classify the Concepts",
+  "categories": [
+    { "id": "compiled", "label": "Compiled Languages" },
+    { "id": "interpreted", "label": "Interpreted Languages" }
+  ],
+  "items": [
+    { "id": "c", "text": "C", "categoryId": "compiled", "explanation": "C is compiled to machine code." },
+    { "id": "python", "text": "Python", "categoryId": "interpreted", "explanation": "Python is interpreted at runtime." },
+    { "id": "rust", "text": "Rust", "categoryId": "compiled", "explanation": "Rust compiles to native machine code." }
+  ]
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `categories` | array | ✅ | Target category buckets (minimum 2) |
+| `categories[].id` | string | ✅ | Unique category identifier |
+| `categories[].label` | string | ✅ | Display label for the category |
+| `items` | array | ✅ | Items to classify (minimum 3) |
+| `items[].id` | string | ✅ | Unique item identifier |
+| `items[].text` | string | ✅ | Display text for the item |
+| `items[].categoryId` | string | ✅ | Must match a defined category `id` |
+| `items[].explanation` | string | ❌ | Shown after submission to explain the correct category |
+
 ## Validation
 
 All uploaded JSON files are validated against this schema before rendering. Errors are displayed in a red panel with field paths (e.g., `learn[2].content`).
@@ -295,8 +378,11 @@ All uploaded JSON files are validated against this schema before rendering. Erro
 The validator enforces:
 1. **Required Fields**: Every uploaded JSON file must contain a `page` object, and `learn`, `practice`, and `exam` arrays.
 2. **Item Count Constraints**:
-    - `quiz` sections: Must contain at least **5 questions**
+    - `quiz` sections: Must contain at least **3 questions**
     - `fill-blank` sections: Must contain at least **5 sentences**
-    - `matching` sections: Must contain at least **5 pairs**
-    - `sorting` sections: Must contain at least **5 items**
+    - `matching` sections: Must contain at least **4 pairs**
+    - `sorting` sections: Must contain at least **4 items**
     - `cloze` sections: Must contain at least **5 blanks**
+    - `true-false` sections: Must contain at least **3 statements**
+    - `short-answer` sections: Must contain at least **1 question**
+    - `categorize` sections: Must contain at least **3 items** and **2 categories**

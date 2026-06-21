@@ -34,9 +34,17 @@ export default function FillBlankSection({
   const isExamSubmitted = isExamMode && !!state.examSubmittedPages[currentPageId];
   const activeSubmitted = isExamMode ? isExamSubmitted : submitted;
 
+  const debounceTimerRef = useRef<number | null>(null);
+  const latestAnswersRef = useRef(answers);
+
+  useEffect(() => {
+    latestAnswersRef.current = answers;
+  }, [answers]);
+
   // Load saved answers
   useEffect(() => {
-    const saved = state.sectionAnswers[currentPageId]?.[sectionIndex];
+    const savedKey = `${state.learningMode}_${sectionIndex}`;
+    const saved = state.sectionAnswers[currentPageId]?.[savedKey] ?? state.sectionAnswers[currentPageId]?.[sectionIndex];
     if (saved) {
       setAnswers(saved);
     } else {
@@ -56,13 +64,29 @@ export default function FillBlankSection({
       const cappedValue = value.slice(0, 100);
       const newAnswers = { ...answers, [index]: cappedValue };
       setAnswers(newAnswers);
-      saveSectionAnswers(state.currentPageIndex, sectionIndex, newAnswers);
+
+      if (debounceTimerRef.current) {
+        window.clearTimeout(debounceTimerRef.current);
+      }
+      debounceTimerRef.current = window.setTimeout(() => {
+        saveSectionAnswers(state.currentPageIndex, sectionIndex, newAnswers);
+      }, 500);
+
       if (instantFeedback) {
         setSubmitted(false);
       }
     },
     [activeSubmitted, instantFeedback, showAnswer, answers, saveSectionAnswers, state.currentPageIndex, sectionIndex]
   );
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        window.clearTimeout(debounceTimerRef.current);
+        saveSectionAnswers(state.currentPageIndex, sectionIndex, latestAnswersRef.current);
+      }
+    };
+  }, [saveSectionAnswers, state.currentPageIndex, sectionIndex]);
 
   const runGrading = useCallback(() => {
     setSubmitted(true);
@@ -284,29 +308,32 @@ export default function FillBlankSection({
         display: 'flex',
         gap: '0.5rem',
         marginTop: '1rem',
+        justifyContent: 'flex-end',
       }}>
-        <button
-          onClick={handleCheck}
-          disabled={
-            activeSubmitted ||
-            showAnswer ||
-            Object.keys(answers).length < section.sentences.length
-          }
-          className="btn-base"
-          style={{
-            padding: '0.5rem 1.25rem',
-            border: 'none',
-            borderRadius: '6px',
-            backgroundColor: (activeSubmitted || showAnswer || Object.keys(answers).length < section.sentences.length) ? 'var(--bg-tertiary)' : (confirming ? 'var(--warning)' : 'var(--accent)'),
-            color: (activeSubmitted || showAnswer || Object.keys(answers).length < section.sentences.length) ? 'var(--text-muted)' : '#fff',
-            cursor: (activeSubmitted || showAnswer || Object.keys(answers).length < section.sentences.length) ? 'not-allowed' : 'pointer',
-            fontWeight: 600,
-            fontSize: '0.875rem',
-            transition: 'var(--transition-fast)',
-          }}
-        >
-          {isExamMode ? (isSavedText ? t('interactive.answersSaved') : t('interactive.saveAnswers')) : (confirming ? t('interactive.confirmSubmit') : t('interactive.checkAnswers'))}
-        </button>
+        {!isExamMode && (
+          <button
+            onClick={handleCheck}
+            disabled={
+              activeSubmitted ||
+              showAnswer ||
+              Object.keys(answers).length < section.sentences.length
+            }
+            className="btn-base"
+            style={{
+              padding: '0.5rem 1.25rem',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: (activeSubmitted || showAnswer || Object.keys(answers).length < section.sentences.length) ? 'var(--bg-tertiary)' : (confirming ? 'var(--warning)' : 'var(--accent)'),
+              color: (activeSubmitted || showAnswer || Object.keys(answers).length < section.sentences.length) ? 'var(--text-muted)' : '#fff',
+              cursor: (activeSubmitted || showAnswer || Object.keys(answers).length < section.sentences.length) ? 'not-allowed' : 'pointer',
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              transition: 'var(--transition-fast)',
+            }}
+          >
+            {confirming ? t('interactive.confirmSubmit') : t('interactive.checkAnswers')}
+          </button>
+        )}
         {state.learningMode !== 'exam' && (
           <>
             <button

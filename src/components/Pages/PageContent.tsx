@@ -82,7 +82,11 @@ export default function PageContent() {
   }, [currentSlide, totalSlides]);
 
   const section = sections[safeSlideIndex];
-  const isGraded = section && ['quiz', 'fill-blank', 'matching', 'sorting', 'cloze'].includes(section.type);
+  const isGraded = section && (
+    state.learningMode === 'exam' && section.type === 'short-answer'
+      ? false
+      : ['quiz', 'fill-blank', 'matching', 'sorting', 'cloze', 'true-false', 'short-answer', 'categorize'].includes(section.type)
+  );
 
   // ── Exam mode: page-wide timer ─────────────────────────────────────────────
   const isExamMode = state.learningMode === 'exam';
@@ -93,13 +97,16 @@ export default function PageContent() {
     if (!isExamMode || !page) return 0;
     let total = 0;
     (page.exam || []).forEach((sec) => {
-      const isGradedSec = ['quiz', 'fill-blank', 'matching', 'sorting', 'cloze'].includes(sec.type);
+      const isGradedSec = ['quiz', 'fill-blank', 'matching', 'sorting', 'cloze', 'true-false', 'short-answer', 'categorize'].includes(sec.type);
       if (!isGradedSec) return;
       if (sec.type === 'quiz' && 'questions' in sec) total += ((sec as any).questions?.length || 1) * 30;
       else if (sec.type === 'fill-blank' && 'sentences' in sec) total += ((sec as any).sentences?.length || 1) * 30;
       else if (sec.type === 'matching' && 'pairs' in sec) total += ((sec as any).pairs?.length || 1) * 20;
       else if (sec.type === 'sorting' && 'items' in sec) total += ((sec as any).items?.length || 1) * 30;
       else if (sec.type === 'cloze') total += 60;
+      else if (sec.type === 'true-false' && 'statements' in sec) total += ((sec as any).statements?.length || 1) * 20;
+      else if (sec.type === 'short-answer' && 'questions' in sec) total += ((sec as any).questions?.length || 1) * 60;
+      else if (sec.type === 'categorize' && 'items' in sec) total += ((sec as any).items?.length || 1) * 30;
     });
     return Math.max(total, 60); // at least 1 minute
   }, [isExamMode, page, state.currentPageIndex]);
@@ -911,7 +918,7 @@ export default function PageContent() {
             )}
 
             {/* Navigation options to other modes on the last slide */}
-            {isLastSlide && (
+            {isLastSlide && (state.learningMode !== 'exam' || isPageExamSubmitted) && (
               <div style={{
                 marginTop: 32,
                 padding: '24px',

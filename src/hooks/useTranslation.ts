@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useAppContext } from '../context/AppContext';
 import en from '../locales/en.json';
 import vi from '../locales/vi.json';
@@ -9,7 +10,7 @@ export function useTranslation() {
   const lang = state.language || 'en';
   const dict = translations[lang] || en;
 
-  const t = (keyPath: string, variables?: Record<string, string | number>): string => {
+  const t = useCallback((keyPath: string, variables?: Record<string, string | number>): string => {
     const keys = keyPath.split('.');
     let result: any = dict;
 
@@ -44,7 +45,7 @@ export function useTranslation() {
     }
 
     return result;
-  };
+  }, [dict]);
 
   return {
     t,

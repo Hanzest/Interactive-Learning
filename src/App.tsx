@@ -36,29 +36,25 @@ function AppShell() {
     (swipeRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
   };
 
+  const prevPageIndexRef = useRef<number>(state.currentPageIndex);
+
   // Save/restore scroll position when navigating between pages
   useEffect(() => {
     const main = mainRef.current;
     if (!main) return;
 
-    // Save current scroll position keyed by page index
-    const prevIndex = state.currentPageIndex;
+    // Save scroll position of the previous page
+    const prevIdx = prevPageIndexRef.current;
+    if (prevIdx !== -1 && prevIdx !== state.currentPageIndex) {
+      scrollPositions.current[prevIdx] = main.scrollTop;
+    }
+
     // Restore saved scroll position for the new page (or scroll to top)
-    const savedPos = scrollPositions.current[prevIndex];
+    const savedPos = scrollPositions.current[state.currentPageIndex];
     main.scrollTop = savedPos ?? 0;
-  }, [state.currentPageIndex]);
 
-  // Save scroll position on scroll events
-  useEffect(() => {
-    const main = mainRef.current;
-    if (!main) return;
-
-    const handleScroll = () => {
-      scrollPositions.current[state.currentPageIndex] = main.scrollTop;
-    };
-
-    main.addEventListener('scroll', handleScroll, { passive: true });
-    return () => main.removeEventListener('scroll', handleScroll);
+    // Update the ref to the new page index
+    prevPageIndexRef.current = state.currentPageIndex;
   }, [state.currentPageIndex]);
 
   return (

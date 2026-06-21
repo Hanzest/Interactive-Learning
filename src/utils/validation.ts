@@ -6,6 +6,10 @@ export const MIN_CONSTRAINTS = {
   matching: 4,
   sorting: 4,
   cloze: 5,
+  trueFalse: 3,
+  shortAnswer: 1,
+  categorizeItems: 3,
+  categorizeCategories: 2,
   learnSections: 7,
   practiceSections: 3,
   examSections: 5,
@@ -19,7 +23,8 @@ function validateSection(section: any, path: string): { valid: boolean; error?: 
   const { type, title } = section;
   const validTypes = [
     'text', 'tabs', 'accordion', 'timeline', 'flashcards',
-    'quiz', 'fill-blank', 'matching', 'sorting', 'checklist', 'cloze'
+    'quiz', 'fill-blank', 'matching', 'sorting', 'checklist', 'cloze',
+    'true-false', 'short-answer', 'categorize'
   ];
 
   if (typeof type !== 'string' || !validTypes.includes(type)) {
@@ -267,6 +272,104 @@ function validateSection(section: any, path: string): { valid: boolean; error?: 
       }
       if (blank.hint !== undefined && typeof blank.hint !== 'string') {
         return { valid: false, error: `"${path}.blanks[${j}].hint" must be a string` };
+      }
+    }
+  } else if (type === 'true-false') {
+    if (!Array.isArray(section.statements)) {
+      return { valid: false, error: `"${path}.statements" must be an array` };
+    }
+    if (section.statements.length < MIN_CONSTRAINTS.trueFalse) {
+      return { valid: false, error: `"${path}.statements" must contain at least ${MIN_CONSTRAINTS.trueFalse} statements (found ${section.statements.length})` };
+    }
+    for (let j = 0; j < section.statements.length; j++) {
+      const stmt = section.statements[j];
+      if (!stmt || typeof stmt !== 'object' || Array.isArray(stmt)) {
+        return { valid: false, error: `"${path}.statements[${j}]" must be an object` };
+      }
+      if (typeof stmt.statement !== 'string' || !stmt.statement.trim()) {
+        return { valid: false, error: `"${path}.statements[${j}].statement" must be a non-empty string` };
+      }
+      if (typeof stmt.isTrue !== 'boolean') {
+        return { valid: false, error: `"${path}.statements[${j}].isTrue" must be a boolean` };
+      }
+      if (typeof stmt.explanation !== 'string' || !stmt.explanation.trim()) {
+        return { valid: false, error: `"${path}.statements[${j}].explanation" must be a non-empty string` };
+      }
+    }
+  } else if (type === 'short-answer') {
+    if (!Array.isArray(section.questions)) {
+      return { valid: false, error: `"${path}.questions" must be an array` };
+    }
+    if (section.questions.length < MIN_CONSTRAINTS.shortAnswer) {
+      return { valid: false, error: `"${path}.questions" must contain at least ${MIN_CONSTRAINTS.shortAnswer} question (found ${section.questions.length})` };
+    }
+    for (let j = 0; j < section.questions.length; j++) {
+      const q = section.questions[j];
+      if (!q || typeof q !== 'object' || Array.isArray(q)) {
+        return { valid: false, error: `"${path}.questions[${j}]" must be an object` };
+      }
+      if (typeof q.prompt !== 'string' || !q.prompt.trim()) {
+        return { valid: false, error: `"${path}.questions[${j}].prompt" must be a non-empty string` };
+      }
+      if (typeof q.sampleAnswer !== 'string' || !q.sampleAnswer.trim()) {
+        return { valid: false, error: `"${path}.questions[${j}].sampleAnswer" must be a non-empty string` };
+      }
+      if (q.keyPoints !== undefined) {
+        if (!Array.isArray(q.keyPoints)) {
+          return { valid: false, error: `"${path}.questions[${j}].keyPoints" must be an array of strings` };
+        }
+        for (let k = 0; k < q.keyPoints.length; k++) {
+          if (typeof q.keyPoints[k] !== 'string') {
+            return { valid: false, error: `"${path}.questions[${j}].keyPoints[${k}]" must be a string` };
+          }
+        }
+      }
+      if (q.hint !== undefined && typeof q.hint !== 'string') {
+        return { valid: false, error: `"${path}.questions[${j}].hint" must be a string` };
+      }
+    }
+  } else if (type === 'categorize') {
+    if (!Array.isArray(section.categories)) {
+      return { valid: false, error: `"${path}.categories" must be an array` };
+    }
+    if (section.categories.length < MIN_CONSTRAINTS.categorizeCategories) {
+      return { valid: false, error: `"${path}.categories" must contain at least ${MIN_CONSTRAINTS.categorizeCategories} categories (found ${section.categories.length})` };
+    }
+    for (let j = 0; j < section.categories.length; j++) {
+      const cat = section.categories[j];
+      if (!cat || typeof cat !== 'object' || Array.isArray(cat)) {
+        return { valid: false, error: `"${path}.categories[${j}]" must be an object` };
+      }
+      if (typeof cat.id !== 'string' || !cat.id.trim()) {
+        return { valid: false, error: `"${path}.categories[${j}].id" must be a non-empty string` };
+      }
+      if (typeof cat.label !== 'string' || !cat.label.trim()) {
+        return { valid: false, error: `"${path}.categories[${j}].label" must be a non-empty string` };
+      }
+    }
+    if (!Array.isArray(section.items)) {
+      return { valid: false, error: `"${path}.items" must be an array` };
+    }
+    if (section.items.length < MIN_CONSTRAINTS.categorizeItems) {
+      return { valid: false, error: `"${path}.items" must contain at least ${MIN_CONSTRAINTS.categorizeItems} items (found ${section.items.length})` };
+    }
+    const catIds = new Set(section.categories.map((c: any) => c.id));
+    for (let j = 0; j < section.items.length; j++) {
+      const item = section.items[j];
+      if (!item || typeof item !== 'object' || Array.isArray(item)) {
+        return { valid: false, error: `"${path}.items[${j}]" must be an object` };
+      }
+      if (typeof item.id !== 'string' || !item.id.trim()) {
+        return { valid: false, error: `"${path}.items[${j}].id" must be a non-empty string` };
+      }
+      if (typeof item.text !== 'string' || !item.text.trim()) {
+        return { valid: false, error: `"${path}.items[${j}].text" must be a non-empty string` };
+      }
+      if (typeof item.categoryId !== 'string' || !catIds.has(item.categoryId)) {
+        return { valid: false, error: `"${path}.items[${j}].categoryId" must match one of the defined category ids` };
+      }
+      if (item.explanation !== undefined && typeof item.explanation !== 'string') {
+        return { valid: false, error: `"${path}.items[${j}].explanation" must be a string` };
       }
     }
   }

@@ -85,6 +85,7 @@
   "sections": {
     "checkAnswer": "Kiểm tra câu trả lời",
     "showHint": "Xem gợi ý",
+    "hideHint": "Ẩn gợi ý",
     "explanation": "Giải thích",
     "matches": "Ghép cặp",
     "sortingInstructions": "Kéo thả hoặc bấm mũi tên để sắp xếp thứ tự:",
@@ -169,7 +170,7 @@
     "stepReady": "Hoàn tất",
     "avoidStep": {
       "question": "Bạn muốn tránh những thành phần tính điểm nào?",
-      "description": "Chọn tối đa 4 thành phần bạn KHÔNG muốn xuất hiện trong chế độ luyện tập và kiểm tra.",
+      "description": "Chọn tối đa 7 thành phần bạn KHÔNG muốn xuất hiện trong chế độ luyện tập và kiểm tra.",
       "limitWarning": "Bạn phải giữ lại ít nhất một loại thành phần tính điểm.",
       "avoidLabel": "Tránh ✕",
       "allowLabel": "Cho phép ✓",
@@ -178,7 +179,10 @@
         "fill-blank": "Điền vào chỗ trống (câu)",
         "matching": "Ghép cặp",
         "sorting": "Sắp xếp thứ tự",
-        "cloze": "Điền vào chỗ trống (đoạn văn - Cloze)"
+        "cloze": "Điền vào chỗ trống (đoạn văn - Cloze)",
+        "true-false": "Đúng / Sai",
+        "short-answer": "Câu hỏi tự luận ngắn",
+        "categorize": "Phân loại (Kéo vào nhóm)"
       }
     },
     "questionTopic": "Bạn muốn học về chủ đề gì?",
@@ -328,6 +332,35 @@
     "pleaseAnswerAll": "Vui lòng hoàn thành tất cả câu trả lời trước khi nộp.",
     "pleaseFillBlanks": "Vui lòng điền vào tất cả các chỗ trống trước khi kiểm tra.",
     "pleaseMatchAll": "Vui lòng ghép nối tất cả các cặp trước khi nộp."
+  },
+  "trueFalse": {
+    "true": "Đúng",
+    "false": "Sai",
+    "statement": "Phát biểu",
+    "pleaseAnswerAll": "Vui lòng trả lời tất cả các phát biểu trước khi nộp."
+  },
+  "shortAnswer": {
+    "question": "Câu hỏi",
+    "placeholder": "Viết câu trả lời của bạn tại đây...",
+    "selfAssessNotice": "Tự đánh giá — so sánh câu trả lời của bạn với đáp án mẫu sau khi nộp.",
+    "revealAll": "Xem tất cả đáp án mẫu",
+    "hideAll": "Ẩn tất cả đáp án mẫu",
+    "revealSample": "Xem đáp án mẫu",
+    "sampleAnswer": "Đáp án mẫu",
+    "keyPoints": "Các ý chính cần có:",
+    "submitAndReveal": "Nộp bài & Xem đáp án",
+    "pleaseAnswerAll": "Vui lòng trả lời tất cả các câu hỏi trước khi nộp."
+  },
+  "categorize": {
+    "instruction": "Kéo thả các mục từ khu vực bên dưới vào đúng danh mục, hoặc dùng danh sách thả xuống trong mỗi danh mục.",
+    "itemPool": "Các mục cần phân loại",
+    "allAssigned": "Tất cả mục đã được phân loại!",
+    "addItem": "+ Gán một mục...",
+    "removeItem": "Xóa khỏi danh mục",
+    "pleaseAssignAll": "Vui lòng phân loại tất cả các mục trước khi nộp.",
+    "unassignedItemsReview": "Các mục chưa được phân loại (Chưa trả lời/Bỏ qua)",
+    "unknownCategory": "Không xác định",
+    "shouldBe": "Đúng ra là"
   },
   "flashcard": {
     "allMastered": "Đã thuộc tất cả các thẻ!",

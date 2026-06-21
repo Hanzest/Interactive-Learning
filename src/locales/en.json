@@ -85,6 +85,7 @@
   "sections": {
     "checkAnswer": "Check Answer",
     "showHint": "Show Hint",
+    "hideHint": "Hide Hint",
     "explanation": "Explanation",
     "matches": "Matches",
     "sortingInstructions": "Drag or click arrows to order items:",
@@ -169,7 +170,7 @@
     "stepReady": "Ready",
     "avoidStep": {
       "question": "Which graded components do you want to avoid?",
-      "description": "Select at most 4 components you do NOT want to appear in the practice and exam modes.",
+      "description": "Select at most 7 components you do NOT want to appear in the practice and exam modes.",
       "limitWarning": "You must leave at least one graded component type allowed.",
       "avoidLabel": "Avoid ✕",
       "allowLabel": "Allow ✓",
@@ -178,7 +179,10 @@
         "fill-blank": "Fill-in-the-Blank Sentences",
         "matching": "Matching Pairs",
         "sorting": "Sorting Items",
-        "cloze": "Cloze Deletion"
+        "cloze": "Cloze Deletion",
+        "true-false": "True / False",
+        "short-answer": "Short Answer (Open-Ended)",
+        "categorize": "Categorize (Drag to Group)"
       }
     },
     "questionTopic": "What topic do you want to learn?",
@@ -328,6 +332,35 @@
     "pleaseAnswerAll": "Please answer all questions before submitting.",
     "pleaseFillBlanks": "Please fill in all blanks before checking.",
     "pleaseMatchAll": "Please match all pairs before submitting."
+  },
+  "trueFalse": {
+    "true": "True",
+    "false": "False",
+    "statement": "Statement",
+    "pleaseAnswerAll": "Please answer all statements before submitting."
+  },
+  "shortAnswer": {
+    "question": "Question",
+    "placeholder": "Write your answer here...",
+    "selfAssessNotice": "Self-assessed — compare your answer to the sample after submitting.",
+    "revealAll": "Reveal All Answers",
+    "hideAll": "Hide All Answers",
+    "revealSample": "Reveal Sample Answer",
+    "sampleAnswer": "Sample Answer",
+    "keyPoints": "Key Points to Include:",
+    "submitAndReveal": "Submit & Reveal Answers",
+    "pleaseAnswerAll": "Please write an answer for all questions before submitting."
+  },
+  "categorize": {
+    "instruction": "Drag items from the pool below into the correct category, or use the dropdown inside each category.",
+    "itemPool": "Items to Classify",
+    "allAssigned": "All items classified!",
+    "addItem": "+ Assign an item...",
+    "removeItem": "Remove from category",
+    "pleaseAssignAll": "Please classify all items before submitting.",
+    "unassignedItemsReview": "Uncategorized Items (Incorrect/Skipped)",
+    "unknownCategory": "Unknown",
+    "shouldBe": "Should be"
   },
   "flashcard": {
     "allMastered": "All cards mastered!",

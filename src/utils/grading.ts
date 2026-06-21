@@ -15,7 +15,7 @@ export interface PageGradingResult {
 export function gradePageSections(
   page: any,
   pageKey: string,
-  sectionAnswers: Record<string, Record<number, any>>,
+  sectionAnswers: Record<string, Record<string, any>>,
   mode: 'learn' | 'practice' | 'exam' = 'learn'
 ): PageGradingResult {
   let totalCorrect = 0;
@@ -35,10 +35,12 @@ export function gradePageSections(
   }
 
   targetSections.forEach((sec: any, secIdx: number) => {
-    const saved = sectionAnswers[pageKey]?.[secIdx];
+    const saved = sectionAnswers[pageKey]?.[`${mode}_${secIdx}`] ?? sectionAnswers[pageKey]?.[secIdx];
     let secCorrect = 0;
     let secTotal = 0;
-    const isGraded = ['quiz', 'fill-blank', 'matching', 'sorting', 'cloze'].includes(sec.type);
+    const isGraded = sec.type === 'short-answer' && mode === 'exam'
+      ? false
+      : ['quiz', 'fill-blank', 'matching', 'sorting', 'cloze', 'true-false', 'short-answer', 'categorize'].includes(sec.type);
 
     if (sec.type === 'quiz') {
       const questions = sec.questions || [];
@@ -115,6 +117,37 @@ export function gradePageSections(
           }
         });
       }
+    } else if (sec.type === 'true-false') {
+      const statements = sec.statements || [];
+      secTotal = statements.length;
+      if (saved) {
+        statements.forEach((stmt: any, i: number) => {
+          const ans = saved[i];
+          if (ans !== undefined && ans === stmt.isTrue) {
+            secCorrect++;
+          }
+        });
+      }
+    } else if (sec.type === 'short-answer') {
+      const questions = sec.questions || [];
+      secTotal = questions.length;
+      const userAnswers = saved?.answers || {};
+      questions.forEach((_: any, i: number) => {
+        const ans = userAnswers[i];
+        if (ans !== undefined && ans.trim().length > 0) {
+          secCorrect++;
+        }
+      });
+    } else if (sec.type === 'categorize') {
+      const items = sec.items || [];
+      secTotal = items.length;
+      const userAssignments = saved?.assignments || {};
+      items.forEach((item: any) => {
+        const assignedCatId = userAssignments[item.id];
+        if (assignedCatId !== undefined && assignedCatId === item.categoryId) {
+          secCorrect++;
+        }
+      });
     }
 
     if (isGraded) {

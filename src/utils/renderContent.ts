@@ -1,5 +1,7 @@
 import katex from 'katex';
 
+const markdownCache = new Map<string, string>();
+
 /**
  * Escape HTML to prevent XSS.
  */
@@ -20,6 +22,8 @@ export function escapeHtml(str: unknown): string {
  */
 export function renderMarkdown(text: string): string {
   if (typeof text !== 'string') return '';
+  const cached = markdownCache.get(text);
+  if (cached !== undefined) return cached;
 
   // Normalize newlines and replace double newlines with single newlines
   const normalizedText = text.replace(/\r\n/g, '\n').replace(/\n\n+/g, '\n');
@@ -153,6 +157,7 @@ export function renderMarkdown(text: string): string {
     html = html.replace(`__LATEX_INLINE_${index}__`, rendered);
   });
 
+  markdownCache.set(text, html);
   return html;
 }
 
